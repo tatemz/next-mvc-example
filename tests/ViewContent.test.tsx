@@ -30,6 +30,23 @@ describe("view content", () => {
     expect(pending).not.toContain("Find them");
   });
 
+  it("renders a form error from the model", () => {
+    const model = SearchFormViewModel.make({
+      value: "abc",
+      error: "Character id must be a positive whole number.",
+      label: "Character id",
+      submitLabel: "Load character",
+      pendingLabel: "Loading...",
+    });
+
+    const html = renderToStaticMarkup(
+      <SearchForm model={model} dispatch={() => {}} isPending={false} />,
+    );
+
+    expect(html).toContain('role="alert"');
+    expect(html).toContain("Character id must be a positive whole number.");
+  });
+
   it("renders person labels from the model", () => {
     const html = renderToStaticMarkup(
       <PersonCard

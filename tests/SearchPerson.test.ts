@@ -15,34 +15,46 @@ const form = (characterId: string) => {
 const previous = presentLoadedHomePage(luke);
 
 describe("searchPerson", () => {
-  it.effect("returns a failed view model for a non-numeric id", () =>
+  it.effect("sets a form error on the current model for a non-numeric id", () =>
     Effect.gen(function*() {
       const model = yield* searchPerson(previous, form("abc"));
 
       expect(model).toMatchObject({
-        _tag: "Failed",
-        form: { value: "abc" },
-        message: "Character id must be a positive whole number.",
+        _tag: "Loaded",
+        form: {
+          value: "abc",
+          error: "Character id must be a positive whole number.",
+        },
+        person: { name: "Luke Skywalker" },
+      });
+      expect(previous.form.error).toBeUndefined();
+    }).pipe(Effect.provide(layerStub(() => Effect.succeed(luke)))),
+  );
+
+  it.effect("sets a form error on the current model for a zero id", () =>
+    Effect.gen(function*() {
+      const model = yield* searchPerson(previous, form("0"));
+
+      expect(model).toMatchObject({
+        _tag: "Loaded",
+        form: {
+          value: "0",
+          error: "Character id must be a positive whole number.",
+        },
       });
     }).pipe(Effect.provide(layerStub(() => Effect.succeed(luke)))),
   );
 
-  it.effect("returns a failed view model for a zero id", () =>
-    Effect.gen(function*() {
-      const model = yield* searchPerson(previous, form("0"));
-
-      expect(model._tag).toBe("Failed");
-    }).pipe(Effect.provide(layerStub(() => Effect.succeed(luke)))),
-  );
-
-  it.effect("returns a failed view model for a missing id", () =>
+  it.effect("sets a form error on the current model for a missing id", () =>
     Effect.gen(function*() {
       const model = yield* searchPerson(previous, new FormData());
 
       expect(model).toMatchObject({
-        _tag: "Failed",
-        form: { value: "" },
-        message: "Character id must be a positive whole number.",
+        _tag: "Loaded",
+        form: {
+          value: "",
+          error: "Character id must be a positive whole number.",
+        },
       });
     }).pipe(Effect.provide(layerStub(() => Effect.succeed(luke)))),
   );

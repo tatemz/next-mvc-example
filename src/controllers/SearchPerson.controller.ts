@@ -1,13 +1,11 @@
-import { Data, Effect, Option, Schema } from "effect";
-import { makeFailedHomePageModel } from "../components/HomePage/HomePage.factory";
+import { Effect, Option, Schema, pipe } from "effect";
 import type { HomePageViewModel } from "../components/HomePage/HomePage.model";
-import { makeRetrySearchFormViewModel } from "../components/SearchForm/SearchForm.factory";
+import { HomePageOptics } from "../components/HomePage/HomePage.optics";
 import { CharacterId } from "../domain/StarWars.model";
 import { loadHomePageFor } from "./HomePage.controller";
 
-class InvalidCharacterId extends Data.TaggedError("InvalidCharacterId")<{
-  readonly characterId: string;
-}> {}
+const invalidCharacterIdMessage =
+  "Character id must be a positive whole number.";
 
 const readCharacterId = (formData: FormData): string =>
   Option.getOrElse(
@@ -15,20 +13,24 @@ const readCharacterId = (formData: FormData): string =>
     () => "",
   );
 
+const withCharacterIdError = (
+  model: HomePageViewModel,
+  characterId: string,
+) =>
+  pipe(
+    model,
+    HomePageOptics.FormValue.set(characterId),
+    HomePageOptics.FormError.set(invalidCharacterIdMessage),
+  );
+
 export const searchPerson = Effect.fn("searchPerson")(
-  function*(_previous: HomePageViewModel, formData: FormData) {
+  function*(previous: HomePageViewModel, formData: FormData) {
     const characterId = readCharacterId(formData);
-    const id = yield* Schema.decodeUnknownEffect(CharacterId)(characterId).pipe(
-      Effect.mapError(() => new InvalidCharacterId({ characterId })),
+    return yield* Schema.decodeUnknownEffect(CharacterId)(characterId).pipe(
+      Effect.flatMap(loadHomePageFor),
+      Effect.catchTag("SchemaError", () =>
+        Effect.succeed(withCharacterIdError(previous, characterId)),
+      ),
     );
-    return yield* loadHomePageFor(id);
   },
-  Effect.catchTag("InvalidCharacterId", (error) =>
-    Effect.succeed(
-      makeFailedHomePageModel({
-        form: makeRetrySearchFormViewModel(error.characterId),
-        message: "Character id must be a positive whole number.",
-      }),
-    ),
-  ),
 );
