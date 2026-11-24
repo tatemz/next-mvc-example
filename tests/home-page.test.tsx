@@ -1,7 +1,10 @@
 import { Schema } from "effect";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { makeFailedHomePageModel, makeLoadedHomePageModel } from "../src/components/HomePage/factory";
+import {
+  makeFailedHomePageModel,
+  makeLoadedHomePageModel,
+} from "../src/components/HomePage/factory";
 import { HomePageViewModel } from "../src/components/HomePage/model";
 import { HomePage } from "../src/components/HomePage/view";
 import { luke } from "./fixtures/person";
@@ -12,22 +15,43 @@ describe("makeLoadedHomePageModel", () => {
 
     expect(model).toMatchObject({
       _tag: "Loaded",
-      form: { characterId: "1" },
-      person: { name: "Luke Skywalker", height: "172", mass: "77" },
+      form: { _tag: "SearchFormViewModel", characterId: "1" },
+      person: {
+        _tag: "PersonViewModel",
+        name: "Luke Skywalker",
+        height: "172",
+        mass: "77",
+      },
+      filmList: {
+        _tag: "FilmListViewModel",
+        films: [
+          { _tag: "FilmViewModel", title: "A New Hope", episodeId: 4 },
+          {
+            _tag: "FilmViewModel",
+            title: "The Empire Strikes Back",
+            episodeId: 5,
+          },
+        ],
+      },
     });
-    if (model._tag !== "Loaded") throw new Error("expected Loaded");
-    expect(model.films).toHaveLength(2);
   });
 
   it("keeps films a non-empty array in the schema", () => {
     const invalid = {
       _tag: "Loaded",
-      form: { characterId: "1" },
-      person: { name: "Luke Skywalker", height: "172", mass: "77" },
-      films: [],
+      form: { _tag: "SearchFormViewModel", characterId: "1" },
+      person: {
+        _tag: "PersonViewModel",
+        name: "Luke Skywalker",
+        height: "172",
+        mass: "77",
+      },
+      filmList: { _tag: "FilmListViewModel", films: [] },
     };
 
-    expect(() => Schema.decodeUnknownSync(HomePageViewModel)(invalid)).toThrow();
+    expect(() =>
+      Schema.decodeUnknownSync(HomePageViewModel)(invalid),
+    ).toThrow();
   });
 });
 
@@ -51,7 +75,7 @@ describe("HomePage", () => {
     const html = renderToStaticMarkup(
       <HomePage
         model={makeFailedHomePageModel({
-          form: { characterId: "abc" },
+          characterId: "abc",
           message: "Character id must be a positive whole number.",
         })}
         dispatch={() => {}}

@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 
-export const PersonViewModel = Schema.Struct({
+export const PersonViewModel = Schema.TaggedStruct("PersonViewModel", {
   name: Schema.NonEmptyString,
   height: Schema.String,
   mass: Schema.String,

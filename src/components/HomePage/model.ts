@@ -7,7 +7,7 @@ export const HomePageViewModel = Schema.TaggedUnion({
   Loaded: {
     form: SearchFormViewModel,
     person: PersonViewModel,
-    films: FilmListViewModel,
+    filmList: FilmListViewModel,
   },
   Failed: {
     form: SearchFormViewModel,

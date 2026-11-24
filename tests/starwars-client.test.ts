@@ -39,13 +39,18 @@ describe("StarWarsClient", () => {
       const person = yield* StarWarsClient.use((client) => client.getPerson(1));
 
       expect(person).toMatchObject({
+        _tag: "Person",
         id: 1,
         name: "Luke Skywalker",
         height: "172",
         mass: "77",
       });
       expect(person.films).toHaveLength(1);
-      expect(person.films[0]).toEqual({ title: "A New Hope", episodeId: 4 });
+      expect(person.films[0]).toEqual({
+        _tag: "Film",
+        title: "A New Hope",
+        episodeId: 4,
+      });
     }).pipe(Effect.provide(layer)),
   );
 });

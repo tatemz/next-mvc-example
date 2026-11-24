@@ -1,6 +1,6 @@
 import { Config, Context, Effect, Layer, Schema } from "effect";
 import { HttpClient, HttpClientResponse } from "effect/http";
-import { type Film, Person } from "../domain/Person";
+import { Film, Person } from "../domain/Person";
 
 const PersonResponse = Schema.Struct({
   name: Schema.NonEmptyString,
@@ -80,11 +80,16 @@ export class StarWarsClient extends Context.Service<
           }
 
           const domainFilms: [Film, ...Array<Film>] = [
-            { title: first.title, episodeId: first.episode_id },
-            ...rest.map((film) => ({
-              title: film.title,
-              episodeId: film.episode_id,
-            })),
+            Film.make({
+              title: first.title,
+              episodeId: first.episode_id,
+            }),
+            ...rest.map((film) =>
+              Film.make({
+                title: film.title,
+                episodeId: film.episode_id,
+              }),
+            ),
           ];
 
           return Person.make({

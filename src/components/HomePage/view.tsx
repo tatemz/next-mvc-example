@@ -18,7 +18,7 @@ export const HomePage = ({
     Loaded: (loaded) => (
       <>
         <PersonCard model={loaded.person} />
-        <FilmList films={loaded.films} />
+        <FilmList model={loaded.filmList} />
         <SearchForm
           model={loaded.form}
           dispatch={dispatch}

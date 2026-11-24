@@ -1,12 +1,12 @@
 import type { FilmListViewModel } from "./model";
 
 export type FilmListProps = {
-  readonly films: FilmListViewModel;
+  readonly model: FilmListViewModel;
 };
 
-export const FilmList = ({ films }: FilmListProps) => (
+export const FilmList = ({ model }: FilmListProps) => (
   <ul>
-    {films.map((film) => (
+    {model.films.map((film) => (
       <li key={`${film.episodeId}-${film.title}`}>
         {film.title} (Episode {film.episodeId})
       </li>

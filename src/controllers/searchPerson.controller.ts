@@ -28,7 +28,7 @@ export const searchPerson = (
 
     if (Result.isFailure(decoded)) {
       return makeFailedHomePageModel({
-        form: { characterId },
+        characterId,
         message: "Character id must be a positive whole number.",
       });
     }

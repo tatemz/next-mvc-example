@@ -6,8 +6,10 @@ form posts to a server action and gets the next view model back.
 
 ## What it shows
 
+- Every model is a `Schema.TaggedStruct` or `Schema.TaggedUnion`, and nested
+  models carry their own `_tag`.
 - `HomePageViewModel` is a `Schema.TaggedUnion` of `Loaded` and `Failed`.
-- `Loaded.films` is `Schema.NonEmptyArray(FilmViewModel)`.
+- `Loaded.filmList.films` is `Schema.NonEmptyArray(FilmViewModel)`.
 - `StarWarsClient` is a `Context.Service` layer that decodes SWAPI responses
   into `Person` and `Film` domain objects.
 - `makeLoadedHomePageModel` takes the `Person` domain object and builds the view
@@ -28,7 +30,7 @@ app/page.tsx                             runs the controller and renders the mod
 src/actions/searchPerson.serverAction.ts "use server" boundary
 src/components/HomePage/                 model, factory, view, connected view
 src/components/PersonCard/               person view model and view
-src/components/FilmList/                 non-empty film list model and view
+src/components/FilmList/                 non-empty film list model, factory, and view
 src/components/SearchForm/               form view model and view
 src/controllers/homePage.controller.ts   Config + client -> view model
 src/controllers/searchPerson.controller.ts form schema + client -> view model

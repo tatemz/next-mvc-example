@@ -17,7 +17,7 @@ export const loadHomePageFor = (
     Effect.catchTag("StarWarsError", (error) =>
       Effect.succeed(
         makeFailedHomePageModel({
-          form: { characterId: String(characterId) },
+          characterId: String(characterId),
           message: error.message,
         }),
       ),
@@ -37,7 +37,7 @@ export const loadHomePage: Effect.Effect<
   Effect.catchTag("ConfigError", (error) =>
     Effect.succeed(
       makeFailedHomePageModel({
-        form: { characterId: "" },
+        characterId: "",
         message: error.message,
       }),
     ),
