@@ -36,23 +36,21 @@ export const presentLoadedHomePage = (person: Person): HomePageViewModel =>
     filmList: makeFilmListViewModel(Array.map(person.films, filmListItem)),
   });
 
-export const loadHomePageFor = (
-  characterId: CharacterId,
-): Effect.Effect<HomePageViewModel, never, StarWarsClient> =>
-  Effect.gen(function*() {
+export const loadHomePageFor = Effect.fn("loadHomePageFor")(
+  function*(characterId: CharacterId) {
     const client = yield* StarWarsClient;
-    const person = yield* client.getPerson(characterId);
-    return presentLoadedHomePage(person);
-  }).pipe(
-    Effect.catchTag("StarWarsError", (error) =>
-      Effect.succeed(
-        makeFailedHomePageModel({
-          form: makeRetrySearchFormViewModel(characterId),
-          message: error.message,
-        }),
-      ),
-    ),
-  );
+    return yield* client.getPerson(characterId).pipe(
+      Effect.match({
+        onFailure: (error) =>
+          makeFailedHomePageModel({
+            form: makeRetrySearchFormViewModel(characterId),
+            message: error.message,
+          }),
+        onSuccess: presentLoadedHomePage,
+      }),
+    );
+  },
+);
 
 export const loadHomePage: Effect.Effect<
   HomePageViewModel,

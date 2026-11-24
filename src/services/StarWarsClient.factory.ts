@@ -41,8 +41,8 @@ export const make = (swapi: SwapiClient) => {
     );
 
   return StarWarsClient.of({
-    getPerson: (id) =>
-      Effect.gen(function*() {
+    getPerson: Effect.fn("StarWarsClient.getPerson")(
+      function*(id: CharacterId) {
         const person = yield* swapi.people.get({ params: { id } }).pipe(
           Effect.mapError(
             () =>
@@ -61,7 +61,8 @@ export const make = (swapi: SwapiClient) => {
           mass: person.mass,
           films: Array.map(films, toFilm),
         });
-      }),
+      },
+    ),
   });
 };
 
