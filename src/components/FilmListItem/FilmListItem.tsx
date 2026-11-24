@@ -32,6 +32,6 @@ export const makeFilmListItemViewModel = (
 
 export type FilmListItemProps = FilmListItemViewModel;
 
-export const FilmListItem = ({ text }: FilmListItemProps) => (
-  <li>{text}</li>
+export const FilmListItem = (model: FilmListItemProps) => (
+  <li>{model.text}</li>
 );

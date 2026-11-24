@@ -41,20 +41,14 @@ export const makePersonViewModel = (
 
 export type PersonCardProps = PersonViewModel;
 
-export const PersonCard = ({
-  name,
-  height,
-  mass,
-  heightLabel,
-  massLabel,
-}: PersonCardProps) => (
+export const PersonCard = (model: PersonCardProps) => (
   <section>
-    <h1>{name}</h1>
+    <h1>{model.name}</h1>
     <dl>
-      <dt>{heightLabel}</dt>
-      <dd>{height}</dd>
-      <dt>{massLabel}</dt>
-      <dd>{mass}</dd>
+      <dt>{model.heightLabel}</dt>
+      <dd>{model.height}</dd>
+      <dt>{model.massLabel}</dt>
+      <dd>{model.mass}</dd>
     </dl>
   </section>
 );

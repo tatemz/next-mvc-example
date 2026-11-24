@@ -30,12 +30,12 @@ export const makeFilmListViewModel = (
 
 export type FilmListProps = FilmListViewModel;
 
-export const FilmList = ({ countLabel, films }: FilmListProps) => (
+export const FilmList = (model: FilmListProps) => (
   <section>
-    <h2>{countLabel}</h2>
+    <h2>{model.countLabel}</h2>
     <ul>
       {Function.pipe(
-        films,
+        model.films,
         Array.map((film) => (
           <FilmListItem key={film.text} {...film} />
         )),

@@ -44,34 +44,30 @@ export type SearchFormProps = SearchFormViewModel & {
 };
 
 export const SearchForm = ({
-  value,
-  error,
-  label,
-  submitLabel,
-  pendingLabel,
   dispatch,
   isPending,
+  ...model
 }: SearchFormProps) => (
   <form action={dispatch} method="post">
-    <label htmlFor="characterId">{label}</label>
+    <label htmlFor="characterId">{model.label}</label>
     <input
-      key={value}
+      key={model.value}
       id="characterId"
       name="characterId"
-      defaultValue={value}
+      defaultValue={model.value}
       inputMode="numeric"
-      aria-invalid={error !== undefined}
+      aria-invalid={model.error !== undefined}
       aria-describedby={
-        error === undefined ? undefined : "characterId-error"
+        model.error === undefined ? undefined : "characterId-error"
       }
     />
-    {error === undefined ? null : (
+    {model.error === undefined ? null : (
       <p id="characterId-error" role="alert">
-        {error}
+        {model.error}
       </p>
     )}
     <button type="submit" disabled={isPending}>
-      {isPending ? pendingLabel : submitLabel}
+      {isPending ? model.pendingLabel : model.submitLabel}
     </button>
   </form>
 );

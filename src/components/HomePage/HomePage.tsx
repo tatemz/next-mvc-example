@@ -93,17 +93,15 @@ type LoadedHomePageProps = LoadedHomePageViewModel & HomePageExtras;
 type FailedHomePageProps = FailedHomePageViewModel & HomePageExtras;
 
 const LoadedHomePage = ({
-  person,
-  filmList,
-  form,
   dispatch,
   isPending,
+  ...model
 }: LoadedHomePageProps) => (
   <>
-    <PersonCard {...person} />
-    <FilmList {...filmList} />
+    <PersonCard {...model.person} />
+    <FilmList {...model.filmList} />
     <SearchForm
-      {...form}
+      {...model.form}
       dispatch={dispatch}
       isPending={isPending}
     />
@@ -111,35 +109,38 @@ const LoadedHomePage = ({
 );
 
 const FailedHomePage = ({
-  message,
-  form,
   dispatch,
   isPending,
+  ...model
 }: FailedHomePageProps) => (
   <>
-    <p role="alert">{message}</p>
+    <p role="alert">{model.message}</p>
     <SearchForm
-      {...form}
+      {...model.form}
       dispatch={dispatch}
       isPending={isPending}
     />
   </>
 );
 
-export const HomePage = (props: HomePageProps) =>
-  HomePageViewModel.match(props, {
+export const HomePage = ({
+  dispatch,
+  isPending,
+  ...model
+}: HomePageProps) =>
+  HomePageViewModel.match(model, {
     Loaded: (loaded) => (
       <LoadedHomePage
         {...loaded}
-        dispatch={props.dispatch}
-        isPending={props.isPending}
+        dispatch={dispatch}
+        isPending={isPending}
       />
     ),
     Failed: (failed) => (
       <FailedHomePage
         {...failed}
-        dispatch={props.dispatch}
-        isPending={props.isPending}
+        dispatch={dispatch}
+        isPending={isPending}
       />
     ),
   });
