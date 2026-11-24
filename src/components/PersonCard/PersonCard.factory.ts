@@ -1,13 +1,18 @@
+import { Match, Schema } from "effect";
 import { PersonViewModel } from "./PersonCard.model";
 
-export type PersonCardInput = {
-  readonly name: string;
-  readonly height: string;
-  readonly mass: string;
-};
+export const PersonCardInput = Schema.Struct({
+  name: Schema.NonEmptyString,
+  height: Schema.String,
+  mass: Schema.String,
+});
+export type PersonCardInput = typeof PersonCardInput.Type;
 
 const displayMeasurement = (value: string): string =>
-  value === "" || value === "unknown" ? "Unknown" : value;
+  Match.value(value).pipe(
+    Match.whenOr("", "unknown", () => "Unknown"),
+    Match.orElse((measurement) => measurement),
+  );
 
 export const makePersonViewModel = (person: PersonCardInput): PersonViewModel =>
   PersonViewModel.make({

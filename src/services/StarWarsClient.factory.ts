@@ -1,4 +1,4 @@
-import { Effect } from "effect";
+import { Effect, Number as Num, Option, String as Str } from "effect";
 import type { CharacterId } from "../domain/CharacterId.model";
 import { Film } from "../domain/Film.model";
 import { Person } from "../domain/Person.model";
@@ -6,8 +6,15 @@ import type { SwapiClient } from "./SwapiApi";
 import { StarWarsError, type StarWarsClient } from "./StarWarsClient";
 
 const filmIdFromUrl = (url: string): number => {
-  const trimmed = url.replace(/\/+$/, "");
-  return Number(trimmed.slice(trimmed.lastIndexOf("/") + 1));
+  const trimmed = Str.replace(/\/+$/, "")(url);
+  const slashIndex = Option.getOrElse(
+    Str.lastIndexOf("/")(trimmed),
+    () => -1,
+  );
+  return Option.getOrElse(
+    Num.parse(Str.slice(slashIndex + 1)(trimmed)),
+    () => NaN,
+  );
 };
 
 const personUnavailable = (id: CharacterId) =>

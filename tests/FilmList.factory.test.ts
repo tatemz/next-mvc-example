@@ -8,6 +8,9 @@ describe("makeFilmListViewModel", () => {
     ]);
 
     expect(model.countLabel).toBe("1 film");
+    expect(model.films).toEqual([
+      { _tag: "FilmListItemViewModel", text: "A New Hope (Episode 4)" },
+    ]);
   });
 
   it("pluralizes the count", () => {
@@ -17,5 +20,12 @@ describe("makeFilmListViewModel", () => {
     ]);
 
     expect(model.countLabel).toBe("2 films");
+    expect(model.films).toEqual([
+      { _tag: "FilmListItemViewModel", text: "A New Hope (Episode 4)" },
+      {
+        _tag: "FilmListItemViewModel",
+        text: "The Empire Strikes Back (Episode 5)",
+      },
+    ]);
   });
 });

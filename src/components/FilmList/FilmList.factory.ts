@@ -1,31 +1,20 @@
-import { FilmListViewModel, FilmViewModel } from "./FilmList.model";
-
-export type FilmListItem = {
-  readonly title: string;
-  readonly episodeId: number;
-};
+import { Array, Match } from "effect";
+import {
+  type FilmListItemInput,
+  makeFilmListItemViewModel,
+} from "../FilmListItem/FilmListItem.factory";
+import { FilmListViewModel } from "./FilmList.model";
 
 const formatFilmCount = (count: number): string =>
-  count === 1 ? "1 film" : `${count} films`;
+  Match.value(count).pipe(
+    Match.when(1, () => "1 film"),
+    Match.orElse((count) => `${count} films`),
+  );
 
 export const makeFilmListViewModel = (
-  films: readonly [FilmListItem, ...Array<FilmListItem>],
-): FilmListViewModel => {
-  const [first, ...rest] = films;
-  return FilmListViewModel.make({
-    episodeLabel: "Episode",
+  films: readonly [FilmListItemInput, ...Array<FilmListItemInput>],
+): FilmListViewModel =>
+  FilmListViewModel.make({
     countLabel: formatFilmCount(films.length),
-    films: [
-      FilmViewModel.make({
-        title: first.title,
-        episodeId: first.episodeId,
-      }),
-      ...rest.map((film) =>
-        FilmViewModel.make({
-          title: film.title,
-          episodeId: film.episodeId,
-        }),
-      ),
-    ],
+    films: Array.map(films, makeFilmListItemViewModel),
   });
-};

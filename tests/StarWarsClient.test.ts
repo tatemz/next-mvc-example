@@ -167,4 +167,43 @@ describe("StarWarsClient", () => {
       });
     }).pipe(Effect.provide(failingLayer));
   });
+
+  it.effect("maps a malformed film reference to a StarWarsError", () => {
+    const malformedPerson = {
+      ...personResponse,
+      films: ["not-a-url"],
+    };
+    const malformedClient = HttpClient.make((request) =>
+      request.url.includes("/people/")
+        ? Effect.succeed(
+            HttpClientResponse.fromWeb(
+              request,
+              new Response(JSON.stringify(malformedPerson), {
+                status: 200,
+                headers: { "content-type": "application/json" },
+              }),
+            ),
+          )
+        : Effect.succeed(
+            HttpClientResponse.fromWeb(
+              request,
+              new Response(null, { status: 404 }),
+            ),
+          ),
+    );
+    const malformedLayer = liveLayer.pipe(
+      Layer.provide(Layer.succeed(HttpClient.HttpClient, malformedClient)),
+    );
+
+    return Effect.gen(function*() {
+      const error = yield* StarWarsClient.use((client) =>
+        client.getPerson(makeCharacterId("1")),
+      ).pipe(Effect.flip);
+
+      expect(error).toMatchObject({
+        _tag: "StarWarsError",
+        message: "A film for person 1 is not available.",
+      });
+    }).pipe(Effect.provide(malformedLayer));
+  });
 });

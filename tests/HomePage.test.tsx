@@ -30,11 +30,10 @@ describe("presentLoadedHomePage", () => {
         _tag: "FilmListViewModel",
         countLabel: "2 films",
         films: [
-          { _tag: "FilmViewModel", title: "A New Hope", episodeId: 4 },
+          { _tag: "FilmListItemViewModel", text: "A New Hope (Episode 4)" },
           {
-            _tag: "FilmViewModel",
-            title: "The Empire Strikes Back",
-            episodeId: 5,
+            _tag: "FilmListItemViewModel",
+            text: "The Empire Strikes Back (Episode 5)",
           },
         ],
       },
@@ -64,7 +63,6 @@ describe("HomePageViewModel", () => {
       filmList: {
         _tag: "FilmListViewModel",
         films: [],
-        episodeLabel: "Episode",
         countLabel: "0 films",
       },
     };

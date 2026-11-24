@@ -1,10 +1,8 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import {
-  FilmListViewModel,
-  FilmViewModel,
-} from "../src/components/FilmList/FilmList.model";
+import { FilmListViewModel } from "../src/components/FilmList/FilmList.model";
 import { FilmList } from "../src/components/FilmList/FilmList.view";
+import { FilmListItemViewModel } from "../src/components/FilmListItem/FilmListItem.model";
 import { PersonViewModel } from "../src/components/PersonCard/PersonCard.model";
 import { PersonCard } from "../src/components/PersonCard/PersonCard.view";
 import { SearchFormViewModel } from "../src/components/SearchForm/SearchForm.model";
@@ -49,13 +47,14 @@ describe("view content", () => {
     expect(html).toContain("Heft");
   });
 
-  it("renders the film episode label from the model", () => {
+  it("renders the film text from the model", () => {
     const html = renderToStaticMarkup(
       <FilmList
         model={FilmListViewModel.make({
-          episodeLabel: "Part",
           countLabel: "1 film",
-          films: [FilmViewModel.make({ title: "A New Hope", episodeId: 4 })],
+          films: [
+            FilmListItemViewModel.make({ text: "A New Hope (Part 4)" }),
+          ],
         })}
       />,
     );
