@@ -3,17 +3,21 @@ import { Effect, Layer } from "effect";
 import { HttpClient, HttpClientResponse } from "effect/http";
 import { describe, expect } from "vitest";
 import { StarWarsClient } from "./StarWarsClient";
-import {
-  layer as liveLayer,
-  layerStub,
-} from "./StarWarsClient.layer";
+import { layer as liveLayer, layerStub } from "./StarWarsClient.layer";
 import { makeCharacterId, personNamed } from "../domain/StarWars.fixture";
 
 const personResponse = {
   name: "Luke Skywalker",
   height: "172",
   mass: "77",
+  birth_year: "19BBY",
+  gender: "male",
+  homeworld: "https://swapi.dev/api/planets/1/",
   films: ["https://swapi.dev/api/films/1/"],
+  species: ["https://swapi.dev/api/species/1/"],
+  starships: ["https://swapi.dev/api/starships/12/"],
+  vehicles: ["https://swapi.dev/api/vehicles/14/"],
+  url: "https://swapi.dev/api/people/1/",
 };
 
 const filmResponse = {
@@ -21,42 +25,96 @@ const filmResponse = {
   episode_id: 4,
 };
 
-const httpClient = HttpClient.make((request) => {
-  const body = request.url.includes("/people/") ? personResponse : filmResponse;
-  return Effect.succeed(
-    HttpClientResponse.fromWeb(
-      request,
-      new Response(JSON.stringify(body), {
-        status: 200,
-        headers: { "content-type": "application/json" },
-      }),
+const planetResponse = {
+  name: "Tatooine",
+  climate: "arid",
+  terrain: "desert",
+  url: "https://swapi.dev/api/planets/1/",
+};
+
+const speciesResponse = {
+  name: "Human",
+  classification: "mammal",
+  language: "Galactic Basic",
+  url: "https://swapi.dev/api/species/1/",
+};
+
+const starshipResponse = {
+  name: "X-wing",
+  model: "T-65 X-wing",
+  url: "https://swapi.dev/api/starships/12/",
+};
+
+const vehicleResponse = {
+  name: "Snowspeeder",
+  model: "t-47 airspeeder",
+  url: "https://swapi.dev/api/vehicles/14/",
+};
+
+const searchResponse = {
+  count: 1,
+  results: [personResponse],
+};
+
+const bodyFor = (url: string) => {
+  if (url.endsWith("/people/")) return searchResponse;
+  if (url.includes("/people/")) return personResponse;
+  if (url.includes("/planets/")) return planetResponse;
+  if (url.includes("/species/")) return speciesResponse;
+  if (url.includes("/starships/")) return starshipResponse;
+  if (url.includes("/vehicles/")) return vehicleResponse;
+  return filmResponse;
+};
+
+const jsonClient = (statusFor = () => 200) =>
+  HttpClient.make((request) =>
+    Effect.succeed(
+      HttpClientResponse.fromWeb(
+        request,
+        new Response(
+          statusFor() === 200 ? JSON.stringify(bodyFor(request.url)) : null,
+          {
+            status: statusFor(),
+            headers: { "content-type": "application/json" },
+          },
+        ),
+      ),
     ),
   );
-});
 
-const layer = liveLayer.pipe(
-  Layer.provide(Layer.succeed(HttpClient.HttpClient, httpClient)),
-);
+const layerFor = (statusFor = () => 200) =>
+  liveLayer.pipe(
+    Layer.provide(Layer.succeed(HttpClient.HttpClient, jsonClient(statusFor))),
+  );
 
-const expectFilmErrorFor = (films: ReadonlyArray<string>) =>
+const failingStatus =
+  (path: string) => (url: string) => (url.includes(path) ? 404 : 200);
+
+const expectResourceError = (
+  person: typeof personResponse,
+  statusFor: (url: string) => number,
+  message: string,
+) =>
   Effect.gen(function*() {
     const client = HttpClient.make((request) =>
-      request.url.includes("/people/")
-        ? Effect.succeed(
-            HttpClientResponse.fromWeb(
-              request,
-              new Response(JSON.stringify({ ...personResponse, films }), {
-                status: 200,
-                headers: { "content-type": "application/json" },
-              }),
-            ),
-          )
-        : Effect.succeed(
-            HttpClientResponse.fromWeb(
-              request,
-              new Response(null, { status: 404 }),
-            ),
+      Effect.succeed(
+        HttpClientResponse.fromWeb(
+          request,
+          new Response(
+            statusFor(request.url) === 200
+              ? JSON.stringify(
+                  request.url.includes("/people/")
+                    ? person
+                    : bodyFor(request.url),
+                )
+              : null,
+            {
+              status: statusFor(request.url),
+              headers: { "content-type": "application/json" },
+            },
           ),
+        ),
+      ),
     );
     const layer = liveLayer.pipe(
       Layer.provide(Layer.succeed(HttpClient.HttpClient, client)),
@@ -68,12 +126,12 @@ const expectFilmErrorFor = (films: ReadonlyArray<string>) =>
 
     expect(error).toMatchObject({
       _tag: "StarWarsError",
-      message: "A film for person 1 is not available.",
+      message,
     });
   });
 
 describe("StarWarsClient", () => {
-  it.effect("decodes a person and their films into a domain object", () =>
+  it.effect("decodes a person dossier into a domain object", () =>
     Effect.gen(function*() {
       const person = yield* StarWarsClient.use((client) =>
         client.getPerson(makeCharacterId("1")),
@@ -85,6 +143,10 @@ describe("StarWarsClient", () => {
         name: "Luke Skywalker",
         height: "172",
         mass: "77",
+        birthYear: "19BBY",
+        gender: "male",
+        homeworld: { _tag: "Planet", name: "Tatooine" },
+        species: { _tag: "Species", name: "Human" },
       });
       expect(person.films).toHaveLength(1);
       expect(person.films[0]).toEqual({
@@ -92,7 +154,74 @@ describe("StarWarsClient", () => {
         title: "A New Hope",
         episodeId: 4,
       });
-    }).pipe(Effect.provide(layer)),
+      expect(person.transports).toEqual([
+        {
+          _tag: "Transport",
+          key: "starship-12",
+          kind: "Starship",
+          name: "X-wing",
+          model: "T-65 X-wing",
+        },
+        {
+          _tag: "Transport",
+          key: "vehicle-14",
+          kind: "Vehicle",
+          name: "Snowspeeder",
+          model: "t-47 airspeeder",
+        },
+      ]);
+    }).pipe(Effect.provide(layerFor())),
+  );
+
+  it.effect("handles a person with no species, starships, or vehicles", () => {
+    const barePerson = {
+      ...personResponse,
+      species: [],
+      starships: [],
+      vehicles: [],
+    };
+    const client = HttpClient.make((request) =>
+      Effect.succeed(
+        HttpClientResponse.fromWeb(
+          request,
+          new Response(
+            JSON.stringify(
+              request.url.includes("/people/")
+                ? barePerson
+                : bodyFor(request.url),
+            ),
+            {
+              status: 200,
+              headers: { "content-type": "application/json" },
+            },
+          ),
+        ),
+      ),
+    );
+    const layer = liveLayer.pipe(
+      Layer.provide(Layer.succeed(HttpClient.HttpClient, client)),
+    );
+
+    return Effect.gen(function*() {
+      const person = yield* StarWarsClient.use((service) =>
+        service.getPerson(makeCharacterId("1")),
+      );
+
+      expect(person.species).toBeNull();
+      expect(person.transports).toEqual([]);
+    }).pipe(Effect.provide(layer));
+  });
+
+  it.effect("searches people by name", () =>
+    Effect.gen(function*() {
+      const people = yield* StarWarsClient.use((client) =>
+        client.searchPeople("luke"),
+      );
+
+      expect(people).toEqual([
+        { _tag: "PersonSummary", id: "1", name: "Luke Skywalker" },
+      ]);
+    }).pipe(Effect.provide(layerFor())),
   );
 
   it.effect("provides the client built by layerStub", () =>
@@ -100,8 +229,12 @@ describe("StarWarsClient", () => {
       const person = yield* StarWarsClient.use((client) =>
         client.getPerson(makeCharacterId("3")),
       );
+      const people = yield* StarWarsClient.use((client) =>
+        client.searchPeople("stub"),
+      );
 
       expect(person).toEqual(personNamed(makeCharacterId("3"), "Stubbed"));
+      expect(people).toEqual([]);
     }).pipe(
       Effect.provide(
         layerStub((id) => Effect.succeed(personNamed(id, "Stubbed"))),
@@ -109,108 +242,155 @@ describe("StarWarsClient", () => {
     ),
   );
 
-  it.effect("maps a person request failure to a StarWarsError", () => {
-    const failingClient = HttpClient.make((request) =>
+  it.effect("maps a person request failure to a StarWarsError", () =>
+    expectResourceError(
+      personResponse,
+      failingStatus("/people/"),
+      "Person 1 is not available.",
+    ),
+  );
+
+  it.effect("maps a homeworld request failure to a StarWarsError", () =>
+    expectResourceError(
+      personResponse,
+      failingStatus("/planets/"),
+      "A homeworld for person 1 is not available.",
+    ),
+  );
+
+  it.effect("maps a species request failure to a StarWarsError", () =>
+    expectResourceError(
+      personResponse,
+      failingStatus("/species/"),
+      "A species for person 1 is not available.",
+    ),
+  );
+
+  it.effect("maps a starship request failure to a StarWarsError", () =>
+    expectResourceError(
+      personResponse,
+      failingStatus("/starships/"),
+      "A starship for person 1 is not available.",
+    ),
+  );
+
+  it.effect("maps a vehicle request failure to a StarWarsError", () =>
+    expectResourceError(
+      personResponse,
+      failingStatus("/vehicles/"),
+      "A vehicle for person 1 is not available.",
+    ),
+  );
+
+  it.effect("maps a film request failure to a StarWarsError", () =>
+    expectResourceError(
+      personResponse,
+      failingStatus("/films/"),
+      "A film for person 1 is not available.",
+    ),
+  );
+
+  it.effect("maps a search request failure to a StarWarsError", () => {
+    const client = HttpClient.make((request) =>
       Effect.succeed(
-        HttpClientResponse.fromWeb(request, new Response(null, { status: 404 })),
-      ),
-    );
-    const failingLayer = liveLayer.pipe(
-      Layer.provide(Layer.succeed(HttpClient.HttpClient, failingClient)),
-    );
-
-    return Effect.gen(function*() {
-      const error = yield* StarWarsClient.use((client) =>
-        client.getPerson(makeCharacterId("1")),
-      ).pipe(Effect.flip);
-
-      expect(error).toMatchObject({
-        _tag: "StarWarsError",
-        message: "Person 1 is not available.",
-      });
-    }).pipe(Effect.provide(failingLayer));
-  });
-
-  it.effect("fetches every film a person has", () => {
-    const twoFilmsResponse = {
-      ...personResponse,
-      films: [
-        "https://swapi.dev/api/films/1/",
-        "https://swapi.dev/api/films/2/",
-      ],
-    };
-    const twoFilmClient = HttpClient.make((request) => {
-      const episodeId = request.url.includes("/films/2/") ? 2 : 1;
-      const body = request.url.includes("/people/")
-        ? twoFilmsResponse
-        : { title: `Film ${episodeId}`, episode_id: episodeId };
-      return Effect.succeed(
         HttpClientResponse.fromWeb(
           request,
-          new Response(JSON.stringify(body), {
-            status: 200,
-            headers: { "content-type": "application/json" },
-          }),
+          new Response(null, { status: 503 }),
         ),
-      );
-    });
-    const twoFilmLayer = liveLayer.pipe(
-      Layer.provide(Layer.succeed(HttpClient.HttpClient, twoFilmClient)),
+      ),
+    );
+    const layer = liveLayer.pipe(
+      Layer.provide(Layer.succeed(HttpClient.HttpClient, client)),
     );
 
     return Effect.gen(function*() {
-      const person = yield* StarWarsClient.use((client) =>
-        client.getPerson(makeCharacterId("1")),
-      );
-
-      expect(person.films.map((film) => film.episodeId)).toEqual([1, 2]);
-    }).pipe(Effect.provide(twoFilmLayer));
-  });
-
-  it.effect("maps a film request failure to a StarWarsError", () => {
-    const failingClient = HttpClient.make((request) =>
-      request.url.includes("/people/")
-        ? Effect.succeed(
-            HttpClientResponse.fromWeb(
-              request,
-              new Response(JSON.stringify(personResponse), {
-                status: 200,
-                headers: { "content-type": "application/json" },
-              }),
-            ),
-          )
-        : Effect.succeed(
-            HttpClientResponse.fromWeb(
-              request,
-              new Response(null, { status: 404 }),
-            ),
-          ),
-    );
-    const failingLayer = liveLayer.pipe(
-      Layer.provide(Layer.succeed(HttpClient.HttpClient, failingClient)),
-    );
-
-    return Effect.gen(function*() {
-      const error = yield* StarWarsClient.use((client) =>
-        client.getPerson(makeCharacterId("1")),
+      const error = yield* StarWarsClient.use((service) =>
+        service.searchPeople("luke"),
       ).pipe(Effect.flip);
 
       expect(error).toMatchObject({
         _tag: "StarWarsError",
-        message: "A film for person 1 is not available.",
+        message: "Characters matching luke are not available.",
       });
-    }).pipe(Effect.provide(failingLayer));
+    }).pipe(Effect.provide(layer));
   });
 
+  it.effect("maps an invalid homeworld URL to a StarWarsError", () =>
+    expectResourceError(
+      { ...personResponse, homeworld: "not-a-url" },
+      () => 200,
+      "A homeworld for person 1 is not available.",
+    ),
+  );
+
+  it.effect("maps a species URL without an id to a StarWarsError", () =>
+    expectResourceError(
+      { ...personResponse, species: ["https://swapi.dev/"] },
+      () => 200,
+      "A species for person 1 is not available.",
+    ),
+  );
+
+  it.effect("maps a starship URL without an id to a StarWarsError", () =>
+    expectResourceError(
+      { ...personResponse, starships: ["https://swapi.dev/"] },
+      () => 200,
+      "A starship for person 1 is not available.",
+    ),
+  );
+
+  it.effect("maps a vehicle URL without an id to a StarWarsError", () =>
+    expectResourceError(
+      { ...personResponse, vehicles: ["https://swapi.dev/"] },
+      () => 200,
+      "A vehicle for person 1 is not available.",
+    ),
+  );
+
   it.effect("maps an invalid film URL to a StarWarsError", () =>
-    expectFilmErrorFor(["not-a-url"]),
+    expectResourceError(
+      { ...personResponse, films: ["not-a-url"] },
+      () => 200,
+      "A film for person 1 is not available.",
+    ),
   );
 
-  it.effect("maps a film URL without an id to a StarWarsError", () =>
-    expectFilmErrorFor(["https://swapi.dev/"]),
-  );
+  it.effect("maps a search result without an id to a StarWarsError", () => {
+    const client = HttpClient.make((request) =>
+      Effect.succeed(
+        HttpClientResponse.fromWeb(
+          request,
+          new Response(
+            JSON.stringify({
+              count: 1,
+              results: [
+                {
+                  ...personResponse,
+                  url: "https://swapi.dev/",
+                },
+              ],
+            }),
+            {
+              status: 200,
+              headers: { "content-type": "application/json" },
+            },
+          ),
+        ),
+      ),
+    );
+    const layer = liveLayer.pipe(
+      Layer.provide(Layer.succeed(HttpClient.HttpClient, client)),
+    );
 
-  it.effect("maps a non-numeric film id to a StarWarsError", () =>
-    expectFilmErrorFor(["https://swapi.dev/api/films/not-a-number/"]),
-  );
+    return Effect.gen(function*() {
+      const error = yield* StarWarsClient.use((service) =>
+        service.searchPeople("luke"),
+      ).pipe(Effect.flip);
+
+      expect(error).toMatchObject({
+        _tag: "StarWarsError",
+        message: "Character Luke Skywalker has no id.",
+      });
+    }).pipe(Effect.provide(layer));
+  });
 });

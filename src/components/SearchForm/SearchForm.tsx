@@ -48,26 +48,41 @@ export const SearchForm = ({
   isPending,
   ...model
 }: SearchFormProps) => (
-  <form action={dispatch} method="post">
-    <label htmlFor="characterId">{model.label}</label>
-    <input
-      key={model.value}
-      id="characterId"
-      name="characterId"
-      defaultValue={model.value}
-      inputMode="numeric"
-      aria-invalid={model.error !== undefined}
-      aria-describedby={
-        model.error === undefined ? undefined : "characterId-error"
-      }
-    />
-    {model.error === undefined ? null : (
-      <p id="characterId-error" role="alert">
-        {model.error}
-      </p>
-    )}
-    <button type="submit" disabled={isPending}>
-      {isPending ? model.pendingLabel : model.submitLabel}
-    </button>
+  <form
+    action={dispatch}
+    method="post"
+    className="card bg-base-100 shadow-xl"
+  >
+    <div className="card-body gap-3">
+      <label htmlFor="characterId" className="label-text">
+        {model.label}
+      </label>
+      <input
+        key={model.value}
+        id="characterId"
+        name="characterId"
+        defaultValue={model.value}
+        inputMode="numeric"
+        className={`input input-bordered w-full${
+          model.error === undefined ? "" : " input-error"
+        }`}
+        aria-invalid={model.error !== undefined}
+        aria-describedby={
+          model.error === undefined ? undefined : "characterId-error"
+        }
+      />
+      {model.error === undefined ? null : (
+        <p id="characterId-error" role="alert" className="text-sm text-error">
+          {model.error}
+        </p>
+      )}
+      <button
+        type="submit"
+        className="btn btn-primary"
+        disabled={isPending}
+      >
+        {isPending ? model.pendingLabel : model.submitLabel}
+      </button>
+    </div>
   </form>
 );

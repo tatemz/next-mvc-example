@@ -21,11 +21,47 @@ export const Film = Schema.TaggedStruct("Film", {
 });
 export type Film = typeof Film.Type;
 
+export const Planet = Schema.TaggedStruct("Planet", {
+  name: Schema.NonEmptyString,
+  climate: Schema.String,
+  terrain: Schema.String,
+});
+export type Planet = typeof Planet.Type;
+
+export const Species = Schema.TaggedStruct("Species", {
+  name: Schema.NonEmptyString,
+  classification: Schema.String,
+  language: Schema.String,
+});
+export type Species = typeof Species.Type;
+
+export const TransportKind = Schema.Literals(["Starship", "Vehicle"]);
+export type TransportKind = typeof TransportKind.Type;
+
+export const Transport = Schema.TaggedStruct("Transport", {
+  key: Schema.NonEmptyString,
+  kind: TransportKind,
+  name: Schema.NonEmptyString,
+  model: Schema.NonEmptyString,
+});
+export type Transport = typeof Transport.Type;
+
+export const PersonSummary = Schema.TaggedStruct("PersonSummary", {
+  id: CharacterId,
+  name: Schema.NonEmptyString,
+});
+export type PersonSummary = typeof PersonSummary.Type;
+
 export const Person = Schema.TaggedStruct("Person", {
   id: CharacterId,
   name: Schema.NonEmptyString,
   height: Schema.String,
   mass: Schema.String,
+  birthYear: Schema.String,
+  gender: Schema.String,
+  homeworld: Planet,
+  species: Schema.NullOr(Species),
   films: Schema.NonEmptyArray(Film),
+  transports: Schema.Array(Transport),
 });
 export type Person = typeof Person.Type;

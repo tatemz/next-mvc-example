@@ -5,62 +5,108 @@ import { makeEn } from "../../i18n/I18n.service";
 import {
   makePersonViewModel,
   PersonCard,
-  PersonViewModel,
+  type PersonCardInput,
 } from "./PersonCard";
 
 const i18n = makeEn();
 
+const input = (
+  overrides: Partial<PersonCardInput> = {},
+): PersonCardInput => ({
+  id: "1",
+  name: "Luke Skywalker",
+  height: "172",
+  mass: "77",
+  birthYear: "19BBY",
+  gender: "male",
+  homeworld: { name: "Tatooine", climate: "arid", terrain: "desert" },
+  species: null,
+  films: [{ title: "A New Hope", episodeId: 4 }],
+  transports: [],
+  ...overrides,
+});
+
 describe("makePersonViewModel", () => {
   it("formats known measurements", () => {
-    expect(
-      makePersonViewModel(i18n, {
-        name: "Luke Skywalker",
-        height: "172",
-        mass: "77",
-      }),
-    ).toEqual({
+    expect(makePersonViewModel(i18n, input())).toEqual({
       _tag: "PersonViewModel",
+      id: "1",
       name: "Luke Skywalker",
       height: "172",
       mass: "77",
+      birthYear: "19BBY",
+      gender: "male",
       heightLabel: "Height",
       massLabel: "Mass",
+      birthYearLabel: "Born",
+      genderLabel: "Gender",
+      homeworldLabel: "Homeworld",
+      speciesLabel: "Species",
+      speciesUnknownLabel: "Unknown species",
+      homeworld: {
+        _tag: "PlanetViewModel",
+        name: "Tatooine",
+        climate: "arid",
+        terrain: "desert",
+      },
+      species: null,
+      films: [
+        {
+          _tag: "FilmListItemViewModel",
+          episodeId: 4,
+          text: "A New Hope (Episode 4)",
+        },
+      ],
+      transports: [],
     });
   });
 
   it("replaces unknown measurements with a display value", () => {
     expect(
-      makePersonViewModel(i18n, {
-        name: "Yoda",
-        height: "unknown",
-        mass: "",
-      }),
-    ).toEqual({
-      _tag: "PersonViewModel",
-      name: "Yoda",
+      makePersonViewModel(
+        i18n,
+        input({ name: "Yoda", height: "unknown", mass: "" }),
+      ),
+    ).toMatchObject({
       height: "Unknown",
       mass: "Unknown",
-      heightLabel: "Height",
-      massLabel: "Mass",
+    });
+  });
+
+  it("maps the species when one is present", () => {
+    expect(
+      makePersonViewModel(
+        i18n,
+        input({
+          species: {
+            name: "Human",
+            classification: "mammal",
+            language: "Galactic Basic",
+          },
+        }),
+      ),
+    ).toMatchObject({
+      species: {
+        _tag: "SpeciesViewModel",
+        name: "Human",
+      },
     });
   });
 });
 
 describe("PersonCard", () => {
   it("renders person labels from the model", () => {
-    const html = renderToStaticMarkup(
-      <PersonCard
-        {...PersonViewModel.make({
-          name: "Luke Skywalker",
-          height: "172",
-          mass: "77",
-          heightLabel: "Tallness",
-          massLabel: "Heft",
-        })}
-      />,
-    );
+    const model = {
+      ...makePersonViewModel(i18n, input()),
+      heightLabel: "Tallness",
+      massLabel: "Heft",
+    };
+
+    const html = renderToStaticMarkup(<PersonCard {...model} />);
 
     expect(html).toContain("Tallness");
     expect(html).toContain("Heft");
+    expect(html).toContain("Tatooine");
+    expect(html).toContain("Unknown species");
   });
 });

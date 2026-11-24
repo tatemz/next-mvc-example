@@ -1,4 +1,4 @@
-import { Array, Config, Effect, Function, Schema } from "effect";
+import { Config, Effect, Function, Schema } from "effect";
 import { makeFilmListViewModel } from "../components/FilmList/FilmList";
 import {
   makeFailedHomePageModel,
@@ -13,14 +13,10 @@ const defaultCharacterId = Schema.decodeSync(CharacterId)("1");
 
 export const presentLoadedHomePage = (i18n: I18n, person: Person) => {
   const personViewModel = makePersonViewModel(i18n, person);
-  const films = Function.pipe(
-    person.films,
-    Array.map((film) => ({
-      title: film.title,
-      episodeId: film.episodeId,
-    })),
+  const filmListViewModel = makeFilmListViewModel(
+    i18n,
+    personViewModel.films,
   );
-  const filmListViewModel = makeFilmListViewModel(i18n, films);
 
   return makeLoadedHomePageModel(i18n, {
     formValue: person.id,

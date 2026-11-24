@@ -4,6 +4,7 @@ import type { I18n } from "../../i18n/I18n.service";
 export const FilmListItemViewModel = Schema.TaggedStruct(
   "FilmListItemViewModel",
   {
+    episodeId: Schema.Int,
     text: Schema.NonEmptyString,
   },
 );
@@ -20,6 +21,7 @@ export const makeFilmListItemViewModel = (
   film: FilmListItemInput,
 ) =>
   FilmListItemViewModel.make({
+    episodeId: film.episodeId,
     text: i18n._({
       id: "film.listItem",
       values: {
@@ -33,5 +35,5 @@ export const makeFilmListItemViewModel = (
 export type FilmListItemProps = FilmListItemViewModel;
 
 export const FilmListItem = (model: FilmListItemProps) => (
-  <li>{model.text}</li>
+  <li className="py-2">{model.text}</li>
 );

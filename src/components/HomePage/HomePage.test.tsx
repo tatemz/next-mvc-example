@@ -21,6 +21,10 @@ describe("presentLoadedHomePage", () => {
 
     expect(model).toMatchObject({
       _tag: "Loaded",
+      hero: {
+        _tag: "HomeHeroViewModel",
+        funnelHref: "/funnel",
+      },
       form: {
         _tag: "SearchFormViewModel",
         value: "1",
@@ -31,16 +35,25 @@ describe("presentLoadedHomePage", () => {
         name: "Luke Skywalker",
         height: "172",
         mass: "77",
+        birthYear: "19BBY",
+        gender: "male",
         heightLabel: "Height",
         massLabel: "Mass",
+        homeworld: { _tag: "PlanetViewModel", name: "Tatooine" },
+        species: null,
       },
       filmList: {
         _tag: "FilmListViewModel",
         countLabel: "2 films",
         films: [
-          { _tag: "FilmListItemViewModel", text: "A New Hope (Episode 4)" },
           {
             _tag: "FilmListItemViewModel",
+            episodeId: 4,
+            text: "A New Hope (Episode 4)",
+          },
+          {
+            _tag: "FilmListItemViewModel",
+            episodeId: 5,
             text: "The Empire Strikes Back (Episode 5)",
           },
         ],
@@ -51,28 +64,10 @@ describe("presentLoadedHomePage", () => {
 
 describe("HomePageViewModel", () => {
   it("keeps films a non-empty array in the schema", () => {
+    const model = presentLoadedHomePage(i18n, luke);
     const invalid = {
-      _tag: "Loaded",
-      form: {
-        _tag: "SearchFormViewModel",
-        value: "1",
-        label: "Character id",
-        submitLabel: "Load character",
-        pendingLabel: "Loading...",
-      },
-      person: {
-        _tag: "PersonViewModel",
-        name: "Luke Skywalker",
-        height: "172",
-        mass: "77",
-        heightLabel: "Height",
-        massLabel: "Mass",
-      },
-      filmList: {
-        _tag: "FilmListViewModel",
-        films: [],
-        countLabel: "0 films",
-      },
+      ...model,
+      filmList: { ...model.filmList, films: [] },
     };
 
     expect(() =>
@@ -101,11 +96,12 @@ describe("HomePage", () => {
       />,
     );
 
-    expect(html).toContain("<h1>Luke Skywalker</h1>");
-    expect(html.match(/<li>/g)).toHaveLength(2);
+    expect(html).toContain("Luke Skywalker");
+    expect(html.match(/<li/g)).toHaveLength(2);
     expect(html).toContain("A New Hope (Episode 4)");
     expect(html).toContain("2 films");
     expect(html).toContain("Load character");
+    expect(html).toContain("Build a dossier");
     expect(html).toContain('value="1"');
   });
 

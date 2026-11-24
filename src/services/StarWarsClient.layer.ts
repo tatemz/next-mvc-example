@@ -22,5 +22,7 @@ export const layer = Layer.effect(
   }),
 );
 
-export const layerStub = (getPerson: StarWarsClient["getPerson"]) =>
-  Layer.succeed(StarWarsClient, makeStub(getPerson));
+export const layerStub = (
+  getPerson: StarWarsClient["getPerson"],
+  searchPeople?: StarWarsClient["searchPeople"],
+) => Layer.succeed(StarWarsClient, makeStub(getPerson, searchPeople));

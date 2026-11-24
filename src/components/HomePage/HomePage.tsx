@@ -11,13 +11,31 @@ import {
   SearchFormViewModel,
 } from "../SearchForm/SearchForm";
 
+export const HomeHeroViewModel = Schema.TaggedStruct("HomeHeroViewModel", {
+  title: Schema.NonEmptyString,
+  subtitle: Schema.NonEmptyString,
+  funnelLabel: Schema.NonEmptyString,
+  funnelHref: Schema.NonEmptyString,
+});
+export type HomeHeroViewModel = typeof HomeHeroViewModel.Type;
+
+export const makeHomeHeroViewModel = (i18n: I18n) =>
+  HomeHeroViewModel.make({
+    title: i18n._({ id: "homePage.hero.title" }),
+    subtitle: i18n._({ id: "homePage.hero.subtitle" }),
+    funnelLabel: i18n._({ id: "homePage.hero.funnel" }),
+    funnelHref: "/funnel",
+  });
+
 export const HomePageViewModel = Schema.TaggedUnion({
   Loaded: {
+    hero: HomeHeroViewModel,
     form: SearchFormViewModel,
     person: PersonViewModel,
     filmList: FilmListViewModel,
   },
   Failed: {
+    hero: HomeHeroViewModel,
     form: SearchFormViewModel,
     message: Schema.NonEmptyString,
   },
@@ -57,6 +75,7 @@ export const makeLoadedHomePageModel = (
   input: LoadedHomePageInput,
 ) =>
   HomePageViewModel.cases.Loaded.make({
+    hero: makeHomeHeroViewModel(i18n),
     form: makeInitialSearchFormViewModel(i18n, input.formValue),
     person: input.person,
     filmList: input.filmList,
@@ -67,6 +86,7 @@ export const makeFailedHomePageModel = (
   input: FailedHomePageInput,
 ) =>
   HomePageViewModel.cases.Failed.make({
+    hero: makeHomeHeroViewModel(i18n),
     form: makeRetrySearchFormViewModel(i18n, input.formValue),
     message: i18n._({ id: "homePage.loadError" }),
   });
@@ -92,20 +112,39 @@ type LoadedHomePageProps = LoadedHomePageViewModel & HomePageExtras;
 
 type FailedHomePageProps = FailedHomePageViewModel & HomePageExtras;
 
+const HomeHero = ({ hero }: { readonly hero: HomeHeroViewModel }) => (
+  <section className="hero rounded-box bg-base-100 shadow-xl">
+    <div className="hero-content py-10 text-center">
+      <div className="max-w-2xl">
+        <h1 className="text-4xl font-bold">{hero.title}</h1>
+        <p className="py-4 text-base-content/70">{hero.subtitle}</p>
+        <a href={hero.funnelHref} className="btn btn-primary">
+          {hero.funnelLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+);
+
 const LoadedHomePage = ({
   dispatch,
   isPending,
   ...model
 }: LoadedHomePageProps) => (
-  <>
-    <PersonCard {...model.person} />
-    <FilmList {...model.filmList} />
-    <SearchForm
-      {...model.form}
-      dispatch={dispatch}
-      isPending={isPending}
-    />
-  </>
+  <div className="flex flex-col gap-6">
+    <HomeHero hero={model.hero} />
+    <div className="grid gap-6 lg:grid-cols-2">
+      <PersonCard {...model.person} />
+      <div className="flex flex-col gap-6">
+        <FilmList {...model.filmList} />
+        <SearchForm
+          {...model.form}
+          dispatch={dispatch}
+          isPending={isPending}
+        />
+      </div>
+    </div>
+  </div>
 );
 
 const FailedHomePage = ({
@@ -113,14 +152,17 @@ const FailedHomePage = ({
   isPending,
   ...model
 }: FailedHomePageProps) => (
-  <>
-    <p role="alert">{model.message}</p>
+  <div className="flex flex-col gap-6">
+    <HomeHero hero={model.hero} />
+    <div role="alert" className="alert alert-error">
+      {model.message}
+    </div>
     <SearchForm
       {...model.form}
       dispatch={dispatch}
       isPending={isPending}
     />
-  </>
+  </div>
 );
 
 export const HomePage = ({

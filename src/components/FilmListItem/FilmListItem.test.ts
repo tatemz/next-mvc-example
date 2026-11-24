@@ -14,6 +14,7 @@ describe("makeFilmListItemViewModel", () => {
       }),
     ).toEqual({
       _tag: "FilmListItemViewModel",
+      episodeId: 4,
       text: "A New Hope (Episode 4)",
     });
   });

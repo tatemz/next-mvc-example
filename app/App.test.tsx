@@ -17,7 +17,7 @@ describe("app", () => {
       </RootLayout>,
     );
 
-    expect(html).toContain('<html lang="en">');
+    expect(html).toContain('<html lang="en" data-theme="night">');
     expect(html).toContain("<p>child</p>");
   });
 });

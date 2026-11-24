@@ -1,8 +1,9 @@
 # next-mvc-example
 
-A small Next.js App Router example with Effect v4. Each component keeps a view
-model, a factory, and a view. The page starts with a Star Wars character; the
-form posts to a server action and gets the next view model back.
+A small Next.js App Router example with Effect v4, styled with Tailwind 4 and
+daisyUI. It has three routes: a home character lookup, a multi-step dossier
+funnel, and a results page. Every component keeps a view model, a factory, and a
+view; forms post to server actions that return the next view model.
 
 ## What it shows
 
@@ -13,58 +14,71 @@ form posts to a server action and gets the next view model back.
   id.
 - Every user-visible string, including labels and button copy, is carried by the
   view model rather than written in a view.
-- View models and their factories do not import domain models.
-  `HomePage.controller.ts` is the only place that maps `Person` and `Film` into
-  the page view model.
+- View models and their factories do not import domain models. The controllers
+  are the only place that map SWAPI domain objects into view models.
 - `HomePageViewModel` is a `Schema.TaggedUnion` of `Loaded` and `Failed`.
-- `Loaded.filmList.films` is `Schema.NonEmptyArray(FilmListItemViewModel)`.
-- `StarWarsClient` is a `Context.Service` layer that decodes SWAPI responses
-  into `Person` and `Film` domain objects.
-- `HomePage.controller.ts` maps the `Person` domain object into the nested view
-  models and passes them to `makeLoadedHomePageModel`.
-- `loadHomePage` reads `STAR_WARS_CHARACTER_ID` with `Config`. Effect's default
-  config provider reads `process.env`.
-- `searchPerson` is a server action. It validates the form with a schema and
-  returns the updated `HomePageViewModel`.
-- `HomePage.connected.tsx` is the only client component. It uses
-  `useActionState` and posts the form to the action.
+- `StarWarsClient` decodes a person dossier: films, homeworld, species,
+  starships, and vehicles. It also searches people by name.
+- `FunnelViewModel` is a `Schema.TaggedUnion` of `Search`, `Choose`, `Film`,
+  `Transport`, `Review`, and `Failed`. `Funnel.controller.ts` advances it with an
+  exhaustive Effect `Match` over the current step.
+- The funnel searches SWAPI by name, loads the chosen person, then narrows their
+  films and transports before linking to the results page.
+- The results page reads `?character=&film=&transport=` through the Next 16
+  `searchParams` promise and rebuilds the dossier from SWAPI.
+- `searchPerson` and `submitFunnel` are server actions. Each validates the form
+  and returns the next view model.
+- `HomePage.connected.tsx` and `Funnel.connected.tsx` are the two client
+  components. Both use `useActionState`.
 - `features/` drives the built app with Strider through effect-bdd. Scenarios run
-  in parallel, each on its own OS-assigned port. Every scenario writes a WebM; a
-  failed scenario also writes a full-page screenshot.
+  in parallel, each on its own OS-assigned port. Debug mode records one paced
+  WebM per feature; a failed scenario also writes a full-page screenshot.
 
 Each component is one file, ordered model, optics (when needed), factory, dumb
-view, connected view; its tests sit beside it. HomePage keeps its connected view
-in `HomePage.connected.tsx`, the one `"use client"` module.
+view, connected view; its tests sit beside it. HomePage and Funnel keep their
+connected views in their `.connected.tsx` modules, the two `"use client"`
+boundaries.
 
 ## Layout
 
 ```text
-app/page.tsx                                 Next route; re-exports HomePage.page
-src/page-modules/HomePage/HomePage.page.tsx  thin wrapper: run controller, render view
+app/page.tsx                                 home route
+app/funnel/page.tsx                          funnel route
+app/results/page.tsx                         results route; awaits searchParams
+src/page-modules/HomePage/HomePage.page.tsx  run controller, render view
+src/page-modules/Funnel/Funnel.page.tsx      start the funnel, render it
+src/page-modules/Results/Results.page.tsx    load the dossier, render it
 src/components/HomePage/                     HomePage.tsx, HomePage.connected.tsx
+src/components/Funnel/                       Funnel.tsx, Funnel.connected.tsx
+src/components/Results/                      Results.tsx
+src/components/PersonCard/                   PersonCard.tsx
 src/components/FilmList/                     FilmList.tsx
 src/components/FilmListItem/                 FilmListItem.tsx
-src/components/PersonCard/                   PersonCard.tsx
 src/components/SearchForm/                   SearchForm.tsx
-src/controllers/HomePage.controller.ts       Config + client -> view model
-src/controllers/SearchPerson.controller.ts   form schema + client -> view model
+src/controllers/HomePage.controller.ts       Config + client -> home view model
+src/controllers/SearchPerson.controller.ts   form schema + client -> home view model
+src/controllers/Funnel.controller.ts         Match state machine for the funnel
+src/controllers/Results.controller.ts        searchParams + client -> dossier
 src/actions/SearchPerson.serverAction.ts     "use server" boundary
-src/domain/StarWars.model.ts              CharacterId, Film, and Person schemas
-src/server/Runtime.ts                    one ManagedRuntime for page and action
-src/services/StarWarsClient.ts           service interface and error
-src/services/StarWarsClient.factory.ts   client implementation
-src/services/StarWarsClient.layer.ts     Config + HttpClient layer
-features/CharacterLookup.feature         the integration scenarios
-features/CharacterLookup.steps.ts        the scenario chains
-features/SharedSteps.ts                  shared browser steps
-features/support/ScenarioApp.ts          boots the built Next app per scenario
-                                         on an OS-assigned port
-features/support/ScenarioPage.ts         page, video, failure screenshot
-features/support/Video.ts                ordered clips -> one WebM per feature
-features/support/Debug.ts                E2E_DEBUG flag and interaction pause
+src/actions/Funnel.serverAction.ts           "use server" boundary
+src/domain/StarWars.model.ts                 CharacterId, Person, Film, Planet,
+                                             Species, Transport
+src/server/Runtime.ts                        one ManagedRuntime for pages and actions
+src/services/SwapiApi.ts                     typed SWAPI endpoints
+src/services/StarWarsClient.ts               service interface and error
+src/services/StarWarsClient.factory.ts       client implementation
+src/services/StarWarsClient.layer.ts         Config + HttpClient layer
+features/CharacterLookup.feature             home lookup scenarios
+features/Funnel.feature                      dossier funnel scenario
+features/SharedSteps.ts                      shared browser steps
+features/support/ScenarioApp.ts              boots the built Next app per scenario
+                                             on an OS-assigned port
+features/support/ScenarioPage.ts             page, video, failure screenshot
+features/support/Video.ts                    ordered clips -> one WebM per feature
+features/support/Debug.ts                    E2E_DEBUG flag and interaction pause
 ```
 
-`src/pages` is reserved by Next’s Pages Router, so page modules use the
+`src/pages` is reserved by Next's Pages Router, so page modules use the
 `src/page-modules` name. A page module is only the page wrapper;
 controllers, actions, domain, services, and the server runtime stay in their own
 layers.
@@ -85,9 +99,10 @@ pnpm test:e2e:debug
 ## Integration tests
 
 `pnpm test:e2e` builds the app, then runs the Gherkin scenarios with
-`effect-bdd`. Scenarios run in parallel; each starts its own `next start -p 0`,
-so the OS assigns a free port, opens a Chromium page with Strider, and closes
-both when the scenario ends. It records nothing and pauses nowhere.
+`effect-bdd`. Two features cover the home lookup and the full dossier funnel.
+Scenarios run in parallel; each starts its own `next start -p 0`, so the OS
+assigns a free port, opens a Chromium page with Strider, and closes both when
+the scenario ends. It records nothing and pauses nowhere.
 
 `pnpm test:e2e:debug` runs the same scenarios one at a time, pauses a second
 after each browser interaction, and records the whole feature into one

@@ -27,7 +27,17 @@ const person = {
   name: "Luke Skywalker",
   height: "172",
   mass: "77",
+  birthYear: "19BBY",
+  gender: "male",
+  homeworld: {
+    _tag: "Planet",
+    name: "Tatooine",
+    climate: "arid",
+    terrain: "desert",
+  },
+  species: null,
   films: [{ _tag: "Film", title: "A New Hope", episodeId: 4 }],
+  transports: [],
 };
 
 describe("Person", () => {
