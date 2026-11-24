@@ -2,12 +2,16 @@ import { Schema } from "effect";
 import { renderToStaticMarkup } from "react-dom/server";
 import { it } from "@effect/vitest";
 import { describe, expect } from "vitest";
-import { makeFailedHomePageModel } from "./HomePage.factory";
-import { HomePageViewModel } from "./HomePage.model";
-import { HomePage } from "./HomePage.view";
 import { presentLoadedHomePage } from "../../controllers/HomePage.controller";
-import { makeEn } from "../../i18n/I18n.service";
 import { luke } from "../../domain/StarWars.fixture";
+import { makeEn } from "../../i18n/I18n.service";
+import {
+  HomePage,
+  HomePageOptics,
+  HomePageViewModel,
+  makeFailedHomePageModel,
+} from "./HomePage";
+import { ConnectedHomePage } from "./HomePage.connected";
 
 const i18n = makeEn();
 
@@ -77,6 +81,16 @@ describe("HomePageViewModel", () => {
   });
 });
 
+describe("HomePageOptics", () => {
+  it("sets and reads the form error without mutating the model", () => {
+    const model = presentLoadedHomePage(makeEn(), luke);
+    const updated = HomePageOptics.FormError.set("Bad id")(model);
+
+    expect(HomePageOptics.FormError.get(updated)).toBe("Bad id");
+    expect(model.form.error).toBeUndefined();
+  });
+});
+
 describe("HomePage", () => {
   it("renders the loaded character and films", () => {
     const html = renderToStaticMarkup(
@@ -126,5 +140,15 @@ describe("HomePage", () => {
 
     expect(html).toContain("Loading...");
     expect(html).toContain("disabled");
+  });
+});
+
+describe("ConnectedHomePage", () => {
+  it("renders the initial model", () => {
+    const html = renderToStaticMarkup(
+      <ConnectedHomePage {...presentLoadedHomePage(makeEn(), luke)} />,
+    );
+
+    expect(html).toContain("Luke Skywalker");
   });
 });

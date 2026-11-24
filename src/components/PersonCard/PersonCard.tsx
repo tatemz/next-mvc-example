@@ -1,6 +1,14 @@
 import { Function, Match, Schema } from "effect";
 import type { I18n } from "../../i18n/I18n.service";
-import { PersonViewModel } from "./PersonCard.model";
+
+export const PersonViewModel = Schema.TaggedStruct("PersonViewModel", {
+  name: Schema.NonEmptyString,
+  height: Schema.String,
+  mass: Schema.String,
+  heightLabel: Schema.NonEmptyString,
+  massLabel: Schema.NonEmptyString,
+});
+export type PersonViewModel = typeof PersonViewModel.Type;
 
 export const PersonCardInput = Schema.Struct({
   name: Schema.NonEmptyString,
@@ -30,3 +38,23 @@ export const makePersonViewModel = (
     heightLabel: i18n._({ id: "person.heightLabel" }),
     massLabel: i18n._({ id: "person.massLabel" }),
   });
+
+export type PersonCardProps = PersonViewModel;
+
+export const PersonCard = ({
+  name,
+  height,
+  mass,
+  heightLabel,
+  massLabel,
+}: PersonCardProps) => (
+  <section>
+    <h1>{name}</h1>
+    <dl>
+      <dt>{heightLabel}</dt>
+      <dd>{height}</dd>
+      <dt>{massLabel}</dt>
+      <dd>{mass}</dd>
+    </dl>
+  </section>
+);

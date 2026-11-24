@@ -1,10 +1,10 @@
 import { Array, Config, Effect, Function, Schema } from "effect";
-import { makeFilmListViewModel } from "../components/FilmList/FilmList.factory";
+import { makeFilmListViewModel } from "../components/FilmList/FilmList";
 import {
   makeFailedHomePageModel,
   makeLoadedHomePageModel,
-} from "../components/HomePage/HomePage.factory";
-import { makePersonViewModel } from "../components/PersonCard/PersonCard.factory";
+} from "../components/HomePage/HomePage";
+import { makePersonViewModel } from "../components/PersonCard/PersonCard";
 import { CharacterId, type Person } from "../domain/StarWars.model";
 import { I18n } from "../i18n/I18n.service";
 import { StarWarsClient } from "../services/StarWarsClient";

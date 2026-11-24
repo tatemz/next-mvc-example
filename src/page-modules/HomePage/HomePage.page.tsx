@@ -1,5 +1,5 @@
 import { runtime } from "../../server/Runtime";
-import { ConnectedHomePage } from "../../components/HomePage/HomePage.connected.view";
+import { ConnectedHomePage } from "../../components/HomePage/HomePage.connected";
 import { loadHomePage } from "../../controllers/HomePage.controller";
 
 export async function HomePage() {

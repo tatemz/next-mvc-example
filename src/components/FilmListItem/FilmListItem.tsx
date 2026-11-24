@@ -1,6 +1,13 @@
 import { Schema } from "effect";
 import type { I18n } from "../../i18n/I18n.service";
-import { FilmListItemViewModel } from "./FilmListItem.model";
+
+export const FilmListItemViewModel = Schema.TaggedStruct(
+  "FilmListItemViewModel",
+  {
+    text: Schema.NonEmptyString,
+  },
+);
+export type FilmListItemViewModel = typeof FilmListItemViewModel.Type;
 
 export const FilmListItemInput = Schema.Struct({
   title: Schema.NonEmptyString,
@@ -22,3 +29,9 @@ export const makeFilmListItemViewModel = (
       },
     }),
   });
+
+export type FilmListItemProps = FilmListItemViewModel;
+
+export const FilmListItem = ({ text }: FilmListItemProps) => (
+  <li>{text}</li>
+);

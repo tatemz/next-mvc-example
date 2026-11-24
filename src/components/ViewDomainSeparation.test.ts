@@ -11,7 +11,7 @@ const filesUnder = (directory: string): string[] =>
 
 const viewModelFiles = ["src/components", "src/page-modules"]
   .flatMap(filesUnder)
-  .filter((path) => /\.(model|factory|view)\.tsx?$/.test(path));
+  .filter((path) => !/\.test\.tsx?$/.test(path));
 
 const domainImport = /from\s+["'][^"']*\/domain\//;
 const viewModelImport = /from\s+["'][^"']*(components|page-modules)\//;

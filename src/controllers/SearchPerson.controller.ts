@@ -1,6 +1,8 @@
 import { Effect, Function } from "effect";
-import type { HomePageViewModel } from "../components/HomePage/HomePage.model";
-import { HomePageOptics } from "../components/HomePage/HomePage.optics";
+import {
+  type HomePageViewModel,
+  HomePageOptics,
+} from "../components/HomePage/HomePage";
 import {
   type SearchFormValidationError,
   validateSearchForm,

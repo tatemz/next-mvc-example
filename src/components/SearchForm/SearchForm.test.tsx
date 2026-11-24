@@ -1,8 +1,39 @@
 import { it } from "@effect/vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect } from "vitest";
-import { SearchFormViewModel } from "./SearchForm.model";
-import { SearchForm } from "./SearchForm.view";
+import { makeEn } from "../../i18n/I18n.service";
+import {
+  makeInitialSearchFormViewModel,
+  makeRetrySearchFormViewModel,
+  SearchForm,
+  SearchFormViewModel,
+} from "./SearchForm";
+
+const i18n = makeEn();
+
+describe("makeInitialSearchFormViewModel", () => {
+  it("builds the initial form", () => {
+    expect(makeInitialSearchFormViewModel(i18n, "3")).toEqual({
+      _tag: "SearchFormViewModel",
+      value: "3",
+      label: "Character id",
+      submitLabel: "Load character",
+      pendingLabel: "Loading...",
+    });
+  });
+});
+
+describe("makeRetrySearchFormViewModel", () => {
+  it("builds the retry form", () => {
+    expect(makeRetrySearchFormViewModel(i18n, "abc")).toEqual({
+      _tag: "SearchFormViewModel",
+      value: "abc",
+      label: "Character id",
+      submitLabel: "Try again",
+      pendingLabel: "Loading...",
+    });
+  });
+});
 
 describe("SearchForm", () => {
   it("renders form copy from the model", () => {

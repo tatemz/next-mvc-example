@@ -2,8 +2,7 @@
 
 import { useActionState } from "react";
 import { searchPerson } from "../../actions/SearchPerson.serverAction";
-import type { HomePageViewModel } from "./HomePage.model";
-import { HomePage } from "./HomePage.view";
+import { HomePage, type HomePageViewModel } from "./HomePage";
 
 export type ConnectedHomePageProps = HomePageViewModel;
 

@@ -1,6 +1,6 @@
 "use server";
 
-import type { HomePageViewModel } from "../components/HomePage/HomePage.model";
+import type { HomePageViewModel } from "../components/HomePage/HomePage";
 import { searchPerson as searchPersonEffect } from "../controllers/SearchPerson.controller";
 import { runtime } from "../server/Runtime";
 
