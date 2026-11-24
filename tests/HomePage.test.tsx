@@ -2,15 +2,17 @@ import { Schema } from "effect";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { makeFailedHomePageModel } from "../src/components/HomePage/HomePage.factory";
-import { makeRetrySearchFormViewModel } from "../src/components/SearchForm/SearchForm.factory";
 import { HomePageViewModel } from "../src/components/HomePage/HomePage.model";
-import { presentLoadedHomePage } from "../src/controllers/HomePage.controller";
 import { HomePage } from "../src/components/HomePage/HomePage.view";
+import { presentLoadedHomePage } from "../src/controllers/HomePage.controller";
+import { makeEn } from "../src/i18n/I18n.service";
 import { luke } from "./fixtures/Person.fixture";
+
+const i18n = makeEn();
 
 describe("presentLoadedHomePage", () => {
   it("presents a domain person as a loaded view model", () => {
-    const model = presentLoadedHomePage(luke);
+    const model = presentLoadedHomePage(i18n, luke);
 
     expect(model).toMatchObject({
       _tag: "Loaded",
@@ -78,7 +80,7 @@ describe("HomePage", () => {
   it("renders the loaded character and films", () => {
     const html = renderToStaticMarkup(
       <HomePage
-        model={presentLoadedHomePage(luke)}
+        model={presentLoadedHomePage(i18n, luke)}
         dispatch={() => {}}
         isPending={false}
       />,
@@ -93,10 +95,7 @@ describe("HomePage", () => {
   });
 
   it("renders a failure with the submitted form value", () => {
-    const model = makeFailedHomePageModel({
-      form: makeRetrySearchFormViewModel("abc"),
-      message: "Character id must be a positive whole number.",
-    });
+    const model = makeFailedHomePageModel(i18n, { formValue: "abc" });
     expect(model).toMatchObject({
       form: {
         _tag: "SearchFormViewModel",
@@ -110,7 +109,7 @@ describe("HomePage", () => {
     );
 
     expect(html).toContain('role="alert"');
-    expect(html).toContain("Character id must be a positive whole number.");
+    expect(html).toContain("The character could not be loaded.");
     expect(html).toContain("Try again");
     expect(html).toContain('value="abc"');
   });
@@ -118,7 +117,7 @@ describe("HomePage", () => {
   it("renders the pending form state", () => {
     const html = renderToStaticMarkup(
       <HomePage
-        model={presentLoadedHomePage(luke)}
+        model={presentLoadedHomePage(i18n, luke)}
         dispatch={() => {}}
         isPending={true}
       />,

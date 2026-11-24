@@ -3,6 +3,7 @@ import { Effect } from "effect";
 import { describe, expect } from "vitest";
 import { presentLoadedHomePage } from "../src/controllers/HomePage.controller";
 import { searchPerson } from "../src/controllers/SearchPerson.controller";
+import { I18n, makeEn } from "../src/i18n/I18n.service";
 import { layerStub } from "../src/services/StarWarsClient.layer";
 import { luke, personNamed } from "./fixtures/Person.fixture";
 
@@ -12,7 +13,8 @@ const form = (characterId: string) => {
   return data;
 };
 
-const previous = presentLoadedHomePage(luke);
+const i18n = makeEn();
+const previous = presentLoadedHomePage(i18n, luke);
 
 describe("searchPerson", () => {
   it.effect("sets a form error on the current model for a non-numeric id", () =>
@@ -28,7 +30,10 @@ describe("searchPerson", () => {
         person: { name: "Luke Skywalker" },
       });
       expect(previous.form.error).toBeUndefined();
-    }).pipe(Effect.provide(layerStub(() => Effect.succeed(luke)))),
+    }).pipe(
+      Effect.provide(layerStub(() => Effect.succeed(luke))),
+      Effect.provideService(I18n, i18n),
+    ),
   );
 
   it.effect("sets a form error on the current model for a zero id", () =>
@@ -42,7 +47,10 @@ describe("searchPerson", () => {
           error: "Character id must be a positive whole number.",
         },
       });
-    }).pipe(Effect.provide(layerStub(() => Effect.succeed(luke)))),
+    }).pipe(
+      Effect.provide(layerStub(() => Effect.succeed(luke))),
+      Effect.provideService(I18n, i18n),
+    ),
   );
 
   it.effect("sets a form error on the current model for a missing id", () =>
@@ -56,7 +64,10 @@ describe("searchPerson", () => {
           error: "Character id must be a positive whole number.",
         },
       });
-    }).pipe(Effect.provide(layerStub(() => Effect.succeed(luke)))),
+    }).pipe(
+      Effect.provide(layerStub(() => Effect.succeed(luke))),
+      Effect.provideService(I18n, i18n),
+    ),
   );
 
   it.effect("returns the updated loaded view model for a valid id", () =>
@@ -70,6 +81,7 @@ describe("searchPerson", () => {
       });
     }).pipe(
       Effect.provide(layerStub((id) => Effect.succeed(personNamed(id, "Rey")))),
+      Effect.provideService(I18n, i18n),
     ),
   );
 });

@@ -2,10 +2,8 @@ import { Effect, Option, Schema, pipe } from "effect";
 import type { HomePageViewModel } from "../components/HomePage/HomePage.model";
 import { HomePageOptics } from "../components/HomePage/HomePage.optics";
 import { CharacterId } from "../domain/StarWars.model";
+import { I18n } from "../i18n/I18n.service";
 import { loadHomePageFor } from "./HomePage.controller";
-
-const invalidCharacterIdMessage =
-  "Character id must be a positive whole number.";
 
 const readCharacterId = (formData: FormData): string =>
   Option.getOrElse(
@@ -14,22 +12,26 @@ const readCharacterId = (formData: FormData): string =>
   );
 
 const withCharacterIdError = (
+  i18n: I18n,
   model: HomePageViewModel,
   characterId: string,
 ) =>
   pipe(
     model,
     HomePageOptics.FormValue.set(characterId),
-    HomePageOptics.FormError.set(invalidCharacterIdMessage),
+    HomePageOptics.FormError.set(
+      i18n._({ id: "search.invalidCharacterId" }),
+    ),
   );
 
 export const searchPerson = Effect.fn("searchPerson")(
   function*(previous: HomePageViewModel, formData: FormData) {
+    const i18n = yield* I18n;
     const characterId = readCharacterId(formData);
     return yield* Schema.decodeUnknownEffect(CharacterId)(characterId).pipe(
       Effect.flatMap(loadHomePageFor),
       Effect.catchTag("SchemaError", () =>
-        Effect.succeed(withCharacterIdError(previous, characterId)),
+        Effect.succeed(withCharacterIdError(i18n, previous, characterId)),
       ),
     );
   },

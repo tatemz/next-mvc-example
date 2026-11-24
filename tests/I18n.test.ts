@@ -1,0 +1,66 @@
+import { it as effectIt } from "@effect/vitest";
+import { Effect } from "effect";
+import { describe, expect, it } from "vitest";
+import * as I18n from "../src/i18n/I18n";
+import {
+  I18n as I18nService,
+  layer,
+  layerTest,
+} from "../src/i18n/I18n.service";
+
+describe("I18n.make", () => {
+  it("formats a message with values", () => {
+    const i18n = I18n.make({
+      messages: { greeting: "Hello, {name}!" } as const,
+    });
+
+    expect(i18n._({ id: "greeting", values: { name: "John" } })).toBe(
+      "Hello, John!",
+    );
+  });
+
+  it("formats all descriptors", () => {
+    const i18n = I18n.make({ messages: { a: "A", b: "B" } as const });
+
+    expect(i18n.all([{ id: "a" }, { id: "b" }])).toEqual({ a: "A", b: "B" });
+  });
+
+  it("formats a rich message", () => {
+    const i18n = I18n.make({ messages: { greeting: "Hello" } as const });
+
+    expect(i18n.rich({ id: "greeting" })).toBe("Hello");
+  });
+});
+
+describe("I18n.service", () => {
+  effectIt.layer(layer)("en", (it) => {
+    it.effect("formats the app messages", () =>
+      Effect.gen(function*() {
+        const i18n = yield* I18nService;
+
+        expect(i18n._({ id: "person.heightLabel" })).toBe("Height");
+        expect(i18n._({ id: "film.count", values: { count: 2 } })).toBe(
+          "2 films",
+        );
+      }),
+    );
+  });
+
+  effectIt.layer(layerTest)("test", (it) => {
+    it.effect("formats descriptors for assertions", () =>
+      Effect.gen(function*() {
+        const i18n = yield* I18nService;
+
+        expect(i18n._({ id: "person.heightLabel" })).toBe(
+          '{"id":"person.heightLabel"}',
+        );
+        expect(i18n.all([{ id: "person.heightLabel" }])).toEqual({
+          "person.heightLabel": '{"id":"person.heightLabel"}',
+        });
+        expect(i18n.rich({ id: "person.heightLabel" })).toEqual([
+          '{"id":"person.heightLabel"}',
+        ]);
+      }),
+    );
+  });
+});

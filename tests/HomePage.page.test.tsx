@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { loadHomePage } from "../src/controllers/HomePage.controller";
-import { presentLoadedHomePage } from "../src/controllers/HomePage.controller";
+import { loadHomePage, presentLoadedHomePage } from "../src/controllers/HomePage.controller";
+import { makeEn } from "../src/i18n/I18n.service";
 import { luke } from "./fixtures/Person.fixture";
 
 const { runPromise } = vi.hoisted(() => ({ runPromise: vi.fn() }));
@@ -10,7 +10,7 @@ import { HomePage } from "../src/page-modules/HomePage/HomePage.page";
 
 describe("HomePage page", () => {
   it("loads the model through the runtime", async () => {
-    const model = presentLoadedHomePage(luke);
+    const model = presentLoadedHomePage(makeEn(), luke);
     runPromise.mockResolvedValue(model);
 
     const element = await HomePage();

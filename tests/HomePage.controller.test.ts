@@ -2,12 +2,15 @@ import { it } from "@effect/vitest";
 import { ConfigProvider, Effect } from "effect";
 import { describe, expect } from "vitest";
 import { loadHomePage } from "../src/controllers/HomePage.controller";
+import { I18n, makeEn } from "../src/i18n/I18n.service";
 import { StarWarsError } from "../src/services/StarWarsClient";
 import { layerStub } from "../src/services/StarWarsClient.layer";
 import { luke, personNamed } from "./fixtures/Person.fixture";
 
 const env = (values: Record<string, string>) =>
   ConfigProvider.fromEnv({ env: values });
+
+const i18n = makeEn();
 
 describe("loadHomePage", () => {
   it.effect("reads the default character id from Config", () =>
@@ -26,6 +29,7 @@ describe("loadHomePage", () => {
         ConfigProvider.ConfigProvider,
         env({ STAR_WARS_CHARACTER_ID: "2" }),
       ),
+      Effect.provideService(I18n, i18n),
     ),
   );
 
@@ -42,6 +46,7 @@ describe("loadHomePage", () => {
         ConfigProvider.ConfigProvider,
         env({}),
       ),
+      Effect.provideService(I18n, i18n),
     ),
   );
 
@@ -52,7 +57,7 @@ describe("loadHomePage", () => {
       expect(model).toMatchObject({
         _tag: "Failed",
         form: { value: "1" },
-        message: "Person 1 is not available.",
+        message: "The character could not be loaded.",
       });
     }).pipe(
       Effect.provide(
@@ -64,6 +69,7 @@ describe("loadHomePage", () => {
         ConfigProvider.ConfigProvider,
         env({}),
       ),
+      Effect.provideService(I18n, i18n),
     ),
   );
 
@@ -81,6 +87,7 @@ describe("loadHomePage", () => {
         ConfigProvider.ConfigProvider,
         env({ STAR_WARS_CHARACTER_ID: "abc" }),
       ),
+      Effect.provideService(I18n, i18n),
     ),
   );
 });

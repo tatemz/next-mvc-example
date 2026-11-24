@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { makeFilmListViewModel } from "../src/components/FilmList/FilmList.factory";
+import { makeEn } from "../src/i18n/I18n.service";
+
+const i18n = makeEn();
 
 describe("makeFilmListViewModel", () => {
   it("labels a single film", () => {
-    const model = makeFilmListViewModel([
+    const model = makeFilmListViewModel(i18n, [
       { title: "A New Hope", episodeId: 4 },
     ]);
 
@@ -14,7 +17,7 @@ describe("makeFilmListViewModel", () => {
   });
 
   it("pluralizes the count", () => {
-    const model = makeFilmListViewModel([
+    const model = makeFilmListViewModel(i18n, [
       { title: "A New Hope", episodeId: 4 },
       { title: "The Empire Strikes Back", episodeId: 5 },
     ]);
