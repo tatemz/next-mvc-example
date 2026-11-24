@@ -1,4 +1,4 @@
-import { Array } from "effect";
+import { Array, Function } from "effect";
 import type { I18n } from "../../i18n/I18n.service";
 import {
   type FilmListItemInput,
@@ -15,5 +15,8 @@ export const makeFilmListViewModel = (
       id: "film.count",
       values: { count: films.length },
     }),
-    films: Array.map(films, (film) => makeFilmListItemViewModel(i18n, film)),
+    films: Function.pipe(
+      films,
+      Array.map((film) => makeFilmListItemViewModel(i18n, film)),
+    ),
   });

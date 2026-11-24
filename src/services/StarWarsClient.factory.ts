@@ -1,20 +1,29 @@
-import { Array, Effect, Number as Num, Option, Result, String as Str, pipe } from "effect";
+import {
+  Array,
+  Effect,
+  Function,
+  Number as Num,
+  Option,
+  Result,
+  String as Str,
+} from "effect";
 import { Url } from "effect/http";
 import { Film, Person, type CharacterId } from "../domain/StarWars.model";
 import type { FilmResponse, PersonResponse, SwapiClient } from "./SwapiApi";
 import { StarWarsClient, StarWarsError } from "./StarWarsClient";
 
 const filmIdFromUrl = (url: string) =>
-  Url.fromString(url).pipe(
+  Function.pipe(
+    Url.fromString(url),
     Result.match({
-      onFailure: () => NaN,
+      onFailure: () => Option.none<number>(),
       onSuccess: ({ pathname }) =>
-        pipe(
-          Str.split(pathname, "/"),
+        Function.pipe(
+          pathname,
+          Str.split("/"),
           Array.filter(Str.isNonEmpty),
           Array.last,
           Option.flatMap(Num.parse),
-          Option.getOrElse(() => NaN),
         ),
     }),
   );
@@ -27,23 +36,40 @@ const toFilm = (film: FilmResponse) =>
 
 export const make = (swapi: SwapiClient) => {
   const getFilms = (urls: PersonResponse["films"], id: CharacterId) =>
-    Effect.forEach(
+    Function.pipe(
       urls,
-      (url) => swapi.films.get({ params: { id: filmIdFromUrl(url) } }),
-      { concurrency: "unbounded" },
-    ).pipe(
-      Effect.mapError(
-        () =>
-          new StarWarsError({
-            message: `A film for person ${id} is not available.`,
-          }),
+      Effect.forEach(
+        (url) =>
+          Function.pipe(
+            filmIdFromUrl(url),
+            Option.match({
+              onNone: () =>
+                Effect.fail(
+                  new StarWarsError({
+                    message: `A film for person ${id} is not available.`,
+                  }),
+                ),
+              onSome: (filmId) =>
+                Function.pipe(
+                  swapi.films.get({ params: { id: filmId } }),
+                  Effect.mapError(
+                    () =>
+                      new StarWarsError({
+                        message: `A film for person ${id} is not available.`,
+                      }),
+                  ),
+                ),
+            }),
+          ),
+        { concurrency: "unbounded" },
       ),
     );
 
   return StarWarsClient.of({
     getPerson: Effect.fn("StarWarsClient.getPerson")(
       function*(id: CharacterId) {
-        const person = yield* swapi.people.get({ params: { id } }).pipe(
+        const person = yield* Function.pipe(
+          swapi.people.get({ params: { id } }),
           Effect.mapError(
             () =>
               new StarWarsError({
@@ -59,7 +85,7 @@ export const make = (swapi: SwapiClient) => {
           name: person.name,
           height: person.height,
           mass: person.mass,
-          films: Array.map(films, toFilm),
+          films: Function.pipe(films, Array.map(toFilm)),
         });
       },
     ),

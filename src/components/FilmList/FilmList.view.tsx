@@ -1,4 +1,4 @@
-import { Array } from "effect";
+import { Array, Function } from "effect";
 import { FilmListItem } from "../FilmListItem/FilmListItem.view";
 import type { FilmListViewModel } from "./FilmList.model";
 
@@ -8,9 +8,12 @@ export const FilmList = ({ countLabel, films }: FilmListProps) => (
   <section>
     <h2>{countLabel}</h2>
     <ul>
-      {Array.map(films, (film) => (
-        <FilmListItem key={film.text} {...film} />
-      ))}
+      {Function.pipe(
+        films,
+        Array.map((film) => (
+          <FilmListItem key={film.text} {...film} />
+        )),
+      )}
     </ul>
   </section>
 );

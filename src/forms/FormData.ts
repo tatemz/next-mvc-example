@@ -2,6 +2,7 @@ import {
   Array,
   Data,
   Effect,
+  Function,
   Record,
   Schema,
   type SchemaIssue,
@@ -10,13 +11,16 @@ import {
 export type FormDataRecord = Readonly<Record<string, string>>;
 
 export const toRecord = (formData: globalThis.FormData) => {
-  const entries = Array.map(
-    Array.fromIterable(formData),
-    ([key, value]) =>
-      [
-        key,
-        typeof value === "string" ? value : value.name,
-      ] as const,
+  const entries = Function.pipe(
+    formData,
+    Array.fromIterable,
+    Array.map(
+      ([key, value]) =>
+        [
+          key,
+          typeof value === "string" ? value : value.name,
+        ] as const,
+    ),
   );
   return Record.fromEntries(entries);
 };
@@ -41,7 +45,8 @@ export const validateFormData =
       const formDataRecord = toRecord(formData);
       const decoded = Schema.decodeUnknownEffect(schema)(formDataRecord);
 
-      return yield* decoded.pipe(
+      return yield* Function.pipe(
+        decoded,
         Effect.mapError(
           (error) =>
             new FormValidationError({

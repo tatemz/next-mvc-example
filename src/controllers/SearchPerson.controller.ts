@@ -1,4 +1,4 @@
-import { Effect, pipe } from "effect";
+import { Effect, Function } from "effect";
 import type { HomePageViewModel } from "../components/HomePage/HomePage.model";
 import { HomePageOptics } from "../components/HomePage/HomePage.optics";
 import {
@@ -17,7 +17,7 @@ const handleValidationError =
       const formValue = getString(error.formData, "characterId");
       const message = i18n._({ id: error.errors.characterId });
 
-      return pipe(
+      return Function.pipe(
         previous,
         HomePageOptics.FormValue.set(formValue),
         HomePageOptics.FormError.set(message),
@@ -35,6 +35,7 @@ export const searchPerson = (
   previous: HomePageViewModel,
   formData: FormData,
 ) =>
-  searchPersonEffect(formData).pipe(
+  Function.pipe(
+    searchPersonEffect(formData),
     Effect.catchTag("FormValidationError", handleValidationError(previous)),
   );

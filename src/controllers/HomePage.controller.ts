@@ -1,4 +1,4 @@
-import { Array, Config, Effect, Schema } from "effect";
+import { Array, Config, Effect, Function, Schema } from "effect";
 import { makeFilmListViewModel } from "../components/FilmList/FilmList.factory";
 import {
   makeFailedHomePageModel,
@@ -13,10 +13,13 @@ const defaultCharacterId = Schema.decodeSync(CharacterId)("1");
 
 export const presentLoadedHomePage = (i18n: I18n, person: Person) => {
   const personViewModel = makePersonViewModel(i18n, person);
-  const films = Array.map(person.films, (film) => ({
-    title: film.title,
-    episodeId: film.episodeId,
-  }));
+  const films = Function.pipe(
+    person.films,
+    Array.map((film) => ({
+      title: film.title,
+      episodeId: film.episodeId,
+    })),
+  );
   const filmListViewModel = makeFilmListViewModel(i18n, films);
 
   return makeLoadedHomePageModel(i18n, {
@@ -34,7 +37,8 @@ const loadHomePageForEffect = Effect.fn("loadHomePageFor")(
 );
 
 export const loadHomePageFor = (characterId: CharacterId) =>
-  loadHomePageForEffect(characterId).pipe(
+  Function.pipe(
+    loadHomePageForEffect(characterId),
     Effect.matchEffect({
       onFailure: () =>
         Effect.gen(function*() {
@@ -50,15 +54,16 @@ export const loadHomePageFor = (characterId: CharacterId) =>
   );
 
 const loadHomePageEffect = Effect.fn("loadHomePage")(function*() {
-  const characterIdConfig = Config.schema(
-    CharacterId,
-    "STAR_WARS_CHARACTER_ID",
-  ).pipe(Config.withDefault(defaultCharacterId));
+  const characterIdConfig = Function.pipe(
+    Config.schema(CharacterId, "STAR_WARS_CHARACTER_ID"),
+    Config.withDefault(defaultCharacterId),
+  );
   const characterId = yield* characterIdConfig;
   return yield* loadHomePageFor(characterId);
 });
 
-export const loadHomePage = loadHomePageEffect().pipe(
+export const loadHomePage = Function.pipe(
+  loadHomePageEffect(),
   Effect.catchTag("ConfigError", () =>
     Effect.gen(function*() {
       const i18n = yield* I18n;

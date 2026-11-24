@@ -1,6 +1,6 @@
 import { createIntl, type IntlConfig } from "@formatjs/intl";
 import type { InferInterpolations } from "@typesafe-intl/core";
-import { Record } from "effect";
+import { Function, Record } from "effect";
 import type { Types } from "effect";
 import type { ReactNode } from "react";
 
@@ -98,10 +98,13 @@ export const make = <const Messages extends AnyMessages>(opts: {
   const all = <Id extends keyof Messages>(
     descriptors: { [P in Id]: MessageDescriptor<Messages, P> }[Id][],
   ): Record<Id, string> =>
-    Record.fromIterableWith(descriptors, (descriptor) => [
-      descriptor.id as string,
-      format(descriptor),
-    ]) as Record<Id, string>;
+    Function.pipe(
+      descriptors,
+      Record.fromIterableWith((descriptor) => [
+        descriptor.id as string,
+        format(descriptor),
+      ]),
+    ) as Record<Id, string>;
 
   return { _: format, rich: format, all };
 };

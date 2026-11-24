@@ -1,11 +1,12 @@
-import { Schema, SchemaGetter } from "effect";
+import { Function, Schema, SchemaGetter } from "effect";
 
 const CharacterNumber = Schema.NumberFromString.check(
   Schema.isInt(),
   Schema.isGreaterThan(0),
 );
 
-export const CharacterId = CharacterNumber.pipe(
+export const CharacterId = Function.pipe(
+  CharacterNumber,
   Schema.decodeTo(Schema.String, {
     decode: SchemaGetter.transform((value: number) => String(value)),
     encode: SchemaGetter.transform((value: string) => Number(value)),

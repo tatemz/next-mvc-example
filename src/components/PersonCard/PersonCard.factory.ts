@@ -10,7 +10,9 @@ export const PersonCardInput = Schema.Struct({
 export type PersonCardInput = typeof PersonCardInput.Type;
 
 const displayMeasurement = (i18n: I18n, value: string): string =>
-  Match.value(value).pipe(
+  Function.pipe(
+    value,
+    Match.value,
     Match.whenOr("", "unknown", () =>
       i18n._({ id: "person.unknownMeasurement" }),
     ),
