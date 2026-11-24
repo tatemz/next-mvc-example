@@ -28,8 +28,9 @@ form posts to a server action and gets the next view model back.
   returns the updated `HomePageViewModel`.
 - `HomePage.connected.view.tsx` is the only client component. It uses
   `useActionState` and posts the form to the action.
-- `features/` drives the built app with Strider through effect-bdd. Every
-  scenario writes a WebM; a failed scenario also writes a full-page screenshot.
+- `features/` drives the built app with Strider through effect-bdd. Scenarios run
+  in parallel, each on its own OS-assigned port. Every scenario writes a WebM; a
+  failed scenario also writes a full-page screenshot.
 
 Every file is named `Thing.suffix`: `HomePage.model.ts`, `HomePage.factory.ts`,
 `HomePage.view.tsx`, `HomePage.connected.view.tsx`, `Person.fixture.ts`.
@@ -56,7 +57,8 @@ src/services/StarWarsClient.layer.ts     Config + HttpClient layer
 features/CharacterLookup.feature         the integration scenarios
 features/CharacterLookup.steps.ts        the scenario chains
 features/SharedSteps.ts                  shared browser steps
-features/support/ScenarioApp.ts          starts the built Next app per scenario
+features/support/ScenarioApp.ts          boots the built Next app per scenario
+                                         on an OS-assigned port
 features/support/ScenarioPage.ts         page, video, failure screenshot
 features/support/Video.ts                screencast frames -> ffmpeg WebM
 ```
@@ -81,8 +83,9 @@ pnpm test:e2e
 ## Integration tests
 
 `pnpm test:e2e` builds the app, then runs the Gherkin scenarios with
-`effect-bdd`. Each scenario starts its own `next start` on a free port, opens a
-Chromium page with Strider, and closes both when the scenario ends.
+`effect-bdd`. Scenarios run in parallel; each starts its own `next start -p 0`,
+so the OS assigns a free port, opens a Chromium page with Strider, and closes
+both when the scenario ends.
 
 It needs Chrome or Chromium and ffmpeg:
 
