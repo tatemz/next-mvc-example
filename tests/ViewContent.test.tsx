@@ -54,6 +54,7 @@ describe("view content", () => {
       <FilmList
         model={FilmListViewModel.make({
           episodeLabel: "Part",
+          countLabel: "1 film",
           films: [FilmViewModel.make({ title: "A New Hope", episodeId: 4 })],
         })}
       />,

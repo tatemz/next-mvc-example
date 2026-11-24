@@ -5,11 +5,14 @@ export type FilmListProps = {
 };
 
 export const FilmList = ({ model }: FilmListProps) => (
-  <ul>
-    {model.films.map((film) => (
-      <li key={`${film.episodeId}-${film.title}`}>
-        {film.title} ({model.episodeLabel} {film.episodeId})
-      </li>
-    ))}
-  </ul>
+  <section>
+    <h2>{model.countLabel}</h2>
+    <ul>
+      {model.films.map((film) => (
+        <li key={`${film.episodeId}-${film.title}`}>
+          {film.title} ({model.episodeLabel} {film.episodeId})
+        </li>
+      ))}
+    </ul>
+  </section>
 );

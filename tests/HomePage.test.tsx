@@ -13,15 +13,22 @@ describe("presentLoadedHomePage", () => {
 
     expect(model).toMatchObject({
       _tag: "Loaded",
-      form: { _tag: "SearchFormViewModel", characterId: "1" },
+      form: {
+        _tag: "SearchFormViewModel",
+        characterId: "1",
+        submitLabel: "Load character",
+      },
       person: {
         _tag: "PersonViewModel",
         name: "Luke Skywalker",
         height: "172",
         mass: "77",
+        heightLabel: "Height",
+        massLabel: "Mass",
       },
       filmList: {
         _tag: "FilmListViewModel",
+        countLabel: "2 films",
         films: [
           { _tag: "FilmViewModel", title: "A New Hope", episodeId: 4 },
           {
@@ -58,6 +65,7 @@ describe("HomePageViewModel", () => {
         _tag: "FilmListViewModel",
         films: [],
         episodeLabel: "Episode",
+        countLabel: "0 films",
       },
     };
 
@@ -80,23 +88,27 @@ describe("HomePage", () => {
     expect(html).toContain("<h1>Luke Skywalker</h1>");
     expect(html.match(/<li>/g)).toHaveLength(2);
     expect(html).toContain("A New Hope (Episode 4)");
+    expect(html).toContain("2 films");
+    expect(html).toContain("Load character");
     expect(html).toContain('value="1"');
   });
 
   it("renders a failure with the submitted form value", () => {
+    const model = makeFailedHomePageModel({
+      characterId: "abc",
+      message: "Character id must be a positive whole number.",
+    });
+    expect(model).toMatchObject({
+      form: { _tag: "SearchFormViewModel", submitLabel: "Try again" },
+    });
+
     const html = renderToStaticMarkup(
-      <HomePage
-        model={makeFailedHomePageModel({
-          characterId: "abc",
-          message: "Character id must be a positive whole number.",
-        })}
-        dispatch={() => {}}
-        isPending={false}
-      />,
+      <HomePage model={model} dispatch={() => {}} isPending={false} />,
     );
 
     expect(html).toContain('role="alert"');
     expect(html).toContain("Character id must be a positive whole number.");
+    expect(html).toContain("Try again");
     expect(html).toContain('value="abc"');
   });
 

@@ -9,5 +9,6 @@ export type FilmViewModel = typeof FilmViewModel.Type;
 export const FilmListViewModel = Schema.TaggedStruct("FilmListViewModel", {
   films: Schema.NonEmptyArray(FilmViewModel),
   episodeLabel: Schema.NonEmptyString,
+  countLabel: Schema.NonEmptyString,
 });
 export type FilmListViewModel = typeof FilmListViewModel.Type;
