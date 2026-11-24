@@ -14,10 +14,10 @@ export const SearchForm = ({
   <form action={dispatch} method="post">
     <label htmlFor="characterId">{model.label}</label>
     <input
-      key={model.characterId}
+      key={model.value}
       id="characterId"
       name="characterId"
-      defaultValue={model.characterId}
+      defaultValue={model.value}
       inputMode="numeric"
     />
     <button type="submit" disabled={isPending}>

@@ -2,8 +2,9 @@ import { Schema } from "effect";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { makeFailedHomePageModel } from "../src/components/HomePage/HomePage.factory";
+import { makeRetrySearchFormViewModel } from "../src/components/SearchForm/SearchForm.factory";
 import { HomePageViewModel } from "../src/components/HomePage/HomePage.model";
-import { presentLoadedHomePage } from "../src/components/HomePage/HomePage.presenter";
+import { presentLoadedHomePage } from "../src/controllers/HomePage.controller";
 import { HomePage } from "../src/components/HomePage/HomePage.view";
 import { luke } from "./fixtures/Person.fixture";
 
@@ -15,7 +16,7 @@ describe("presentLoadedHomePage", () => {
       _tag: "Loaded",
       form: {
         _tag: "SearchFormViewModel",
-        characterId: "1",
+        value: "1",
         submitLabel: "Load character",
       },
       person: {
@@ -47,7 +48,7 @@ describe("HomePageViewModel", () => {
       _tag: "Loaded",
       form: {
         _tag: "SearchFormViewModel",
-        characterId: "1",
+        value: "1",
         label: "Character id",
         submitLabel: "Load character",
         pendingLabel: "Loading...",
@@ -93,11 +94,15 @@ describe("HomePage", () => {
 
   it("renders a failure with the submitted form value", () => {
     const model = makeFailedHomePageModel({
-      characterId: "abc",
+      form: makeRetrySearchFormViewModel("abc"),
       message: "Character id must be a positive whole number.",
     });
     expect(model).toMatchObject({
-      form: { _tag: "SearchFormViewModel", submitLabel: "Try again" },
+      form: {
+        _tag: "SearchFormViewModel",
+        value: "abc",
+        submitLabel: "Try again",
+      },
     });
 
     const html = renderToStaticMarkup(

@@ -1,7 +1,7 @@
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
-import { presentLoadedHomePage } from "../src/components/HomePage/HomePage.presenter";
+import { presentLoadedHomePage } from "../src/controllers/HomePage.controller";
 import { searchPerson } from "../src/controllers/SearchPerson.controller";
 import { layerStub } from "../src/services/StarWarsClient.layer";
 import { luke, personNamed } from "./fixtures/Person.fixture";
@@ -21,7 +21,7 @@ describe("searchPerson", () => {
 
       expect(model).toMatchObject({
         _tag: "Failed",
-        form: { characterId: "abc" },
+        form: { value: "abc" },
         message: "Character id must be a positive whole number.",
       });
     }).pipe(Effect.provide(layerStub(() => Effect.succeed(luke)))),
@@ -41,7 +41,7 @@ describe("searchPerson", () => {
 
       expect(model).toMatchObject({
         _tag: "Failed",
-        form: { characterId: "" },
+        form: { value: "" },
         message: "Character id must be a positive whole number.",
       });
     }).pipe(Effect.provide(layerStub(() => Effect.succeed(luke)))),
@@ -53,7 +53,7 @@ describe("searchPerson", () => {
 
       expect(model).toMatchObject({
         _tag: "Loaded",
-        form: { characterId: "3" },
+        form: { value: "3" },
         person: { name: "Rey" },
       });
     }).pipe(

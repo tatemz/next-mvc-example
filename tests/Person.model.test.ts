@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import { describe, expect, it } from "vitest";
-import { Person } from "../src/domain/Person.model";
+import { Person } from "../src/domain/StarWars.model";
 
 const person = {
   _tag: "Person",

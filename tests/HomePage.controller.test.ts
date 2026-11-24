@@ -16,7 +16,7 @@ describe("loadHomePage", () => {
 
       expect(model._tag).toBe("Loaded");
       if (model._tag !== "Loaded") throw new Error("expected Loaded");
-      expect(model.form.characterId).toBe("2");
+      expect(model.form.value).toBe("2");
       expect(model.person.name).toBe("Leia Organa");
     }).pipe(
       Effect.provide(
@@ -35,7 +35,7 @@ describe("loadHomePage", () => {
 
       expect(model._tag).toBe("Loaded");
       if (model._tag !== "Loaded") throw new Error("expected Loaded");
-      expect(model.form.characterId).toBe("1");
+      expect(model.form.value).toBe("1");
     }).pipe(
       Effect.provide(layerStub(() => Effect.succeed(luke))),
       Effect.provideService(
@@ -51,7 +51,7 @@ describe("loadHomePage", () => {
 
       expect(model).toMatchObject({
         _tag: "Failed",
-        form: { characterId: "1" },
+        form: { value: "1" },
         message: "Person 1 is not available.",
       });
     }).pipe(
@@ -73,7 +73,7 @@ describe("loadHomePage", () => {
 
       expect(model).toMatchObject({
         _tag: "Failed",
-        form: { characterId: "" },
+        form: { value: "" },
       });
     }).pipe(
       Effect.provide(layerStub(() => Effect.succeed(luke))),

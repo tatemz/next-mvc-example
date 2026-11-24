@@ -6,9 +6,9 @@ import {
 
 describe("makeInitialSearchFormViewModel", () => {
   it("builds the initial form", () => {
-    expect(makeInitialSearchFormViewModel("abc")).toEqual({
+    expect(makeInitialSearchFormViewModel("3")).toEqual({
       _tag: "SearchFormViewModel",
-      characterId: "abc",
+      value: "3",
       label: "Character id",
       submitLabel: "Load character",
       pendingLabel: "Loading...",
@@ -20,7 +20,7 @@ describe("makeRetrySearchFormViewModel", () => {
   it("builds the retry form", () => {
     expect(makeRetrySearchFormViewModel("abc")).toEqual({
       _tag: "SearchFormViewModel",
-      characterId: "abc",
+      value: "abc",
       label: "Character id",
       submitLabel: "Try again",
       pendingLabel: "Loading...",

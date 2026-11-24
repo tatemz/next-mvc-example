@@ -11,7 +11,7 @@ import { SearchForm } from "../src/components/SearchForm/SearchForm.view";
 describe("view content", () => {
   it("renders search form copy from the model", () => {
     const model = SearchFormViewModel.make({
-      characterId: "1",
+      value: "1",
       label: "Sith id",
       submitLabel: "Find them",
       pendingLabel: "Searching...",

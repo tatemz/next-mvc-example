@@ -1,6 +1,5 @@
 import { Context, Effect, Schema } from "effect";
-import type { CharacterId } from "../domain/CharacterId.model";
-import type { Person } from "../domain/Person.model";
+import type { CharacterId, Person } from "../domain/StarWars.model";
 
 export class StarWarsError extends Schema.TaggedError<StarWarsError>()(
   "StarWarsError",

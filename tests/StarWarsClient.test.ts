@@ -38,6 +38,40 @@ const layer = liveLayer.pipe(
   Layer.provide(Layer.succeed(HttpClient.HttpClient, httpClient)),
 );
 
+const expectFilmErrorFor = (films: ReadonlyArray<string>) =>
+  Effect.gen(function*() {
+    const client = HttpClient.make((request) =>
+      request.url.includes("/people/")
+        ? Effect.succeed(
+            HttpClientResponse.fromWeb(
+              request,
+              new Response(JSON.stringify({ ...personResponse, films }), {
+                status: 200,
+                headers: { "content-type": "application/json" },
+              }),
+            ),
+          )
+        : Effect.succeed(
+            HttpClientResponse.fromWeb(
+              request,
+              new Response(null, { status: 404 }),
+            ),
+          ),
+    );
+    const layer = liveLayer.pipe(
+      Layer.provide(Layer.succeed(HttpClient.HttpClient, client)),
+    );
+
+    const error = yield* StarWarsClient.use((service) =>
+      service.getPerson(makeCharacterId("1")),
+    ).pipe(Effect.flip, Effect.provide(layer));
+
+    expect(error).toMatchObject({
+      _tag: "StarWarsError",
+      message: "A film for person 1 is not available.",
+    });
+  });
+
 describe("StarWarsClient", () => {
   it.effect("decodes a person and their films into a domain object", () =>
     Effect.gen(function*() {
@@ -168,42 +202,15 @@ describe("StarWarsClient", () => {
     }).pipe(Effect.provide(failingLayer));
   });
 
-  it.effect("maps a malformed film reference to a StarWarsError", () => {
-    const malformedPerson = {
-      ...personResponse,
-      films: ["not-a-url"],
-    };
-    const malformedClient = HttpClient.make((request) =>
-      request.url.includes("/people/")
-        ? Effect.succeed(
-            HttpClientResponse.fromWeb(
-              request,
-              new Response(JSON.stringify(malformedPerson), {
-                status: 200,
-                headers: { "content-type": "application/json" },
-              }),
-            ),
-          )
-        : Effect.succeed(
-            HttpClientResponse.fromWeb(
-              request,
-              new Response(null, { status: 404 }),
-            ),
-          ),
-    );
-    const malformedLayer = liveLayer.pipe(
-      Layer.provide(Layer.succeed(HttpClient.HttpClient, malformedClient)),
-    );
+  it.effect("maps an invalid film URL to a StarWarsError", () =>
+    expectFilmErrorFor(["not-a-url"]),
+  );
 
-    return Effect.gen(function*() {
-      const error = yield* StarWarsClient.use((client) =>
-        client.getPerson(makeCharacterId("1")),
-      ).pipe(Effect.flip);
+  it.effect("maps a film URL without an id to a StarWarsError", () =>
+    expectFilmErrorFor(["https://swapi.dev/"]),
+  );
 
-      expect(error).toMatchObject({
-        _tag: "StarWarsError",
-        message: "A film for person 1 is not available.",
-      });
-    }).pipe(Effect.provide(malformedLayer));
-  });
+  it.effect("maps a non-numeric film id to a StarWarsError", () =>
+    expectFilmErrorFor(["https://swapi.dev/api/films/not-a-number/"]),
+  );
 });

@@ -1,20 +1,20 @@
 import { SearchFormViewModel } from "./SearchForm.model";
 
 export const makeInitialSearchFormViewModel = (
-  characterId: string,
+  value: string,
 ): SearchFormViewModel =>
   SearchFormViewModel.make({
-    characterId,
+    value,
     label: "Character id",
     submitLabel: "Load character",
     pendingLabel: "Loading...",
   });
 
 export const makeRetrySearchFormViewModel = (
-  characterId: string,
+  value: string,
 ): SearchFormViewModel =>
   SearchFormViewModel.make({
-    characterId,
+    value,
     label: "Character id",
     submitLabel: "Try again",
     pendingLabel: "Loading...",

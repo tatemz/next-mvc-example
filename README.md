@@ -14,14 +14,14 @@ form posts to a server action and gets the next view model back.
 - Every user-visible string, including labels and button copy, is carried by the
   view model rather than written in a view.
 - View models and their factories do not import domain models.
-  `HomePage.presenter.ts` is the only place that maps `Person` and `Film` into
+  `HomePage.controller.ts` is the only place that maps `Person` and `Film` into
   the page view model.
 - `HomePageViewModel` is a `Schema.TaggedUnion` of `Loaded` and `Failed`.
-- `Loaded.filmList.films` is `Schema.NonEmptyArray(FilmViewModel)`.
+- `Loaded.filmList.films` is `Schema.NonEmptyArray(FilmListItemViewModel)`.
 - `StarWarsClient` is a `Context.Service` layer that decodes SWAPI responses
   into `Person` and `Film` domain objects.
-- `makeLoadedHomePageModel` takes the `Person` domain object and builds the view
-  model.
+- `HomePage.controller.ts` maps the `Person` domain object into the nested view
+  models and passes them to `makeLoadedHomePageModel`.
 - `loadHomePage` reads `STAR_WARS_CHARACTER_ID` with `Config`. Effect's default
   config provider reads `process.env`.
 - `searchPerson` is a server action. It validates the form with a schema and
@@ -39,7 +39,7 @@ Every file is named `Thing.suffix`: `HomePage.model.ts`, `HomePage.factory.ts`,
 ```text
 app/page.tsx                                 Next route; re-exports HomePage.page
 src/page-modules/HomePage/HomePage.page.tsx  thin wrapper: run controller, render view
-src/components/HomePage/                     HomePage.model, .factory, .presenter,
+src/components/HomePage/                     HomePage.model, .factory,
                                              .view, .connected.view
 src/components/FilmList/                     FilmList.model, .factory, .view
 src/components/FilmListItem/                 FilmListItem.model, .factory, .view
@@ -48,9 +48,7 @@ src/components/SearchForm/                   SearchForm.model, .factory, .view
 src/controllers/HomePage.controller.ts       Config + client -> view model
 src/controllers/SearchPerson.controller.ts   form schema + client -> view model
 src/actions/SearchPerson.serverAction.ts     "use server" boundary
-src/domain/CharacterId.model.ts          branded character id
-src/domain/Film.model.ts                 Film domain schema
-src/domain/Person.model.ts               Person domain schema
+src/domain/StarWars.model.ts              CharacterId, Film, and Person schemas
 src/server/Runtime.ts                    one ManagedRuntime for page and action
 src/services/StarWarsClient.ts           service interface and error
 src/services/StarWarsClient.factory.ts   client implementation

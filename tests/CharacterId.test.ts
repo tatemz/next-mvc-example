@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import { describe, expect, it } from "vitest";
-import { CharacterId } from "../src/domain/CharacterId.model";
+import { CharacterId } from "../src/domain/StarWars.model";
 
 describe("CharacterId", () => {
   it("accepts a positive whole number written as a string", () => {

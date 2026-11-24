@@ -1,21 +1,18 @@
 import { Schema } from "effect";
 import { FilmListViewModel } from "../FilmList/FilmList.model";
 import { PersonViewModel } from "../PersonCard/PersonCard.model";
-import {
-  makeInitialSearchFormViewModel,
-  makeRetrySearchFormViewModel,
-} from "../SearchForm/SearchForm.factory";
+import { SearchFormViewModel } from "../SearchForm/SearchForm.model";
 import { HomePageViewModel } from "./HomePage.model";
 
 export const LoadedHomePageInput = Schema.Struct({
-  characterId: Schema.String,
+  form: SearchFormViewModel,
   person: PersonViewModel,
   filmList: FilmListViewModel,
 });
 export type LoadedHomePageInput = typeof LoadedHomePageInput.Type;
 
 export const FailedHomePageInput = Schema.Struct({
-  characterId: Schema.String,
+  form: SearchFormViewModel,
   message: Schema.NonEmptyString,
 });
 export type FailedHomePageInput = typeof FailedHomePageInput.Type;
@@ -24,7 +21,7 @@ export const makeLoadedHomePageModel = (
   input: LoadedHomePageInput,
 ): HomePageViewModel =>
   HomePageViewModel.cases.Loaded.make({
-    form: makeInitialSearchFormViewModel(input.characterId),
+    form: input.form,
     person: input.person,
     filmList: input.filmList,
   });
@@ -33,6 +30,6 @@ export const makeFailedHomePageModel = (
   input: FailedHomePageInput,
 ): HomePageViewModel =>
   HomePageViewModel.cases.Failed.make({
-    form: makeRetrySearchFormViewModel(input.characterId),
+    form: input.form,
     message: input.message,
   });

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { presentLoadedHomePage } from "../src/components/HomePage/HomePage.presenter";
+import { presentLoadedHomePage } from "../src/controllers/HomePage.controller";
 import { luke } from "./fixtures/Person.fixture";
 
 const { runPromise } = vi.hoisted(() => ({ runPromise: vi.fn() }));

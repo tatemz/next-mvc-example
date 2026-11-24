@@ -5,7 +5,7 @@ import {
   HttpApiEndpoint,
   HttpApiGroup,
 } from "effect/http-api";
-import { CharacterId } from "../domain/CharacterId.model";
+import { CharacterId } from "../domain/StarWars.model";
 
 export const PersonResponse = Schema.Struct({
   name: Schema.NonEmptyString,

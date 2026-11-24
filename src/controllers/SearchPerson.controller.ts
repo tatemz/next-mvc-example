@@ -1,7 +1,8 @@
 import { Effect, Option, Result, Schema } from "effect";
-import { CharacterId } from "../domain/CharacterId.model";
+import { CharacterId } from "../domain/StarWars.model";
 import { makeFailedHomePageModel } from "../components/HomePage/HomePage.factory";
 import type { HomePageViewModel } from "../components/HomePage/HomePage.model";
+import { makeRetrySearchFormViewModel } from "../components/SearchForm/SearchForm.factory";
 import type { StarWarsClient } from "../services/StarWarsClient";
 import { loadHomePageFor } from "./HomePage.controller";
 
@@ -23,7 +24,7 @@ export const searchPerson = (
 
     if (Result.isFailure(decoded)) {
       return makeFailedHomePageModel({
-        characterId,
+        form: makeRetrySearchFormViewModel(characterId),
         message: "Character id must be a positive whole number.",
       });
     }
