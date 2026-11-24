@@ -26,26 +26,26 @@ form posts to a server action and gets the next view model back.
   config provider reads `process.env`.
 - `searchPerson` is a server action. It validates the form with a schema and
   returns the updated `HomePageViewModel`.
-- `HomePage.connected.view.tsx` is the only client component. It uses
+- `HomePage.connected.tsx` is the only client component. It uses
   `useActionState` and posts the form to the action.
 - `features/` drives the built app with Strider through effect-bdd. Scenarios run
   in parallel, each on its own OS-assigned port. Every scenario writes a WebM; a
   failed scenario also writes a full-page screenshot.
 
-Every file is named `Thing.suffix`: `HomePage.model.ts`, `HomePage.factory.ts`,
-`HomePage.view.tsx`, `HomePage.connected.view.tsx`, `Person.fixture.ts`.
+Each component is one file, ordered model, optics (when needed), factory, dumb
+view, connected view; its tests sit beside it. HomePage keeps its connected view
+in `HomePage.connected.tsx`, the one `"use client"` module.
 
 ## Layout
 
 ```text
 app/page.tsx                                 Next route; re-exports HomePage.page
 src/page-modules/HomePage/HomePage.page.tsx  thin wrapper: run controller, render view
-src/components/HomePage/                     HomePage.model, .factory,
-                                             .view, .connected.view
-src/components/FilmList/                     FilmList.model, .factory, .view
-src/components/FilmListItem/                 FilmListItem.model, .factory, .view
-src/components/PersonCard/                   PersonCard.model, .factory, .view
-src/components/SearchForm/                   SearchForm.model, .factory, .view
+src/components/HomePage/                     HomePage.tsx, HomePage.connected.tsx
+src/components/FilmList/                     FilmList.tsx
+src/components/FilmListItem/                 FilmListItem.tsx
+src/components/PersonCard/                   PersonCard.tsx
+src/components/SearchForm/                   SearchForm.tsx
 src/controllers/HomePage.controller.ts       Config + client -> view model
 src/controllers/SearchPerson.controller.ts   form schema + client -> view model
 src/actions/SearchPerson.serverAction.ts     "use server" boundary
