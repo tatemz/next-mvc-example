@@ -18,6 +18,8 @@ form posts to a server action and gets the next view model back.
   returns the updated `HomePageViewModel`.
 - `HomePage.connected.view.tsx` is the only client component. It uses
   `useActionState` and posts the form to the action.
+- `features/` drives the built app with Strider through effect-bdd. Every
+  scenario writes a WebM; a failed scenario also writes a full-page screenshot.
 
 ## Layout
 
@@ -33,6 +35,12 @@ src/controllers/searchPerson.controller.ts form schema + client -> view model
 src/domain/Person.ts                     Person and Film domain schemas
 src/server/runtime.ts                    one ManagedRuntime for page and action
 src/services/StarWarsClient.ts           Context.Service + HttpClient layer
+features/character-lookup.feature        the integration scenarios
+features/character-lookup.steps.ts       the scenario chains
+features/steps.ts                        shared browser steps
+features/support/scenario-app.ts         starts the built Next app per scenario
+features/support/scenario-page.ts        page, video, failure screenshot
+features/support/video.ts                screencast frames -> ffmpeg WebM
 ```
 
 ## Commands
@@ -44,7 +52,25 @@ pnpm test
 pnpm typecheck
 pnpm build
 pnpm start
+pnpm test:e2e
 ```
+
+## Integration tests
+
+`pnpm test:e2e` builds the app, then runs the Gherkin scenarios with
+`effect-bdd`. Each scenario starts its own `next start` on a free port, opens a
+Chromium page with Strider, and closes both when the scenario ends.
+
+It needs Chrome or Chromium and ffmpeg:
+
+```sh
+CHROMIUM_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  pnpm test:e2e
+```
+
+The scenarios use the live SWAPI, so they need a network connection. Videos land
+in `artifacts/<scenario>.webm`; a failure also writes
+`artifacts/<scenario>.png`. The folder is ignored by git.
 
 Copy `.env.example` to `.env.local` to point at another SWAPI host or start with
 another character. The defaults are `https://swapi.dev/api` and `1`.
