@@ -1,10 +1,10 @@
 import { Schema } from "effect";
-import { FilmListViewModel } from "../../components/FilmList/FilmList.model";
-import { PersonViewModel } from "../../components/PersonCard/PersonCard.model";
+import { FilmListViewModel } from "../FilmList/FilmList.model";
+import { PersonViewModel } from "../PersonCard/PersonCard.model";
 import {
   makeInitialSearchFormViewModel,
   makeRetrySearchFormViewModel,
-} from "../../components/SearchForm/SearchForm.factory";
+} from "../SearchForm/SearchForm.factory";
 import { HomePageViewModel } from "./HomePage.model";
 
 export const LoadedHomePageInput = Schema.Struct({

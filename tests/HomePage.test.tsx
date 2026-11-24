@@ -1,10 +1,10 @@
 import { Schema } from "effect";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { makeFailedHomePageModel } from "../src/page-modules/HomePage/HomePage.factory";
-import { HomePageViewModel } from "../src/page-modules/HomePage/HomePage.model";
-import { presentLoadedHomePage } from "../src/page-modules/HomePage/HomePage.presenter";
-import { HomePage } from "../src/page-modules/HomePage/HomePage.view";
+import { makeFailedHomePageModel } from "../src/components/HomePage/HomePage.factory";
+import { HomePageViewModel } from "../src/components/HomePage/HomePage.model";
+import { presentLoadedHomePage } from "../src/components/HomePage/HomePage.presenter";
+import { HomePage } from "../src/components/HomePage/HomePage.view";
 import { luke } from "./fixtures/Person.fixture";
 
 describe("presentLoadedHomePage", () => {

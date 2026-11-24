@@ -1,8 +1,8 @@
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
-import { presentLoadedHomePage } from "../src/page-modules/HomePage/HomePage.presenter";
-import { searchPerson } from "../src/page-modules/HomePage/SearchPerson.controller";
+import { presentLoadedHomePage } from "../src/components/HomePage/HomePage.presenter";
+import { searchPerson } from "../src/controllers/SearchPerson.controller";
 import { layerStub } from "../src/services/StarWarsClient.layer";
 import { luke, personNamed } from "./fixtures/Person.fixture";
 

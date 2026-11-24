@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { ConnectedHomePage } from "../src/page-modules/HomePage/HomePage.connected.view";
-import { presentLoadedHomePage } from "../src/page-modules/HomePage/HomePage.presenter";
+import { ConnectedHomePage } from "../src/components/HomePage/HomePage.connected.view";
+import { presentLoadedHomePage } from "../src/components/HomePage/HomePage.presenter";
 import { luke } from "./fixtures/Person.fixture";
 
 describe("ConnectedHomePage", () => {

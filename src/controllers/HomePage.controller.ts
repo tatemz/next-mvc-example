@@ -1,9 +1,9 @@
 import { Config, Effect, Schema } from "effect";
-import { CharacterId } from "../../domain/CharacterId.model";
-import { makeFailedHomePageModel } from "./HomePage.factory";
-import type { HomePageViewModel } from "./HomePage.model";
-import { presentLoadedHomePage } from "./HomePage.presenter";
-import { StarWarsClient } from "../../services/StarWarsClient";
+import { CharacterId } from "../domain/CharacterId.model";
+import { makeFailedHomePageModel } from "../components/HomePage/HomePage.factory";
+import type { HomePageViewModel } from "../components/HomePage/HomePage.model";
+import { presentLoadedHomePage } from "../components/HomePage/HomePage.presenter";
+import { StarWarsClient } from "../services/StarWarsClient";
 
 const defaultCharacterId = Schema.decodeSync(CharacterId)("1");
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { searchPerson } from "./SearchPerson.serverAction";
+import { searchPerson } from "../../actions/SearchPerson.serverAction";
 import type { HomePageViewModel } from "./HomePage.model";
 import { HomePage } from "./HomePage.view";
 

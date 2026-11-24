@@ -1,6 +1,6 @@
-import { FilmList } from "../../components/FilmList/FilmList.view";
-import { PersonCard } from "../../components/PersonCard/PersonCard.view";
-import { SearchForm } from "../../components/SearchForm/SearchForm.view";
+import { FilmList } from "../FilmList/FilmList.view";
+import { PersonCard } from "../PersonCard/PersonCard.view";
+import { SearchForm } from "../SearchForm/SearchForm.view";
 import { HomePageViewModel } from "./HomePage.model";
 
 export type HomePageProps = {

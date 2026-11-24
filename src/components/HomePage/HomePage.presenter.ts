@@ -1,9 +1,9 @@
 import { Array } from "effect";
 import type { Film } from "../../domain/Film.model";
 import type { Person } from "../../domain/Person.model";
-import { makeFilmListViewModel } from "../../components/FilmList/FilmList.factory";
-import type { FilmListItemInput } from "../../components/FilmListItem/FilmListItem.factory";
-import { makePersonViewModel } from "../../components/PersonCard/PersonCard.factory";
+import { makeFilmListViewModel } from "../FilmList/FilmList.factory";
+import type { FilmListItemInput } from "../FilmListItem/FilmListItem.factory";
+import { makePersonViewModel } from "../PersonCard/PersonCard.factory";
 import { makeLoadedHomePageModel } from "./HomePage.factory";
 import type { HomePageViewModel } from "./HomePage.model";
 

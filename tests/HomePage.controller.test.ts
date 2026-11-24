@@ -1,7 +1,7 @@
 import { it } from "@effect/vitest";
 import { ConfigProvider, Effect } from "effect";
 import { describe, expect } from "vitest";
-import { loadHomePage } from "../src/page-modules/HomePage/HomePage.controller";
+import { loadHomePage } from "../src/controllers/HomePage.controller";
 import { StarWarsError } from "../src/services/StarWarsClient";
 import { layerStub } from "../src/services/StarWarsClient.layer";
 import { luke, personNamed } from "./fixtures/Person.fixture";

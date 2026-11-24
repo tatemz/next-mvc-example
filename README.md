@@ -37,13 +37,17 @@ Every file is named `Thing.suffix`: `HomePage.model.ts`, `HomePage.factory.ts`,
 ## Layout
 
 ```text
-app/page.tsx                             Next route; re-exports HomePage.page
-src/page-modules/HomePage/               HomePage.page, .model, .factory,
-                                         .presenter, .view, .connected.view,
-                                         .controller, .serverAction
-src/components/FilmList/                 FilmList.model, .factory, .view
-src/components/PersonCard/               PersonCard.model, .factory, .view
-src/components/SearchForm/               SearchForm.model, .factory, .view
+app/page.tsx                                 Next route; re-exports HomePage.page
+src/page-modules/HomePage/HomePage.page.tsx  thin wrapper: run controller, render view
+src/components/HomePage/                     HomePage.model, .factory, .presenter,
+                                             .view, .connected.view
+src/components/FilmList/                     FilmList.model, .factory, .view
+src/components/FilmListItem/                 FilmListItem.model, .factory, .view
+src/components/PersonCard/                   PersonCard.model, .factory, .view
+src/components/SearchForm/                   SearchForm.model, .factory, .view
+src/controllers/HomePage.controller.ts       Config + client -> view model
+src/controllers/SearchPerson.controller.ts   form schema + client -> view model
+src/actions/SearchPerson.serverAction.ts     "use server" boundary
 src/domain/CharacterId.model.ts          branded character id
 src/domain/Film.model.ts                 Film domain schema
 src/domain/Person.model.ts               Person domain schema
@@ -60,8 +64,9 @@ features/support/Video.ts                screencast frames -> ffmpeg WebM
 ```
 
 `src/pages` is reserved by Next’s Pages Router, so page modules use the
-`src/page-modules` name. Domain, services, and the server runtime stay
-in their own layers rather than under `components`.
+`src/page-modules` name. A page module is only the page wrapper;
+controllers, actions, domain, services, and the server runtime stay in their own
+layers.
 
 ## Commands
 
