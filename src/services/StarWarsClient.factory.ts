@@ -12,21 +12,20 @@ import { Film, Person, type CharacterId } from "../domain/StarWars.model";
 import type { FilmResponse, PersonResponse, SwapiClient } from "./SwapiApi";
 import { StarWarsClient, StarWarsError } from "./StarWarsClient";
 
-const filmIdFromUrl = (url: string) =>
-  Function.pipe(
-    Url.fromString(url),
-    Result.match({
-      onFailure: () => Option.none<number>(),
-      onSuccess: ({ pathname }) =>
-        Function.pipe(
-          pathname,
-          Str.split("/"),
-          Array.filter(Str.isNonEmpty),
-          Array.last,
-          Option.flatMap(Num.parse),
-        ),
-    }),
-  );
+const filmIdFromPath = Function.flow(
+  Str.split("/"),
+  Array.filter(Str.isNonEmpty),
+  Array.last,
+  Option.flatMap(Num.parse),
+);
+
+const filmIdFromUrl = Function.flow(
+  (url: string) => Url.fromString(url),
+  Result.match({
+    onFailure: () => Option.none<number>(),
+    onSuccess: ({ pathname }) => filmIdFromPath(pathname),
+  }),
+);
 
 const toFilm = (film: FilmResponse) =>
   Film.make({
@@ -39,28 +38,27 @@ export const make = (swapi: SwapiClient) => {
     Function.pipe(
       urls,
       Effect.forEach(
-        (url) =>
-          Function.pipe(
-            filmIdFromUrl(url),
-            Option.match({
-              onNone: () =>
-                Effect.fail(
+        Function.flow(
+          filmIdFromUrl,
+          Option.match({
+            onNone: () =>
+              Effect.fail(
+                new StarWarsError({
+                  message: `A film for person ${id} is not available.`,
+                }),
+              ),
+            onSome: Function.flow(
+              (filmId: number) =>
+                swapi.films.get({ params: { id: filmId } }),
+              Effect.mapError(
+                () =>
                   new StarWarsError({
                     message: `A film for person ${id} is not available.`,
                   }),
-                ),
-              onSome: (filmId) =>
-                Function.pipe(
-                  swapi.films.get({ params: { id: filmId } }),
-                  Effect.mapError(
-                    () =>
-                      new StarWarsError({
-                        message: `A film for person ${id} is not available.`,
-                      }),
-                  ),
-                ),
-            }),
-          ),
+              ),
+            ),
+          }),
+        ),
         { concurrency: "unbounded" },
       ),
     );

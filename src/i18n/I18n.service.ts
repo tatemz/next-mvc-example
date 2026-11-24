@@ -1,4 +1,4 @@
-import { Array, Context, Function, Layer } from "effect";
+import { Array, Context, Layer } from "effect";
 import * as PlatformI18n from "./I18n";
 import { MESSAGES } from "./messages";
 
@@ -13,17 +13,13 @@ export const layer = Layer.sync(I18n, makeEn);
 
 export const layerTest = Layer.sync(I18n, () => {
   const _: I18n["_"] = (descriptor) => JSON.stringify(descriptor);
-  const all: I18n["all"] = (descriptors) =>
-    Function.pipe(
-      descriptors,
-      Array.reduce(
-        {} as { [K in keyof typeof MESSAGES]: string },
-        (acc, descriptor) => ({
-          ...acc,
-          [descriptor.id]: _(descriptor),
-        }),
-      ),
-    );
+  const all: I18n["all"] = Array.reduce(
+    {} as { [K in keyof typeof MESSAGES]: string },
+    (acc, descriptor) => ({
+      ...acc,
+      [descriptor.id]: _(descriptor),
+    }),
+  );
   const rich: I18n["rich"] = (descriptor) => [_(descriptor)];
   return I18n.of({ _, all, rich });
 });
