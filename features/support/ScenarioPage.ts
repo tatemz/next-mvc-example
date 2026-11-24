@@ -2,7 +2,8 @@ import { NodeServices } from "@effect/platform-node";
 import { Browser, type Page } from "@usestrider/browser";
 import { Chromium } from "@usestrider/browser/chromium";
 import { Config, Context, Effect, Exit, FileSystem, Layer } from "effect";
-import { recordVideo } from "./Video";
+import { debugMode } from "./Debug";
+import { recordVideo, type ScenarioRecording } from "./Video";
 
 export class ScenarioPage extends Context.Service<ScenarioPage, Page.Page>()(
   "next-mvc-example/test/ScenarioPage",
@@ -12,7 +13,7 @@ const ChromiumLive = Chromium.layerConfig({
   executablePath: Config.String("CHROMIUM_PATH"),
 });
 
-export const scenarioPage = (name: string) =>
+export const scenarioPage = (recording: ScenarioRecording) =>
   Layer.effect(
     ScenarioPage,
     Effect.gen(function*() {
@@ -21,12 +22,14 @@ export const scenarioPage = (name: string) =>
       const page = yield* Browser.newPage({
         emulation: { viewport: { width: 1280, height: 720 } },
       });
-      yield* recordVideo(page, `artifacts/${name}.webm`);
+      if (debugMode) {
+        yield* recordVideo(page, recording);
+      }
       yield* Effect.addFinalizer((exit) =>
         Exit.isFailure(exit)
           ? page.screenshot({ area: "fullPage" }).pipe(
               Effect.flatMap((png) =>
-                fs.writeFile(`artifacts/${name}.png`, png),
+                fs.writeFile(`artifacts/${recording.scenario}.png`, png),
               ),
               Effect.ignore,
             )

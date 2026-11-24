@@ -60,7 +60,8 @@ features/SharedSteps.ts                  shared browser steps
 features/support/ScenarioApp.ts          boots the built Next app per scenario
                                          on an OS-assigned port
 features/support/ScenarioPage.ts         page, video, failure screenshot
-features/support/Video.ts                screencast frames -> ffmpeg WebM
+features/support/Video.ts                ordered clips -> one WebM per feature
+features/support/Debug.ts                E2E_DEBUG flag and interaction pause
 ```
 
 `src/pages` is reserved by Next’s Pages Router, so page modules use the
@@ -78,6 +79,7 @@ pnpm typecheck
 pnpm build
 pnpm start
 pnpm test:e2e
+pnpm test:e2e:debug
 ```
 
 ## Integration tests
@@ -85,18 +87,21 @@ pnpm test:e2e
 `pnpm test:e2e` builds the app, then runs the Gherkin scenarios with
 `effect-bdd`. Scenarios run in parallel; each starts its own `next start -p 0`,
 so the OS assigns a free port, opens a Chromium page with Strider, and closes
-both when the scenario ends.
+both when the scenario ends. It records nothing and pauses nowhere.
 
-It needs Chrome or Chromium and ffmpeg:
+`pnpm test:e2e:debug` runs the same scenarios one at a time, pauses a second
+after each browser interaction, and records the whole feature into one
+`artifacts/<feature>.webm`. Debug mode needs ffmpeg; the default run does not.
+
+Both need Chrome or Chromium:
 
 ```sh
 CHROMIUM_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
   pnpm test:e2e
 ```
 
-The scenarios use the live SWAPI, so they need a network connection. Videos land
-in `artifacts/<scenario>.webm`; a failure also writes
-`artifacts/<scenario>.png`. The folder is ignored by git.
+The scenarios use the live SWAPI, so they need a network connection. A failure
+writes `artifacts/<scenario>.png`. The folder is ignored by git.
 
 Copy `.env.example` to `.env.local` to point at another SWAPI host or start with
 another character. The defaults are `https://swapi.dev/api` and `1`.

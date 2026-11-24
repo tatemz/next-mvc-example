@@ -12,7 +12,9 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "pretest:e2e": "next build",
-    "test:e2e": "NODE_OPTIONS=\"--import tsx\" effect-bdd --features \"features/**/*.feature\" --steps \"features/**/*.steps.ts\" --reporter text --parallel=3 --strict --step-timeout \"60 seconds\""
+    "test:e2e": "NODE_OPTIONS=\"--import tsx\" effect-bdd --features \"features/**/*.feature\" --steps \"features/**/*.steps.ts\" --reporter text --parallel=3 --strict --step-timeout \"60 seconds\"",
+    "pretest:e2e:debug": "next build",
+    "test:e2e:debug": "E2E_DEBUG=1 NODE_OPTIONS=\"--import tsx\" effect-bdd --features \"features/**/*.feature\" --steps \"features/**/*.steps.ts\" --reporter text --parallel=1 --verbose --strict --step-timeout \"60 seconds\""
   },
   "dependencies": {
     "@formatjs/intl": "^3.1.8",

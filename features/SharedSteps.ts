@@ -1,6 +1,7 @@
 import { Expect, type Page } from "@usestrider/browser";
 import { Effect, Schema } from "effect";
 import { Bdd } from "effect-bdd";
+import { interactionPause } from "./support/Debug";
 import { ScenarioApp } from "./support/ScenarioApp";
 import { ScenarioPage } from "./support/ScenarioPage";
 
@@ -13,6 +14,7 @@ export const givenTheAppIsOpen = Bdd.given`the app is open`(
     const app = yield* ScenarioApp;
     const page = yield* ScenarioPage;
     yield* page.goto(app.url, { waitUntil: "load" });
+    yield* interactionPause;
     return page;
   }),
 );
@@ -24,6 +26,7 @@ export const whenIEnterTheCharacterId =
       page: Page.Page,
     ) {
       yield* page.getByLabel("Character id").fill(characterId);
+      yield* interactionPause;
       return page;
     }),
   );
@@ -31,6 +34,7 @@ export const whenIEnterTheCharacterId =
 export const whenILoadTheCharacter = Bdd.when`I load the character`(
   Effect.fn("whenILoadTheCharacter")(function*(page: Page.Page) {
     yield* page.getByRole("button", { name: "Load character" }).click();
+    yield* interactionPause;
     return page;
   }),
 );

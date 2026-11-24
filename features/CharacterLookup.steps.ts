@@ -11,10 +11,12 @@ import {
 import { scenarioApp } from "./support/ScenarioApp";
 import { scenarioPage } from "./support/ScenarioPage";
 
-const environment = (name: string) =>
+const feature = "character-lookup";
+
+const environment = (scenario: string, index: number) =>
   Layer.merge(
     scenarioApp({ STAR_WARS_CHARACTER_ID: "1" }),
-    scenarioPage(name),
+    scenarioPage({ feature, index, scenario }),
   );
 
 const configuredCharacter = Bdd.scenario("The configured character loads").pipe(
@@ -22,7 +24,7 @@ const configuredCharacter = Bdd.scenario("The configured character loads").pipe(
   thenISee,
   thenISee,
   thenISeeFilms,
-  Bdd.provide(environment("configured-character")),
+  Bdd.provide(environment("configured-character", 0)),
 );
 
 const anotherCharacter = Bdd.scenario("Loading another character").pipe(
@@ -32,7 +34,7 @@ const anotherCharacter = Bdd.scenario("Loading another character").pipe(
   thenISee,
   thenISeeFilms,
   thenTheCharacterIdFieldContains,
-  Bdd.provide(environment("another-character")),
+  Bdd.provide(environment("another-character", 1)),
 );
 
 const invalidCharacterId = Bdd.scenario("Rejecting a non-numeric id").pipe(
@@ -41,7 +43,7 @@ const invalidCharacterId = Bdd.scenario("Rejecting a non-numeric id").pipe(
   whenILoadTheCharacter,
   thenISee,
   thenTheCharacterIdFieldContains,
-  Bdd.provide(environment("invalid-character-id")),
+  Bdd.provide(environment("invalid-character-id", 2)),
 );
 
 export const characterLookup = Bdd.feature(
