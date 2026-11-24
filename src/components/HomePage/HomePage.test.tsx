@@ -1,12 +1,13 @@
 import { Schema } from "effect";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
-import { makeFailedHomePageModel } from "../src/components/HomePage/HomePage.factory";
-import { HomePageViewModel } from "../src/components/HomePage/HomePage.model";
-import { HomePage } from "../src/components/HomePage/HomePage.view";
-import { presentLoadedHomePage } from "../src/controllers/HomePage.controller";
-import { makeEn } from "../src/i18n/I18n.service";
-import { luke } from "./fixtures/Person.fixture";
+import { it } from "@effect/vitest";
+import { describe, expect } from "vitest";
+import { makeFailedHomePageModel } from "./HomePage.factory";
+import { HomePageViewModel } from "./HomePage.model";
+import { HomePage } from "./HomePage.view";
+import { presentLoadedHomePage } from "../../controllers/HomePage.controller";
+import { makeEn } from "../../i18n/I18n.service";
+import { luke } from "../../domain/StarWars.fixture";
 
 const i18n = makeEn();
 
@@ -80,7 +81,7 @@ describe("HomePage", () => {
   it("renders the loaded character and films", () => {
     const html = renderToStaticMarkup(
       <HomePage
-        model={presentLoadedHomePage(i18n, luke)}
+        {...presentLoadedHomePage(i18n, luke)}
         dispatch={() => {}}
         isPending={false}
       />,
@@ -105,7 +106,7 @@ describe("HomePage", () => {
     });
 
     const html = renderToStaticMarkup(
-      <HomePage model={model} dispatch={() => {}} isPending={false} />,
+      <HomePage {...model} dispatch={() => {}} isPending={false} />,
     );
 
     expect(html).toContain('role="alert"');
@@ -117,7 +118,7 @@ describe("HomePage", () => {
   it("renders the pending form state", () => {
     const html = renderToStaticMarkup(
       <HomePage
-        model={presentLoadedHomePage(i18n, luke)}
+        {...presentLoadedHomePage(i18n, luke)}
         dispatch={() => {}}
         isPending={true}
       />,

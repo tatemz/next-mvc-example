@@ -1,36 +1,39 @@
 import type { SearchFormViewModel } from "./SearchForm.model";
 
-export type SearchFormProps = {
-  readonly model: SearchFormViewModel;
+export type SearchFormProps = SearchFormViewModel & {
   readonly dispatch: (formData: FormData) => void;
   readonly isPending: boolean;
 };
 
 export const SearchForm = ({
-  model,
+  value,
+  error,
+  label,
+  submitLabel,
+  pendingLabel,
   dispatch,
   isPending,
 }: SearchFormProps) => (
   <form action={dispatch} method="post">
-    <label htmlFor="characterId">{model.label}</label>
+    <label htmlFor="characterId">{label}</label>
     <input
-      key={model.value}
+      key={value}
       id="characterId"
       name="characterId"
-      defaultValue={model.value}
+      defaultValue={value}
       inputMode="numeric"
-      aria-invalid={model.error !== undefined}
+      aria-invalid={error !== undefined}
       aria-describedby={
-        model.error === undefined ? undefined : "characterId-error"
+        error === undefined ? undefined : "characterId-error"
       }
     />
-    {model.error === undefined ? null : (
+    {error === undefined ? null : (
       <p id="characterId-error" role="alert">
-        {model.error}
+        {error}
       </p>
     )}
     <button type="submit" disabled={isPending}>
-      {isPending ? model.pendingLabel : model.submitLabel}
+      {isPending ? pendingLabel : submitLabel}
     </button>
   </form>
 );

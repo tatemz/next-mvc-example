@@ -1,38 +1,40 @@
-import { Effect, Option, Schema, pipe } from "effect";
+import { Effect, pipe } from "effect";
 import type { HomePageViewModel } from "../components/HomePage/HomePage.model";
 import { HomePageOptics } from "../components/HomePage/HomePage.optics";
-import { CharacterId } from "../domain/StarWars.model";
+import {
+  type SearchFormValidationError,
+  validateSearchForm,
+} from "./SearchPerson.schema";
+import { getString } from "../forms/FormData";
 import { I18n } from "../i18n/I18n.service";
 import { loadHomePageFor } from "./HomePage.controller";
 
-const readCharacterId = (formData: FormData): string =>
-  Option.getOrElse(
-    Schema.decodeUnknownOption(Schema.String)(formData.get("characterId")),
-    () => "",
-  );
+const handleValidationError =
+  (previous: HomePageViewModel) =>
+  (error: SearchFormValidationError) =>
+    Effect.gen(function*() {
+      const i18n = yield* I18n;
+      const formValue = getString(error.formData, "characterId");
+      const message = i18n._({ id: error.errors.characterId });
 
-const withCharacterIdError = (
-  i18n: I18n,
-  model: HomePageViewModel,
-  characterId: string,
-) =>
-  pipe(
-    model,
-    HomePageOptics.FormValue.set(characterId),
-    HomePageOptics.FormError.set(
-      i18n._({ id: "search.invalidCharacterId" }),
-    ),
-  );
+      return pipe(
+        previous,
+        HomePageOptics.FormValue.set(formValue),
+        HomePageOptics.FormError.set(message),
+      );
+    });
 
-export const searchPerson = Effect.fn("searchPerson")(
-  function*(previous: HomePageViewModel, formData: FormData) {
-    const i18n = yield* I18n;
-    const characterId = readCharacterId(formData);
-    return yield* Schema.decodeUnknownEffect(CharacterId)(characterId).pipe(
-      Effect.flatMap(loadHomePageFor),
-      Effect.catchTag("SchemaError", () =>
-        Effect.succeed(withCharacterIdError(i18n, previous, characterId)),
-      ),
-    );
+const searchPersonEffect = Effect.fn("searchPerson")(
+  function*(formData: FormData) {
+    const data = yield* validateSearchForm(formData);
+    return yield* loadHomePageFor(data.characterId);
   },
 );
+
+export const searchPerson = (
+  previous: HomePageViewModel,
+  formData: FormData,
+) =>
+  searchPersonEffect(formData).pipe(
+    Effect.catchTag("FormValidationError", handleValidationError(previous)),
+  );

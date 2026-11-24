@@ -4,7 +4,7 @@ import { SearchFormViewModel } from "./SearchForm.model";
 export const makeInitialSearchFormViewModel = (
   i18n: I18n,
   value: string,
-): SearchFormViewModel =>
+) =>
   SearchFormViewModel.make({
     value,
     label: i18n._({ id: "characterId.label" }),
@@ -15,7 +15,7 @@ export const makeInitialSearchFormViewModel = (
 export const makeRetrySearchFormViewModel = (
   i18n: I18n,
   value: string,
-): SearchFormViewModel =>
+) =>
   SearchFormViewModel.make({
     value,
     label: i18n._({ id: "characterId.label" }),

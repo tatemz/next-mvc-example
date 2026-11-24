@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
-import { HomePageOptics } from "../src/components/HomePage/HomePage.optics";
-import { presentLoadedHomePage } from "../src/controllers/HomePage.controller";
-import { makeEn } from "../src/i18n/I18n.service";
-import { luke } from "./fixtures/Person.fixture";
+import { it } from "@effect/vitest";
+import { describe, expect } from "vitest";
+import { HomePageOptics } from "./HomePage.optics";
+import { presentLoadedHomePage } from "../../controllers/HomePage.controller";
+import { makeEn } from "../../i18n/I18n.service";
+import { luke } from "../../domain/StarWars.fixture";
 
 describe("HomePageOptics", () => {
   it("sets and reads the form error without mutating the model", () => {

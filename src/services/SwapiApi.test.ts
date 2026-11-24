@@ -3,8 +3,8 @@ import { Effect, Layer } from "effect";
 import { HttpClient, HttpClientResponse } from "effect/http";
 import { HttpApiClient } from "effect/http-api";
 import { describe, expect } from "vitest";
-import { SwapiApi } from "../src/services/SwapiApi";
-import { makeCharacterId } from "./fixtures/Person.fixture";
+import { SwapiApi } from "./SwapiApi";
+import { makeCharacterId } from "../domain/StarWars.fixture";
 
 const personResponse = {
   name: "Luke Skywalker",

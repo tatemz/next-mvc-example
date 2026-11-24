@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { runtime } from "../src/server/Runtime";
+import { it } from "@effect/vitest";
+import { describe, expect } from "vitest";
+import { runtime } from "./Runtime";
 
 describe("runtime", () => {
   it("creates the application runtime", () => {

@@ -1,11 +1,11 @@
 import { it } from "@effect/vitest";
 import { ConfigProvider, Effect } from "effect";
 import { describe, expect } from "vitest";
-import { loadHomePage } from "../src/controllers/HomePage.controller";
-import { I18n, makeEn } from "../src/i18n/I18n.service";
-import { StarWarsError } from "../src/services/StarWarsClient";
-import { layerStub } from "../src/services/StarWarsClient.layer";
-import { luke, personNamed } from "./fixtures/Person.fixture";
+import { loadHomePage } from "./HomePage.controller";
+import { I18n, makeEn } from "../i18n/I18n.service";
+import { StarWarsError } from "../services/StarWarsClient";
+import { layerStub } from "../services/StarWarsClient.layer";
+import { luke, personNamed } from "../domain/StarWars.fixture";
 
 const env = (values: Record<string, string>) =>
   ConfigProvider.fromEnv({ env: values });

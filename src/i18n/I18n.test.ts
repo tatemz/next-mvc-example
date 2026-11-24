@@ -1,12 +1,12 @@
-import { it as effectIt } from "@effect/vitest";
+import { it } from "@effect/vitest";
 import { Effect } from "effect";
-import { describe, expect, it } from "vitest";
-import * as I18n from "../src/i18n/I18n";
+import { describe, expect } from "vitest";
+import * as I18n from "./I18n";
 import {
   I18n as I18nService,
   layer,
   layerTest,
-} from "../src/i18n/I18n.service";
+} from "./I18n.service";
 
 describe("I18n.make", () => {
   it("formats a message with values", () => {
@@ -33,7 +33,7 @@ describe("I18n.make", () => {
 });
 
 describe("I18n.service", () => {
-  effectIt.layer(layer)("en", (it) => {
+  it.layer(layer)("en", (it) => {
     it.effect("formats the app messages", () =>
       Effect.gen(function*() {
         const i18n = yield* I18nService;
@@ -46,7 +46,7 @@ describe("I18n.service", () => {
     );
   });
 
-  effectIt.layer(layerTest)("test", (it) => {
+  it.layer(layerTest)("test", (it) => {
     it.effect("formats descriptors for assertions", () =>
       Effect.gen(function*() {
         const i18n = yield* I18nService;

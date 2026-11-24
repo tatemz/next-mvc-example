@@ -1,17 +1,21 @@
 import type { PersonViewModel } from "./PersonCard.model";
 
-export type PersonCardProps = {
-  readonly model: PersonViewModel;
-};
+export type PersonCardProps = PersonViewModel;
 
-export const PersonCard = ({ model }: PersonCardProps) => (
+export const PersonCard = ({
+  name,
+  height,
+  mass,
+  heightLabel,
+  massLabel,
+}: PersonCardProps) => (
   <section>
-    <h1>{model.name}</h1>
+    <h1>{name}</h1>
     <dl>
-      <dt>{model.heightLabel}</dt>
-      <dd>{model.height}</dd>
-      <dt>{model.massLabel}</dt>
-      <dd>{model.mass}</dd>
+      <dt>{heightLabel}</dt>
+      <dd>{height}</dd>
+      <dt>{massLabel}</dt>
+      <dd>{mass}</dd>
     </dl>
   </section>
 );

@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { CharacterId, type Person } from "../../src/domain/StarWars.model";
+import { CharacterId, type Person } from "./StarWars.model";
 
 export const makeCharacterId = (value: string): CharacterId =>
   Schema.decodeSync(CharacterId)(value);

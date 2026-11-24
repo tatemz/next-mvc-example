@@ -6,12 +6,12 @@ export type I18n = PlatformI18n.I18n<typeof MESSAGES>;
 
 export const I18n = Context.Service<I18n>("next-mvc-example/I18n");
 
-export const makeEn = (): I18n =>
+export const makeEn = () =>
   PlatformI18n.make({ messages: MESSAGES, locale: "en-US" });
 
-export const layer: Layer.Layer<I18n> = Layer.sync(I18n, makeEn);
+export const layer = Layer.sync(I18n, makeEn);
 
-export const layerTest: Layer.Layer<I18n> = Layer.sync(I18n, () => {
+export const layerTest = Layer.sync(I18n, () => {
   const _: I18n["_"] = (descriptor) => JSON.stringify(descriptor);
   const all: I18n["all"] = (descriptors) =>
     Array.reduce(

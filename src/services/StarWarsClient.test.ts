@@ -2,12 +2,12 @@ import { it } from "@effect/vitest";
 import { Effect, Layer } from "effect";
 import { HttpClient, HttpClientResponse } from "effect/http";
 import { describe, expect } from "vitest";
-import { StarWarsClient } from "../src/services/StarWarsClient";
+import { StarWarsClient } from "./StarWarsClient";
 import {
   layer as liveLayer,
   layerStub,
-} from "../src/services/StarWarsClient.layer";
-import { makeCharacterId, personNamed } from "./fixtures/Person.fixture";
+} from "./StarWarsClient.layer";
+import { makeCharacterId, personNamed } from "../domain/StarWars.fixture";
 
 const personResponse = {
   name: "Luke Skywalker",

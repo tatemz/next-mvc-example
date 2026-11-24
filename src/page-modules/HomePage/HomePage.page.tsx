@@ -4,5 +4,5 @@ import { loadHomePage } from "../../controllers/HomePage.controller";
 
 export async function HomePage() {
   const model = await runtime.runPromise(loadHomePage);
-  return <ConnectedHomePage model={model} />;
+  return <ConnectedHomePage {...model} />;
 }

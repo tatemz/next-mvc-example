@@ -1,11 +1,11 @@
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
-import { presentLoadedHomePage } from "../src/controllers/HomePage.controller";
-import { searchPerson } from "../src/controllers/SearchPerson.controller";
-import { I18n, makeEn } from "../src/i18n/I18n.service";
-import { layerStub } from "../src/services/StarWarsClient.layer";
-import { luke, personNamed } from "./fixtures/Person.fixture";
+import { presentLoadedHomePage } from "./HomePage.controller";
+import { searchPerson } from "./SearchPerson.controller";
+import { I18n, makeEn } from "../i18n/I18n.service";
+import { layerStub } from "../services/StarWarsClient.layer";
+import { luke, personNamed } from "../domain/StarWars.fixture";
 
 const form = (characterId: string) => {
   const data = new FormData();
@@ -61,7 +61,7 @@ describe("searchPerson", () => {
         _tag: "Loaded",
         form: {
           value: "",
-          error: "Character id must be a positive whole number.",
+          error: "Character id is required.",
         },
       });
     }).pipe(

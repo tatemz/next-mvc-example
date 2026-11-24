@@ -9,7 +9,7 @@ import { FilmListViewModel } from "./FilmList.model";
 export const makeFilmListViewModel = (
   i18n: I18n,
   films: readonly [FilmListItemInput, ...Array<FilmListItemInput>],
-): FilmListViewModel =>
+) =>
   FilmListViewModel.make({
     countLabel: i18n._({
       id: "film.count",

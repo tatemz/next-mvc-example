@@ -1,7 +1,8 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
-import RootLayout from "../app/layout";
-import Page from "../app/page";
+import { it } from "@effect/vitest";
+import { describe, expect } from "vitest";
+import RootLayout from "./layout";
+import Page from "./page";
 import { HomePage } from "../src/page-modules/HomePage/HomePage.page";
 
 describe("app", () => {

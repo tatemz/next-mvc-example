@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
-import { makeFilmListViewModel } from "../src/components/FilmList/FilmList.factory";
-import { makeEn } from "../src/i18n/I18n.service";
+import { it } from "@effect/vitest";
+import { describe, expect } from "vitest";
+import { makeFilmListViewModel } from "./FilmList.factory";
+import { makeEn } from "../../i18n/I18n.service";
 
 const i18n = makeEn();
 
