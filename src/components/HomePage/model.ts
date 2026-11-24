@@ -1,9 +1,17 @@
 import { Schema } from "effect";
-import { HomePageVariationAModel } from "../HomePageVariationA/model";
-import { HomePageVariationBModel } from "../HomePageVariationB/model";
+import { FilmListViewModel } from "../FilmList/model";
+import { PersonViewModel } from "../PersonCard/model";
+import { SearchFormViewModel } from "../SearchForm/model";
 
-export type HomePageModel = typeof HomePageModel.Type;
-export const HomePageModel = Schema.Union(
-  HomePageVariationAModel,
-  HomePageVariationBModel,
-);
+export const HomePageViewModel = Schema.TaggedUnion({
+  Loaded: {
+    form: SearchFormViewModel,
+    person: PersonViewModel,
+    films: FilmListViewModel,
+  },
+  Failed: {
+    form: SearchFormViewModel,
+    message: Schema.NonEmptyString,
+  },
+});
+export type HomePageViewModel = typeof HomePageViewModel.Type;

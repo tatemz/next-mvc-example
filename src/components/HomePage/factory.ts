@@ -1,10 +1,23 @@
-import { Match } from "effect";
-import { makeHomePageVariationAModel } from "../HomePageVariationA/factory";
-import { makeHomePageVariationBModel } from "../HomePageVariationB/factory";
+import type { Person } from "../../domain/Person";
+import type { SearchFormViewModel } from "../SearchForm/model";
+import { HomePageViewModel } from "./model";
 
-export const makeHomePageModel = (opts: { variation: "a" | "b" }) =>
-  Match.value(opts.variation).pipe(
-    Match.when("a", () => makeHomePageVariationAModel()),
-    Match.when("b", () => makeHomePageVariationBModel()),
-    Match.exhaustive,
-  );
+export const makeLoadedHomePageModel = (person: Person): HomePageViewModel =>
+  HomePageViewModel.cases.Loaded.make({
+    form: { characterId: String(person.id) },
+    person: {
+      name: person.name,
+      height: person.height,
+      mass: person.mass,
+    },
+    films: person.films,
+  });
+
+export const makeFailedHomePageModel = (options: {
+  readonly form: SearchFormViewModel;
+  readonly message: string;
+}): HomePageViewModel =>
+  HomePageViewModel.cases.Failed.make({
+    form: options.form,
+    message: options.message,
+  });

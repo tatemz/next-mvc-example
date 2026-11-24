@@ -1,56 +1,66 @@
+import { Schema } from "effect";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { makeFooBarListModel } from "../src/components/FooBarList/factory";
-import { makeHomePageModel } from "../src/components/HomePage/factory";
+import { makeFailedHomePageModel, makeLoadedHomePageModel } from "../src/components/HomePage/factory";
+import { HomePageViewModel } from "../src/components/HomePage/model";
 import { HomePage } from "../src/components/HomePage/view";
+import { luke } from "./fixtures/person";
 
-describe("makeHomePageModel", () => {
-  it("builds variation A", () => {
-    expect(makeHomePageModel({ variation: "a" })).toMatchObject({
-      _tag: "HomePageVariationAModel",
-      title: "Home Page: Variation A",
+describe("makeLoadedHomePageModel", () => {
+  it("turns a domain person into a loaded view model", () => {
+    const model = makeLoadedHomePageModel(luke);
+
+    expect(model).toMatchObject({
+      _tag: "Loaded",
+      form: { characterId: "1" },
+      person: { name: "Luke Skywalker", height: "172", mass: "77" },
     });
+    if (model._tag !== "Loaded") throw new Error("expected Loaded");
+    expect(model.films).toHaveLength(2);
   });
 
-  it("builds variation B with its list", () => {
-    const model = makeHomePageModel({ variation: "b" });
+  it("keeps films a non-empty array in the schema", () => {
+    const invalid = {
+      _tag: "Loaded",
+      form: { characterId: "1" },
+      person: { name: "Luke Skywalker", height: "172", mass: "77" },
+      films: [],
+    };
 
-    if (model._tag !== "HomePageVariationBModel") {
-      throw new Error(`expected variation B, got ${model._tag}`);
-    }
-    expect(model.title).toBe("Home Page: Variation B");
-    expect(model.fooBarList.items).toHaveLength(5);
-  });
-});
-
-describe("makeFooBarListModel", () => {
-  it("numbers items from one", () => {
-    const model = makeFooBarListModel({ numberOfItems: 3 });
-
-    expect(model.items.map((item) => item.listItemText)).toEqual([
-      "List item #1",
-      "List item #2",
-      "List item #3",
-    ]);
+    expect(() => Schema.decodeUnknownSync(HomePageViewModel)(invalid)).toThrow();
   });
 });
 
 describe("HomePage", () => {
-  it("renders variation A", () => {
+  it("renders the loaded character and films", () => {
     const html = renderToStaticMarkup(
-      <HomePage {...makeHomePageModel({ variation: "a" })} />,
+      <HomePage
+        model={makeLoadedHomePageModel(luke)}
+        dispatch={() => {}}
+        isPending={false}
+      />,
     );
 
-    expect(html).toContain("<h1>Home Page: Variation A</h1>");
+    expect(html).toContain("<h1>Luke Skywalker</h1>");
+    expect(html.match(/<li>/g)).toHaveLength(2);
+    expect(html).toContain("A New Hope (Episode 4)");
+    expect(html).toContain('value="1"');
   });
 
-  it("renders variation B and its five list items", () => {
+  it("renders a failure with the submitted form value", () => {
     const html = renderToStaticMarkup(
-      <HomePage {...makeHomePageModel({ variation: "b" })} />,
+      <HomePage
+        model={makeFailedHomePageModel({
+          form: { characterId: "abc" },
+          message: "Character id must be a positive whole number.",
+        })}
+        dispatch={() => {}}
+        isPending={false}
+      />,
     );
 
-    expect(html).toContain("<h2>Home Page: Variation B</h2>");
-    expect(html.match(/<li>/g)).toHaveLength(5);
-    expect(html).toContain("<li>List item #1</li>");
+    expect(html).toContain('role="alert"');
+    expect(html).toContain("Character id must be a positive whole number.");
+    expect(html).toContain('value="abc"');
   });
 });

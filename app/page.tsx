@@ -1,14 +1,10 @@
-import { Function } from "effect";
-import { makeHomePageModel } from "../src/components/HomePage/factory";
-import { HomePage } from "../src/components/HomePage/view";
+import { ConnectedHomePage } from "../src/components/HomePage/HomePage.connected.view";
+import { loadHomePage } from "../src/controllers/homePage.controller";
+import { runtime } from "../src/server/runtime";
 
 export const dynamic = "force-dynamic";
 
-const getRandomVariation = (): "a" | "b" =>
-  Math.floor(Math.random() * 10) % 2 === 0 ? "a" : "b";
-
-const controller = () => makeHomePageModel({ variation: getRandomVariation() });
-
-const Page = Function.flow(controller, HomePage);
-
-export default Page;
+export default async function Page() {
+  const model = await runtime.runPromise(loadHomePage);
+  return <ConnectedHomePage model={model} />;
+}
