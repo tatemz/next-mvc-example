@@ -1,0 +1,8 @@
+import { runtime } from "../../server/Runtime";
+import { ConnectedHomePage } from "./HomePage.connected.view";
+import { loadHomePage } from "./HomePage.controller";
+
+export async function HomePage() {
+  const model = await runtime.runPromise(loadHomePage);
+  return <ConnectedHomePage model={model} />;
+}

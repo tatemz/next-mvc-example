@@ -8,6 +8,14 @@ form posts to a server action and gets the next view model back.
 
 - Every model is a `Schema.TaggedStruct` or `Schema.TaggedUnion`, and nested
   models carry their own `_tag`.
+- `CharacterId` is a branded string built from `Schema.NumberFromString`, so
+  `Person.id` and `StarWarsClient.getPerson` accept only a validated character
+  id.
+- Every user-visible string, including labels and button copy, is carried by the
+  view model rather than written in a view.
+- View models and their factories do not import domain models.
+  `HomePage.presenter.ts` is the only place that maps `Person` and `Film` into
+  the page view model.
 - `HomePageViewModel` is a `Schema.TaggedUnion` of `Loaded` and `Failed`.
 - `Loaded.filmList.films` is `Schema.NonEmptyArray(FilmViewModel)`.
 - `StarWarsClient` is a `Context.Service` layer that decodes SWAPI responses
@@ -23,27 +31,37 @@ form posts to a server action and gets the next view model back.
 - `features/` drives the built app with Strider through effect-bdd. Every
   scenario writes a WebM; a failed scenario also writes a full-page screenshot.
 
+Every file is named `Thing.suffix`: `HomePage.model.ts`, `HomePage.factory.ts`,
+`HomePage.view.tsx`, `HomePage.connected.view.tsx`, `Person.fixture.ts`.
+
 ## Layout
 
 ```text
-app/page.tsx                             runs the controller and renders the model
-src/actions/searchPerson.serverAction.ts "use server" boundary
-src/components/HomePage/                 model, factory, view, connected view
-src/components/PersonCard/               person view model and view
-src/components/FilmList/                 non-empty film list model, factory, and view
-src/components/SearchForm/               form view model and view
-src/controllers/homePage.controller.ts   Config + client -> view model
-src/controllers/searchPerson.controller.ts form schema + client -> view model
-src/domain/Person.ts                     Person and Film domain schemas
-src/server/runtime.ts                    one ManagedRuntime for page and action
-src/services/StarWarsClient.ts           Context.Service + HttpClient layer
-features/character-lookup.feature        the integration scenarios
-features/character-lookup.steps.ts       the scenario chains
-features/steps.ts                        shared browser steps
-features/support/scenario-app.ts         starts the built Next app per scenario
-features/support/scenario-page.ts        page, video, failure screenshot
-features/support/video.ts                screencast frames -> ffmpeg WebM
+app/page.tsx                             Next route; re-exports HomePage.page
+src/page-modules/HomePage/               HomePage.page, .model, .factory,
+                                         .presenter, .view, .connected.view,
+                                         .controller, .serverAction
+src/components/FilmList/                 FilmList.model, .factory, .view
+src/components/PersonCard/               PersonCard.model, .factory, .view
+src/components/SearchForm/               SearchForm.model, .factory, .view
+src/domain/CharacterId.model.ts          branded character id
+src/domain/Film.model.ts                 Film domain schema
+src/domain/Person.model.ts               Person domain schema
+src/server/Runtime.ts                    one ManagedRuntime for page and action
+src/services/StarWarsClient.ts           service interface and error
+src/services/StarWarsClient.factory.ts   client implementation
+src/services/StarWarsClient.layer.ts     Config + HttpClient layer
+features/CharacterLookup.feature         the integration scenarios
+features/CharacterLookup.steps.ts        the scenario chains
+features/SharedSteps.ts                  shared browser steps
+features/support/ScenarioApp.ts          starts the built Next app per scenario
+features/support/ScenarioPage.ts         page, video, failure screenshot
+features/support/Video.ts                screencast frames -> ffmpeg WebM
 ```
+
+`src/pages` is reserved by Next’s Pages Router, so page modules use the
+`src/page-modules` name. Domain, services, and the server runtime stay
+in their own layers rather than under `components`.
 
 ## Commands
 
