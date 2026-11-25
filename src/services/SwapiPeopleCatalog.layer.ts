@@ -4,10 +4,7 @@ import { SwapiApi } from "./SwapiApi";
 import { PeopleCatalog } from "./PeopleCatalog";
 import { make, makeStub } from "./SwapiPeopleCatalog.factory";
 
-const apiUrl = Function.pipe(
-  Config.String("STAR_WARS_API_URL"),
-  Config.withDefault("https://swapi.dev/api"),
-);
+const apiUrl = Config.String("STAR_WARS_API_URL");
 
 export const layer = Layer.effect(
   PeopleCatalog,

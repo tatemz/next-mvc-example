@@ -1,5 +1,5 @@
 import { it } from "@effect/vitest";
-import { Effect, Layer } from "effect";
+import { ConfigProvider, Effect, Layer } from "effect";
 import { HttpClient, HttpClientResponse } from "effect/http";
 import { describe, expect } from "vitest";
 import { makeCharacterId } from "../domain/FilmUniverse.fixture";
@@ -47,6 +47,14 @@ const httpClient = HttpClient.make((request) =>
 
 const testLayer = layer.pipe(
   Layer.provide(Layer.succeed(HttpClient.HttpClient, httpClient)),
+  Layer.provide(
+    Layer.succeed(
+      ConfigProvider.ConfigProvider,
+      ConfigProvider.fromEnv({
+        env: { GHIBLI_API_URL: "https://ghibliapi.vercel.app" },
+      }),
+    ),
+  ),
 );
 
 describe("GhibliPeopleCatalog layer", () => {

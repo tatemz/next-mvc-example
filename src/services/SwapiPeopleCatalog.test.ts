@@ -1,10 +1,20 @@
 import { it } from "@effect/vitest";
-import { Effect, Layer } from "effect";
+import { ConfigProvider, Effect, Layer } from "effect";
 import { HttpClient, HttpClientResponse } from "effect/http";
 import { describe, expect } from "vitest";
 import { PeopleCatalog } from "./PeopleCatalog";
 import { layer as liveLayer, layerStub } from "./SwapiPeopleCatalog.layer";
 import { makeCharacterId, personNamed } from "../domain/FilmUniverse.fixture";
+
+const configLayer = Layer.succeed(
+  ConfigProvider.ConfigProvider,
+  ConfigProvider.fromEnv({
+    env: { STAR_WARS_API_URL: "https://swapi.dev/api" },
+  }),
+);
+
+const withConfig = <A, E, R>(layer: Layer.Layer<A, E, R>) =>
+  layer.pipe(Layer.provide(configLayer));
 
 const personResponse = {
   name: "Luke Skywalker",
@@ -83,7 +93,7 @@ const jsonClient = (statusFor = () => 200) =>
   );
 
 const layerFor = (statusFor = () => 200) =>
-  liveLayer.pipe(
+  withConfig(liveLayer).pipe(
     Layer.provide(Layer.succeed(HttpClient.HttpClient, jsonClient(statusFor))),
   );
 
@@ -116,7 +126,7 @@ const expectResourceError = (
         ),
       ),
     );
-    const layer = liveLayer.pipe(
+    const layer = withConfig(liveLayer).pipe(
       Layer.provide(Layer.succeed(HttpClient.HttpClient, client)),
     );
 
@@ -198,7 +208,7 @@ describe("PeopleCatalog", () => {
         ),
       ),
     );
-    const layer = liveLayer.pipe(
+    const layer = withConfig(liveLayer).pipe(
       Layer.provide(Layer.succeed(HttpClient.HttpClient, client)),
     );
 
@@ -299,7 +309,7 @@ describe("PeopleCatalog", () => {
         ),
       ),
     );
-    const layer = liveLayer.pipe(
+    const layer = withConfig(liveLayer).pipe(
       Layer.provide(Layer.succeed(HttpClient.HttpClient, client)),
     );
 
@@ -378,7 +388,7 @@ describe("PeopleCatalog", () => {
         ),
       ),
     );
-    const layer = liveLayer.pipe(
+    const layer = withConfig(liveLayer).pipe(
       Layer.provide(Layer.succeed(HttpClient.HttpClient, client)),
     );
 

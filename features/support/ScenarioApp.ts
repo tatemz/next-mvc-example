@@ -27,6 +27,11 @@ export const parseNextStartPort = (line: string): Option.Option<number> => {
   return match === null ? Option.none() : Option.some(Number(match[1]));
 };
 
+const liveApiEnvironment = {
+  STAR_WARS_API_URL: "https://swapi.dev/api",
+  GHIBLI_API_URL: "https://ghibliapi.vercel.app",
+} as const;
+
 const waitUntilReady = (url: string) =>
   Effect.gen(function*() {
     const response = yield* Effect.tryPromise({
@@ -93,7 +98,7 @@ export const scenarioApp = (env: Record<string, string>) =>
   Layer.effect(
     ScenarioApp,
     Effect.gen(function*() {
-      const url = yield* startNext(env);
+      const url = yield* startNext({ ...liveApiEnvironment, ...env });
       return ScenarioApp.of({ url });
     }),
   ).pipe(Layer.provide(NodeServices.layer));

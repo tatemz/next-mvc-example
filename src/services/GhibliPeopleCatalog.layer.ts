@@ -4,10 +4,7 @@ import { GhibliApi } from "./GhibliApi";
 import { PeopleCatalog } from "./PeopleCatalog";
 import { make } from "./GhibliPeopleCatalog.factory";
 
-const apiUrl = Function.pipe(
-  Config.String("GHIBLI_API_URL"),
-  Config.withDefault("https://ghibliapi.vercel.app"),
-);
+const apiUrl = Config.String("GHIBLI_API_URL");
 
 export const layer = Layer.effect(
   PeopleCatalog,
