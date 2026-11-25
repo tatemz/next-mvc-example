@@ -1,7 +1,6 @@
-import { NodeHttpServer } from "@effect/platform-node";
 import { Context, Effect, Layer, Ref } from "effect";
 import { resolve } from "node:path";
-import { app } from "../../boot/app";
+import { appWith } from "../../boot/app";
 import { nextLayer } from "../../boot/next";
 import { serve } from "../../boot/serve";
 import {
@@ -22,14 +21,11 @@ export class ScenarioApp extends Context.Service<
 const repoRoot = resolve(import.meta.dirname, "../..");
 
 const appWithStubs = (mode: Ref.Ref<CatalogMode>) =>
-  app.pipe(
-    Layer.provide(
-      Layer.mergeAll(
-        nextLayer(repoRoot),
-        NodeHttpServer.layerHttpServices,
-        catalogs(mode),
-        Layer.succeed(UiEventLogger, noopUiEventLogger),
-      ),
+  appWith(
+    Layer.mergeAll(
+      nextLayer(repoRoot),
+      catalogs(mode),
+      Layer.succeed(UiEventLogger, noopUiEventLogger),
     ),
   );
 

@@ -1,3 +1,4 @@
+import { NodeHttpServer } from "@effect/platform-node";
 import { Effect, Layer } from "effect";
 import { HttpRouter } from "effect/http";
 import { layer as UiEventApiLayer } from "../src/api/UiEventApi.layer";
@@ -7,7 +8,8 @@ import {
   PeopleCatalog,
   StarWarsCatalog,
 } from "../src/services/PeopleCatalog";
-import { nextCatchAll } from "../src/server/Next";
+import { nextCatchAll, type Next } from "../src/server/Next";
+import type { UiEventLogger } from "../src/server/UiEventLogger";
 
 const starWarsCatalog: Layer.Layer<
   PeopleCatalog,
@@ -37,7 +39,7 @@ const universeRoutes = (
     Layer.mergeAll(nextCatchAll(path), nextCatchAll(`${path}/*`)),
   );
 
-export const app = HttpRouter.serve(
+const app = HttpRouter.serve(
   Layer.mergeAll(
     UiEventApiLayer,
     universeRoutes("/star-wars", starWarsCatalog),
@@ -46,3 +48,16 @@ export const app = HttpRouter.serve(
   ),
   { disableLogger: true, disableListenLog: true },
 );
+
+export type AppServices =
+  | Next
+  | StarWarsCatalog
+  | GhibliCatalog
+  | UiEventLogger;
+
+export const appWith = <E>(services: Layer.Layer<AppServices, E>) =>
+  app.pipe(
+    Layer.provide(
+      Layer.mergeAll(services, NodeHttpServer.layerHttpServices),
+    ),
+  );

@@ -1,5 +1,4 @@
 import { it } from "@effect/vitest";
-import { NodeHttpServer } from "@effect/platform-node";
 import { Context, Effect, Layer, Option } from "effect";
 import {
   FetchHttpClient,
@@ -8,7 +7,7 @@ import {
   HttpServerResponse,
 } from "effect/http";
 import { describe, expect } from "vitest";
-import { app } from "../../boot/app";
+import { appWith } from "../../boot/app";
 import { serve } from "../../boot/serve";
 import { makeCharacterId } from "../domain/FilmUniverse.fixture";
 import { PersonSummary } from "../domain/FilmUniverse.model";
@@ -49,12 +48,13 @@ const fakeNext = Layer.succeed(
   }),
 );
 
-const appWithFakes = app.pipe(
-  Layer.provide(fakeNext),
-  Layer.provide(Layer.succeed(StarWarsCatalog, catalogServing("Luke"))),
-  Layer.provide(Layer.succeed(GhibliCatalog, catalogServing("Haku"))),
-  Layer.provide(Layer.succeed(UiEventLogger, noopUiEventLogger)),
-  Layer.provide(NodeHttpServer.layerHttpServices),
+const appWithFakes = appWith(
+  Layer.mergeAll(
+    fakeNext,
+    Layer.succeed(StarWarsCatalog, catalogServing("Luke")),
+    Layer.succeed(GhibliCatalog, catalogServing("Haku")),
+    Layer.succeed(UiEventLogger, noopUiEventLogger),
+  ),
 );
 
 const body = (url: string) =>
