@@ -1,4 +1,6 @@
-import { Schema } from "effect";
+import { Match, Schema } from "effect";
+import { Universes, type Universe } from "../domain/FilmUniverse.model";
+import type { I18n } from "../i18n/I18n.service";
 
 export const HomeHeroImageViewModel = Schema.TaggedStruct(
   "HomeHeroImageViewModel",
@@ -35,6 +37,38 @@ export const HomeHeroViewModel = Schema.TaggedStruct("HomeHeroViewModel", {
   image: HomeHeroImageViewModel,
 });
 export type HomeHeroViewModel = typeof HomeHeroViewModel.Type;
+
+const copyFor = (i18n: I18n, universe: Universe) =>
+  Match.value(universe).pipe(
+    Match.when(Universes.StarWars, () => ({
+      kicker: i18n._({ id: "shell.starWars" }),
+      title: i18n._({ id: "home.starWars.title" }),
+      subtitle: i18n._({ id: "home.starWars.subtitle" }),
+    })),
+    Match.when(Universes.Ghibli, () => ({
+      kicker: i18n._({ id: "shell.ghibli" }),
+      title: i18n._({ id: "home.ghibli.title" }),
+      subtitle: i18n._({ id: "home.ghibli.subtitle" }),
+    })),
+    Match.exhaustive,
+  );
+
+const splashImageFor = Match.type<Universe>().pipe(
+  Match.when(Universes.StarWars, () => starWarsSplashImage),
+  Match.when(Universes.Ghibli, () => ghibliSplashImage),
+  Match.exhaustive,
+);
+
+export const makeHomeHeroViewModel = (
+  i18n: I18n,
+  universe: Universe,
+): HomeHeroViewModel =>
+  HomeHeroViewModel.make({
+    ...copyFor(i18n, universe),
+    funnelLabel: i18n._({ id: "home.hero.funnel" }),
+    funnelHref: `/${universe}/funnel`,
+    image: splashImageFor(universe),
+  });
 
 export type HomeHeroProps = {
   readonly hero: HomeHeroViewModel;
