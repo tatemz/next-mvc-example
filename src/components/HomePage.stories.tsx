@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import {
+  ghibli,
+  ghibliPilot,
   homeFailed,
-  homeFailedGhibli,
   homeLoaded,
-  homeLoadedGhibli,
   homeLoadedWithError,
-  homeLoadedWithSpecies,
+  starWars,
+  starWarsHuman,
 } from "../../.storybook/pageFixtures";
 import { HomePage } from "./HomePage";
 
@@ -21,34 +22,50 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Loaded: Story = {
-  args: homeLoaded,
-};
-
-export const LoadedWithValidationError: Story = {
-  args: homeLoadedWithError,
-};
-
-export const LoadedPending: Story = {
-  args: { ...homeLoaded, isPending: true },
-};
-
-export const LoadedWithSpecies: Story = {
-  args: homeLoadedWithSpecies,
+export const LoadedStarWars: Story = {
+  args: homeLoaded(starWars),
 };
 
 export const LoadedGhibli: Story = {
-  args: homeLoadedGhibli,
+  args: homeLoaded(ghibli),
 };
 
-export const Failed: Story = {
-  args: homeFailed,
+export const LoadedStarWarsWithValidationError: Story = {
+  args: homeLoadedWithError(starWars),
 };
 
-export const FailedPending: Story = {
-  args: { ...homeFailed, isPending: true },
+export const LoadedGhibliWithValidationError: Story = {
+  args: homeLoadedWithError(ghibli),
+};
+
+export const LoadedStarWarsPending: Story = {
+  args: { ...homeLoaded(starWars), isPending: true },
+};
+
+export const LoadedGhibliPending: Story = {
+  args: { ...homeLoaded(ghibli), isPending: true },
+};
+
+export const LoadedStarWarsWithSpecies: Story = {
+  args: homeLoaded(starWarsHuman),
+};
+
+export const LoadedGhibliWithSpecies: Story = {
+  args: homeLoaded(ghibliPilot),
+};
+
+export const FailedStarWars: Story = {
+  args: homeFailed(starWars, "abc"),
 };
 
 export const FailedGhibli: Story = {
-  args: homeFailedGhibli,
+  args: homeFailed(ghibli, "999"),
+};
+
+export const FailedStarWarsPending: Story = {
+  args: { ...homeFailed(starWars, "abc"), isPending: true },
+};
+
+export const FailedGhibliPending: Story = {
+  args: { ...homeFailed(ghibli, "999"), isPending: true },
 };

@@ -141,7 +141,7 @@ and step timeout.
 
 ## Integration tests
 
-Six features and 17 scenarios cover both universes:
+Six features and 18 scenarios cover both universes:
 
 - Star Wars home: configured character, another character, invalid id, unknown id.
 - Ghibli home: configured character, unknown id.
@@ -149,7 +149,8 @@ Six features and 17 scenarios cover both universes:
 - Star Wars funnel: review, open dossier, no search matches.
 - Star Wars results: complete dossier, missing transport, unknown transport,
   explicit no transport.
-- Ghibli funnel: Haku dossier without transport, no search matches.
+- Ghibli funnel: Haku dossier without transport, a Colonel Muska vehicle dossier,
+  no search matches.
 
 Each scenario starts its own `next start -p 0`, so the OS assigns a free port,
 and closes the server and browser when it ends. The steps are declared inline in

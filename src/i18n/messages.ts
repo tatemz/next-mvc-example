@@ -50,7 +50,7 @@ const funnelMessages = {
   "funnel.search.heading": "Find a character",
   "funnel.search.subtitle": "Search the character API by name.",
   "funnel.search.label": "Character name",
-  "funnel.search.placeholder": "Luke",
+  "funnel.search.placeholder": "Search by name",
   "funnel.search.submit": "Search",
   "funnel.search.required": "Enter a character name.",
   "funnel.search.noResults": "No characters matched that name.",
@@ -82,7 +82,7 @@ const funnelMessages = {
 const resultsMessages = {
   "results.ready.heading": "Your dossier",
   "results.ready.subtitle":
-    "The choices from your funnel, loaded fresh from SWAPI.",
+    "The choices from your funnel, loaded from the character API.",
   "results.ready.filmLabel": "Film",
   "results.ready.transportLabel": "Transport",
   "results.ready.noneTransport": "No transport selected",

@@ -1,6 +1,7 @@
 import { Array, Option } from "effect";
 import {
   makeAppShellViewModel,
+  type AppShellViewModel,
   type ExperienceTheme,
 } from "../src/components/AppShell";
 import {
@@ -13,6 +14,7 @@ import {
   PersonChoiceViewModel,
   type FunnelViewModel,
 } from "../src/components/Funnel";
+import type { FilmListItemViewModel } from "../src/components/FilmListItem";
 import {
   HomePageOptics,
   makeFailedHomePageModel,
@@ -21,6 +23,7 @@ import {
 import {
   makePersonViewModel,
   type PersonViewModel,
+  type TransportViewModel,
 } from "../src/components/PersonCard";
 import {
   makeResultsMissingViewModel,
@@ -34,11 +37,6 @@ import { makeEn } from "../src/i18n/I18n.service";
 
 const i18n = makeEn();
 
-const shellFor = (theme: ExperienceTheme) =>
-  makeAppShellViewModel(i18n, theme);
-
-const nightShell = shellFor("night");
-const autumnShell = shellFor("autumn");
 
 const haku: Person = {
   _tag: "Person",
@@ -72,6 +70,46 @@ const haku: Person = {
   transports: [],
 };
 
+const porco: Person = {
+  _tag: "Person",
+  id: makeCharacterId("1"),
+  name: "Porco Rosso",
+  height: "unknown",
+  mass: "unknown",
+  birthYear: "unknown",
+  gender: "male",
+  origin: {
+    _tag: "Origin",
+    name: "Ghibli",
+    climate: "unknown",
+    terrain: "unknown",
+  },
+  species: {
+    _tag: "Species",
+    name: "Human",
+    classification: "unknown",
+    language: "unknown",
+  },
+  films: [
+    {
+      _tag: "Film",
+      title: "Porco Rosso",
+      order: 1,
+      imageUrl:
+        "https://image.tmdb.org/t/p/w600_and_h900_bestv2/byKAndF6KQSDpGxp1mTr23jPbYp.jpg",
+    },
+  ],
+  transports: [
+    {
+      _tag: "Transport",
+      key: "red-wing",
+      kind: "Vehicle",
+      name: "Red Wing",
+      model: "Airplane",
+    },
+  ],
+};
+
 const humanLuke: Person = {
   ...luke,
   species: {
@@ -82,201 +120,167 @@ const humanLuke: Person = {
   },
 };
 
-const starWarsPerson = makePersonViewModel(i18n, luke);
-const humanPerson = makePersonViewModel(i18n, humanLuke);
-const ghibliPerson = makePersonViewModel(i18n, haku);
+export type PageDataset = {
+  readonly shell: AppShellViewModel;
+  readonly person: Person;
+  readonly view: PersonViewModel;
+  readonly film: FilmListItemViewModel;
+  readonly transport: TransportViewModel | null;
+  readonly funnelHref: string;
+  readonly homeHref: string;
+  readonly query: string;
+};
 
-const firstFilm = (person: PersonViewModel) =>
-  Option.getOrThrow(Array.head(person.films));
+const datasetFor = (
+  person: Person,
+  theme: ExperienceTheme,
+  basePath: string,
+  query: string,
+): PageDataset => {
+  const view = makePersonViewModel(i18n, person);
+  const film = Option.getOrThrow(Array.head(view.films));
+  const transport = Option.getOrNull(Array.head(view.transports));
 
-const firstTransport = (person: PersonViewModel) =>
-  Option.getOrThrow(Array.head(person.transports));
+  return {
+    shell: makeAppShellViewModel(i18n, theme),
+    person,
+    view,
+    film,
+    transport,
+    funnelHref: `${basePath}/funnel`,
+    homeHref: basePath,
+    query,
+  };
+};
 
-const starWarsFilm = firstFilm(starWarsPerson);
-const ghibliFilm = firstFilm(ghibliPerson);
-const starWarsTransport = firstTransport(starWarsPerson);
-
-export const homeLoaded: HomePageViewModel = presentLoadedHomePage(
-  i18n,
-  luke,
-  "/star-wars/funnel",
-  nightShell,
+export const starWars = datasetFor(luke, "night", "/star-wars", "Luke");
+export const starWarsHuman = datasetFor(
+  humanLuke,
+  "night",
+  "/star-wars",
+  "Luke",
+);
+export const ghibli = datasetFor(haku, "autumn", "/ghibli", "Haku");
+export const ghibliPilot = datasetFor(
+  porco,
+  "autumn",
+  "/ghibli",
+  "Porco",
 );
 
-export const homeLoadedWithSpecies: HomePageViewModel =
+export const homeLoaded = (dataset: PageDataset): HomePageViewModel =>
   presentLoadedHomePage(
     i18n,
-    humanLuke,
-    "/star-wars/funnel",
-    nightShell,
+    dataset.person,
+    dataset.funnelHref,
+    dataset.shell,
   );
 
-export const homeLoadedGhibli: HomePageViewModel = presentLoadedHomePage(
-  i18n,
-  haku,
-  "/ghibli/funnel",
-  autumnShell,
-);
-
-export const homeLoadedWithError: HomePageViewModel =
+export const homeLoadedWithError = (
+  dataset: PageDataset,
+): HomePageViewModel =>
   HomePageOptics.FormError.set(
     i18n._({ id: "search.characterId.invalid" }),
-  )(homeLoaded);
+  )(homeLoaded(dataset));
 
-export const homeFailed: HomePageViewModel = HomePageOptics.FormValue.set(
-  "abc",
-)(
-  makeFailedHomePageModel(i18n, {
-    formValue: "",
-    funnelHref: "/star-wars/funnel",
-    shell: nightShell,
-  }),
-);
-
-export const homeFailedGhibli: HomePageViewModel =
-  HomePageOptics.FormValue.set("999")(
+export const homeFailed = (
+  dataset: PageDataset,
+  formValue: string,
+): HomePageViewModel =>
+  HomePageOptics.FormValue.set(formValue)(
     makeFailedHomePageModel(i18n, {
       formValue: "",
-      funnelHref: "/ghibli/funnel",
-      shell: autumnShell,
+      funnelHref: dataset.funnelHref,
+      shell: dataset.shell,
     }),
   );
 
-const choices = [
-  PersonChoiceViewModel.make({ id: "1", name: "Luke Skywalker" }),
-  PersonChoiceViewModel.make({ id: "2", name: "Leia Organa" }),
-] as const;
-
-export const funnelSearch: FunnelViewModel = makeFunnelSearchViewModel(
-  i18n,
-  nightShell,
-  "Luke",
-  undefined,
-);
-
-export const funnelSearchWithError: FunnelViewModel =
+export const funnelSearch = (dataset: PageDataset): FunnelViewModel =>
   makeFunnelSearchViewModel(
     i18n,
-    nightShell,
+    dataset.shell,
+    dataset.query,
+    undefined,
+  );
+
+export const funnelSearchWithError = (
+  dataset: PageDataset,
+): FunnelViewModel =>
+  makeFunnelSearchViewModel(
+    i18n,
+    dataset.shell,
     "",
     i18n._({ id: "funnel.search.required" }),
   );
 
-export const funnelChoose: FunnelViewModel = makeFunnelChooseViewModel(
-  i18n,
-  nightShell,
-  "Luke",
-  choices,
-);
+export const funnelChoose = (
+  dataset: PageDataset,
+  secondName: string,
+): FunnelViewModel =>
+  makeFunnelChooseViewModel(i18n, dataset.shell, dataset.query, [
+    PersonChoiceViewModel.make({
+      id: dataset.person.id,
+      name: dataset.person.name,
+    }),
+    PersonChoiceViewModel.make({ id: "2", name: secondName }),
+  ]);
 
-export const funnelFilm: FunnelViewModel = makeFunnelFilmViewModel(
-  i18n,
-  nightShell,
-  starWarsPerson,
-);
+export const funnelFilm = (dataset: PageDataset): FunnelViewModel =>
+  makeFunnelFilmViewModel(i18n, dataset.shell, dataset.view);
 
-export const funnelFilmGhibli: FunnelViewModel = makeFunnelFilmViewModel(
-  i18n,
-  autumnShell,
-  ghibliPerson,
-);
-
-export const funnelTransport: FunnelViewModel =
+export const funnelTransport = (dataset: PageDataset): FunnelViewModel =>
   makeFunnelTransportViewModel(
     i18n,
-    nightShell,
-    starWarsPerson,
-    starWarsFilm,
+    dataset.shell,
+    dataset.view,
+    dataset.film,
   );
 
-export const funnelTransportGhibli: FunnelViewModel =
-  makeFunnelTransportViewModel(
-    i18n,
-    autumnShell,
-    ghibliPerson,
-    ghibliFilm,
-  );
-
-export const funnelReview: FunnelViewModel = makeFunnelReviewViewModel(
-  i18n,
-  nightShell,
-  starWarsPerson,
-  starWarsFilm,
-  starWarsTransport,
-);
-
-export const funnelReviewWithSpecies: FunnelViewModel =
+export const funnelReview = (
+  dataset: PageDataset,
+  transport: TransportViewModel | null,
+): FunnelViewModel =>
   makeFunnelReviewViewModel(
     i18n,
-    nightShell,
-    humanPerson,
-    firstFilm(humanPerson),
-    firstTransport(humanPerson),
+    dataset.shell,
+    dataset.view,
+    dataset.film,
+    transport,
   );
 
-export const funnelReviewNoTransport: FunnelViewModel =
-  makeFunnelReviewViewModel(
-    i18n,
-    autumnShell,
-    ghibliPerson,
-    ghibliFilm,
-    null,
-  );
-
-export const funnelFailed: FunnelViewModel = makeFunnelFailedViewModel(
-  i18n,
-  nightShell,
-  i18n._({ id: "funnel.failed.message" }),
-);
-
-export const funnelFailedInvalidChoice: FunnelViewModel =
+export const funnelFailed = (dataset: PageDataset): FunnelViewModel =>
   makeFunnelFailedViewModel(
     i18n,
-    nightShell,
+    dataset.shell,
+    i18n._({ id: "funnel.failed.message" }),
+  );
+
+export const funnelFailedInvalidChoice = (
+  dataset: PageDataset,
+): FunnelViewModel =>
+  makeFunnelFailedViewModel(
+    i18n,
+    dataset.shell,
     i18n._({ id: "funnel.failed.invalidChoice" }),
   );
 
-export const resultsReady: ResultsViewModel = makeResultsReadyViewModel(
-  i18n,
-  nightShell,
-  starWarsPerson,
-  starWarsFilm,
-  starWarsTransport,
-  "/star-wars/funnel",
-  "/star-wars",
-);
-
-export const resultsReadyNoTransport: ResultsViewModel =
+export const resultsReady = (
+  dataset: PageDataset,
+  transport: TransportViewModel | null,
+): ResultsViewModel =>
   makeResultsReadyViewModel(
     i18n,
-    nightShell,
-    starWarsPerson,
-    starWarsFilm,
-    null,
-    "/star-wars/funnel",
-    "/star-wars",
+    dataset.shell,
+    dataset.view,
+    dataset.film,
+    transport,
+    dataset.funnelHref,
+    dataset.homeHref,
   );
 
-export const resultsReadyGhibli: ResultsViewModel =
-  makeResultsReadyViewModel(
-    i18n,
-    autumnShell,
-    ghibliPerson,
-    ghibliFilm,
-    null,
-    "/ghibli/funnel",
-    "/ghibli",
-  );
-
-export const resultsMissing: ResultsViewModel = makeResultsMissingViewModel(
-  i18n,
-  nightShell,
-  "/star-wars/funnel",
-);
-
-export const resultsMissingGhibli: ResultsViewModel =
+export const resultsMissing = (dataset: PageDataset): ResultsViewModel =>
   makeResultsMissingViewModel(
     i18n,
-    autumnShell,
-    "/ghibli/funnel",
+    dataset.shell,
+    dataset.funnelHref,
   );

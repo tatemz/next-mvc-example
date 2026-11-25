@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import {
+  ghibli,
+  ghibliPilot,
   resultsMissing,
-  resultsMissingGhibli,
   resultsReady,
-  resultsReadyGhibli,
-  resultsReadyNoTransport,
+  starWars,
 } from "../../.storybook/pageFixtures";
 import { Results } from "./Results";
 
@@ -16,22 +16,26 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Ready: Story = {
-  args: resultsReady,
-};
-
-export const ReadyWithoutTransport: Story = {
-  args: resultsReadyNoTransport,
+export const ReadyStarWars: Story = {
+  args: resultsReady(starWars, starWars.transport),
 };
 
 export const ReadyGhibli: Story = {
-  args: resultsReadyGhibli,
+  args: resultsReady(ghibliPilot, ghibliPilot.transport),
 };
 
-export const Missing: Story = {
-  args: resultsMissing,
+export const ReadyStarWarsWithoutTransport: Story = {
+  args: resultsReady(starWars, null),
+};
+
+export const ReadyGhibliWithoutTransport: Story = {
+  args: resultsReady(ghibli, null),
+};
+
+export const MissingStarWars: Story = {
+  args: resultsMissing(starWars),
 };
 
 export const MissingGhibli: Story = {
-  args: resultsMissingGhibli,
+  args: resultsMissing(ghibli),
 };
