@@ -1,7 +1,5 @@
-import { searchPerson } from "../../src/actions/SearchPerson.serverAction";
-import { makeHomePage } from "../../src/page-modules/HomePage/HomePage.factory";
-import { swapiRuntime } from "../../src/server/Runtime";
+import { StarWarsHome } from "../../src/page-modules/HomePage/StarWarsHome.page";
 
 export const dynamic = "force-dynamic";
 
-export default makeHomePage(swapiRuntime, searchPerson);
+export default StarWarsHome;

@@ -1,4 +1,4 @@
-import { Effect, Option, Schema } from "effect";
+import { Effect, Schema } from "effect";
 import {
   makeResultsMissingViewModel,
   makeResultsReadyViewModel,
@@ -8,34 +8,18 @@ import { CharacterId } from "../domain/FilmUniverse.model";
 import { I18n } from "../i18n/I18n.service";
 import { PeopleCatalog } from "../services/PeopleCatalog";
 
-export type ResultsSearchParams = Readonly<
-  Record<string, string | ReadonlyArray<string> | undefined>
->;
-
-const first = (value: string | ReadonlyArray<string> | undefined) =>
-  typeof value === "string" ? value : value?.[0];
-
-const ResultsParams = Schema.Struct({
+export const ResultsParams = Schema.Struct({
   character: CharacterId,
   film: Schema.NumberFromString.check(Schema.isInt()),
-  transport: Schema.String,
+  transport: Schema.optional(Schema.String),
 });
+export type ResultsParams = typeof ResultsParams.Type;
 
-export const loadResults = (params: ResultsSearchParams) =>
+export const loadResults = (params: ResultsParams) =>
   Effect.gen(function*() {
     const i18n = yield* I18n;
-    const decoded = Schema.decodeUnknownOption(ResultsParams)({
-      character: first(params.character) ?? "",
-      film: first(params.film) ?? "",
-      transport: first(params.transport) ?? "none",
-    });
-
-    if (Option.isNone(decoded)) {
-      return makeResultsMissingViewModel(i18n);
-    }
-
     const client = yield* PeopleCatalog;
-    const person = yield* client.getPerson(decoded.value.character).pipe(
+    const person = yield* client.getPerson(params.character).pipe(
       Effect.match({
         onFailure: () => undefined,
         onSuccess: (loaded) => loaded,
@@ -48,21 +32,22 @@ export const loadResults = (params: ResultsSearchParams) =>
 
     const personViewModel = makePersonViewModel(i18n, person);
     const film = personViewModel.films.find(
-      (candidate) => candidate.order === decoded.value.film,
+      (candidate) => candidate.order === params.film,
     );
 
     if (film === undefined) {
       return makeResultsMissingViewModel(i18n);
     }
 
+    const transportKey = params.transport ?? "none";
     const transport =
-      decoded.value.transport === "none"
+      transportKey === "none"
         ? null
         : personViewModel.transports.find(
-            (candidate) => candidate.key === decoded.value.transport,
+            (candidate) => candidate.key === transportKey,
           ) ?? null;
 
-    if (decoded.value.transport !== "none" && transport === null) {
+    if (transportKey !== "none" && transport === null) {
       return makeResultsMissingViewModel(i18n);
     }
 

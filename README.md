@@ -33,6 +33,11 @@ action injected at the route change.
 - `FilmUniverse.model.ts` uses universe-neutral terms: `Person`, `Film` with an
   `order`, `Origin`, `Species`, `Transport`. A film is a film in either
   universe; its order is an episode number or a list position.
+- `makeNextPage` is the Next boundary adapter. It awaits `searchParams`, takes
+  the first value of repeated query keys, and decodes the result with a schema.
+  The page module receives `Option<Params>`; an invalid query renders its
+  `Missing` state, while the controller receives already-typed params. Route
+  files only re-export page modules.
 - `FunnelViewModel` is a `Schema.TaggedUnion` of `Search`, `Choose`, `Film`,
   `Transport`, `Review`, and `Failed`. `Funnel.controller.ts` advances it with an
   exhaustive Effect `Match` over the current step. Its controller also depends
@@ -57,13 +62,16 @@ boundaries.
 
 ```text
 app/page.tsx                                 redirects / to /star-wars
-app/star-wars/page.tsx                       SWAPI runtime + action -> makeHomePage
-app/ghibli/page.tsx                          Ghibli runtime + action -> makeHomePage
-app/funnel/page.tsx                          funnel route (SWAPI runtime)
-app/results/page.tsx                         results route; awaits searchParams
-src/page-modules/HomePage/HomePage.factory.tsx  runtime + action -> page component
+app/star-wars/page.tsx                       re-exports StarWarsHome.page
+app/ghibli/page.tsx                          re-exports GhibliHome.page
+app/funnel/page.tsx                          re-exports Funnel.page
+app/results/page.tsx                         re-exports Results.page
+src/page-modules/HomePage/StarWarsHome.page.tsx  SWAPI runtime + action -> makeHomePage
+src/page-modules/HomePage/GhibliHome.page.tsx    Ghibli runtime + action -> makeHomePage
+src/page-modules/HomePage/HomePage.factory.tsx   runtime + action -> page component
 src/page-modules/Funnel/Funnel.page.tsx      start the funnel, render it
-src/page-modules/Results/Results.page.tsx    load the dossier, render it
+src/page-modules/Results/Results.page.tsx    schema + runtime -> Results; invalid -> Missing
+src/platform/NextPage.ts                     Next searchParams -> typed page params
 src/components/HomePage/                     HomePage.tsx, HomePage.connected.tsx
 src/components/Funnel/                       Funnel.tsx, Funnel.connected.tsx
 src/components/Results/                      Results.tsx
