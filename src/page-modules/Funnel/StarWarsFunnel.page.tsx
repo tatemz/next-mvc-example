@@ -1,6 +1,6 @@
 import { Effect } from "effect";
-import { submitFunnel } from "../../actions/Funnel.serverAction";
-import { ConnectedFunnel } from "../../components/Funnel.connected";
+import { submitStarWarsFunnel } from "../../actions/StarWarsFunnel.serverAction";
+import { ConnectedFunnelView } from "../../components/FunnelView.connected";
 import { startFunnel } from "../../controllers/Funnel.controller";
 import { makeNextPage } from "../../platform/NextPage";
 import { swapiRuntime } from "../../server/Runtime";
@@ -8,9 +8,9 @@ import { swapiRuntime } from "../../server/Runtime";
 export const StarWarsFunnelPage = makeNextPage(
   swapiRuntime,
   Effect.map(startFunnel("night"), (model) => (
-    <ConnectedFunnel
+    <ConnectedFunnelView
       model={model}
-      submitAction={submitFunnel}
+      submitAction={submitStarWarsFunnel}
       universe="star-wars"
     />
   )),

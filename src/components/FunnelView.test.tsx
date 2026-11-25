@@ -6,7 +6,7 @@ import { makeEn } from "../i18n/I18n.service";
 import { makePersonViewModel } from "./PersonCard";
 import { makeAppShellViewModel } from "./AppShell";
 import {
-  Funnel,
+  FunnelView,
   type FunnelViewModel,
   makeFunnelChooseViewModel,
   makeFunnelFailedViewModel,
@@ -15,8 +15,8 @@ import {
   makeFunnelSearchViewModel,
   makeFunnelTransportViewModel,
   PersonChoiceViewModel,
-} from "./Funnel";
-import { ConnectedFunnel } from "./Funnel.connected";
+} from "./FunnelView";
+import { ConnectedFunnelView } from "./FunnelView.connected";
 import { UiEventProvider } from "../ui-events/UiEventContext";
 
 const i18n = makeEn();
@@ -38,8 +38,8 @@ const choice = PersonChoiceViewModel.make({
 
 const render = (model: FunnelViewModel, isPending = false) =>
   renderToStaticMarkup(
-    <Funnel
-      {...model}
+    <FunnelView
+      model={model}
       dispatch={() => {}}
       isPending={isPending}
       onCtaClick={() => {}}
@@ -225,7 +225,7 @@ describe("Funnel", () => {
   it("renders the connected funnel with its initial model", () => {
     const html = renderToStaticMarkup(
       <UiEventProvider handler={() => {}}>
-        <ConnectedFunnel
+        <ConnectedFunnelView
           model={makeFunnelSearchViewModel(i18n, shell, "", undefined)}
           submitAction={async (previous) => previous}
           universe="ghibli"

@@ -6,118 +6,81 @@ export type Universe = typeof Universe.Type;
 export const Page = Schema.Literals(["home", "funnel", "results"]);
 export type Page = typeof Page.Type;
 
-export const TransportChosen = Schema.TaggedStruct("TransportChosen", {
-  key: Schema.NonEmptyString,
+export const TransportChoice = Schema.TaggedUnion({
+  TransportChosen: {
+    key: Schema.NonEmptyString,
+  },
+  NoTransport: {},
 });
-export type TransportChosen = typeof TransportChosen.Type;
-
-export const NoTransport = Schema.TaggedStruct("NoTransport", {});
-export type NoTransport = typeof NoTransport.Type;
-
-export const TransportChoice = Schema.Union([
-  TransportChosen,
-  NoTransport,
-]);
 export type TransportChoice = typeof TransportChoice.Type;
 
 export const makeTransportChoice = (
   transport: { readonly key: string } | null,
 ): TransportChoice =>
   transport === null
-    ? NoTransport.make({})
-    : TransportChosen.make({ key: transport.key });
+    ? TransportChoice.cases.NoTransport.make({})
+    : TransportChoice.cases.TransportChosen.make({
+      key: transport.key,
+    });
 
-export const HomeContext = Schema.TaggedStruct("Home", {
-  universe: Universe,
-});
-export type HomeContext = typeof HomeContext.Type;
-
-export const FunnelSearchContext = Schema.TaggedStruct("FunnelSearch", {
-  universe: Universe,
-});
-export type FunnelSearchContext = typeof FunnelSearchContext.Type;
-
-export const FunnelChooseContext = Schema.TaggedStruct("FunnelChoose", {
-  universe: Universe,
-  query: Schema.NonEmptyString,
-});
-export type FunnelChooseContext = typeof FunnelChooseContext.Type;
-
-export const FunnelFilmContext = Schema.TaggedStruct("FunnelFilm", {
-  universe: Universe,
-  characterId: Schema.NonEmptyString,
-});
-export type FunnelFilmContext = typeof FunnelFilmContext.Type;
-
-export const FunnelTransportContext = Schema.TaggedStruct(
-  "FunnelTransport",
-  {
+export const PageContext = Schema.TaggedUnion({
+  Home: {
+    universe: Universe,
+  },
+  FunnelSearch: {
+    universe: Universe,
+  },
+  FunnelChoose: {
+    universe: Universe,
+    query: Schema.NonEmptyString,
+  },
+  FunnelFilm: {
+    universe: Universe,
+    characterId: Schema.NonEmptyString,
+  },
+  FunnelTransport: {
     universe: Universe,
     characterId: Schema.NonEmptyString,
     filmOrder: Schema.Int,
   },
-);
-export type FunnelTransportContext =
-  typeof FunnelTransportContext.Type;
-
-export const FunnelReviewContext = Schema.TaggedStruct("FunnelReview", {
-  universe: Universe,
-  characterId: Schema.NonEmptyString,
-  filmOrder: Schema.Int,
-  transport: TransportChoice,
-});
-export type FunnelReviewContext = typeof FunnelReviewContext.Type;
-
-export const FunnelFailedContext = Schema.TaggedStruct("FunnelFailed", {
-  universe: Universe,
-});
-export type FunnelFailedContext = typeof FunnelFailedContext.Type;
-
-export const ResultsMissingContext = Schema.TaggedStruct(
-  "ResultsMissing",
-  {
+  FunnelReview: {
+    universe: Universe,
+    characterId: Schema.NonEmptyString,
+    filmOrder: Schema.Int,
+    transport: TransportChoice,
+  },
+  FunnelFailed: {
     universe: Universe,
   },
-);
-export type ResultsMissingContext =
-  typeof ResultsMissingContext.Type;
-
-export const ResultsReadyContext = Schema.TaggedStruct("ResultsReady", {
-  universe: Universe,
-  characterId: Schema.NonEmptyString,
-  filmOrder: Schema.Int,
-  transport: TransportChoice,
+  ResultsMissing: {
+    universe: Universe,
+  },
+  ResultsReady: {
+    universe: Universe,
+    characterId: Schema.NonEmptyString,
+    filmOrder: Schema.Int,
+    transport: TransportChoice,
+  },
 });
-export type ResultsReadyContext = typeof ResultsReadyContext.Type;
-
-export const FunnelContext = Schema.Union([
-  FunnelSearchContext,
-  FunnelChooseContext,
-  FunnelFilmContext,
-  FunnelTransportContext,
-  FunnelReviewContext,
-  FunnelFailedContext,
-]);
-export type FunnelContext = typeof FunnelContext.Type;
-
-export const ResultsContext = Schema.Union([
-  ResultsMissingContext,
-  ResultsReadyContext,
-]);
-export type ResultsContext = typeof ResultsContext.Type;
-
-export const PageContext = Schema.Union([
-  HomeContext,
-  FunnelSearchContext,
-  FunnelChooseContext,
-  FunnelFilmContext,
-  FunnelTransportContext,
-  FunnelReviewContext,
-  FunnelFailedContext,
-  ResultsMissingContext,
-  ResultsReadyContext,
-]);
 export type PageContext = typeof PageContext.Type;
+
+export type FunnelContext = Extract<
+  PageContext,
+  {
+    _tag:
+      | "FunnelSearch"
+      | "FunnelChoose"
+      | "FunnelFilm"
+      | "FunnelTransport"
+      | "FunnelReview"
+      | "FunnelFailed";
+  }
+>;
+
+export type ResultsContext = Extract<
+  PageContext,
+  { _tag: "ResultsMissing" | "ResultsReady" }
+>;
 
 export const PageLoaded = Schema.TaggedStruct("PageLoaded", {
   context: PageContext,
@@ -140,99 +103,44 @@ export const ResultsCta = Schema.Literals([
 ]);
 export type ResultsCta = typeof ResultsCta.Type;
 
-export const HomeCtaClicked = Schema.TaggedStruct("CtaClicked", {
-  context: HomeContext,
-  cta: Schema.Literal("build_dossier"),
-});
-export type HomeCtaClicked = typeof HomeCtaClicked.Type;
-
-export const FunnelSearchCtaClicked = Schema.TaggedStruct(
-  "CtaClicked",
-  {
-    context: FunnelSearchContext,
+export const CtaClicked = Schema.TaggedUnion({
+  HomeCtaClicked: {
+    context: PageContext.cases.Home,
+    cta: Schema.Literal("build_dossier"),
+  },
+  FunnelSearchCtaClicked: {
+    context: PageContext.cases.FunnelSearch,
     cta: Schema.Literal("search"),
   },
-);
-export type FunnelSearchCtaClicked =
-  typeof FunnelSearchCtaClicked.Type;
-
-export const FunnelChooseCtaClicked = Schema.TaggedStruct(
-  "CtaClicked",
-  {
-    context: FunnelChooseContext,
+  FunnelChooseCtaClicked: {
+    context: PageContext.cases.FunnelChoose,
     cta: Schema.Literal("choose_character"),
   },
-);
-export type FunnelChooseCtaClicked =
-  typeof FunnelChooseCtaClicked.Type;
-
-export const FunnelFilmCtaClicked = Schema.TaggedStruct("CtaClicked", {
-  context: FunnelFilmContext,
-  cta: Schema.Literal("next_transport"),
-});
-export type FunnelFilmCtaClicked = typeof FunnelFilmCtaClicked.Type;
-
-export const FunnelTransportCtaClicked = Schema.TaggedStruct(
-  "CtaClicked",
-  {
-    context: FunnelTransportContext,
+  FunnelFilmCtaClicked: {
+    context: PageContext.cases.FunnelFilm,
+    cta: Schema.Literal("next_transport"),
+  },
+  FunnelTransportCtaClicked: {
+    context: PageContext.cases.FunnelTransport,
     cta: Schema.Literal("review_dossier"),
   },
-);
-export type FunnelTransportCtaClicked =
-  typeof FunnelTransportCtaClicked.Type;
-
-export const FunnelReviewCtaClicked = Schema.TaggedStruct(
-  "CtaClicked",
-  {
-    context: FunnelReviewContext,
+  FunnelReviewCtaClicked: {
+    context: PageContext.cases.FunnelReview,
     cta: Schema.Literals(["open_dossier", "start_over"]),
   },
-);
-export type FunnelReviewCtaClicked =
-  typeof FunnelReviewCtaClicked.Type;
-
-export const FunnelFailedCtaClicked = Schema.TaggedStruct(
-  "CtaClicked",
-  {
-    context: FunnelFailedContext,
+  FunnelFailedCtaClicked: {
+    context: PageContext.cases.FunnelFailed,
     cta: Schema.Literal("start_over"),
   },
-);
-export type FunnelFailedCtaClicked =
-  typeof FunnelFailedCtaClicked.Type;
-
-export const ResultsMissingCtaClicked = Schema.TaggedStruct(
-  "CtaClicked",
-  {
-    context: ResultsMissingContext,
+  ResultsMissingCtaClicked: {
+    context: PageContext.cases.ResultsMissing,
     cta: Schema.Literal("build_another_dossier"),
   },
-);
-export type ResultsMissingCtaClicked =
-  typeof ResultsMissingCtaClicked.Type;
-
-export const ResultsReadyCtaClicked = Schema.TaggedStruct(
-  "CtaClicked",
-  {
-    context: ResultsReadyContext,
+  ResultsReadyCtaClicked: {
+    context: PageContext.cases.ResultsReady,
     cta: Schema.Literals(["build_another_dossier", "back_home"]),
   },
-);
-export type ResultsReadyCtaClicked =
-  typeof ResultsReadyCtaClicked.Type;
-
-export const CtaClicked = Schema.Union([
-  HomeCtaClicked,
-  FunnelSearchCtaClicked,
-  FunnelChooseCtaClicked,
-  FunnelFilmCtaClicked,
-  FunnelTransportCtaClicked,
-  FunnelReviewCtaClicked,
-  FunnelFailedCtaClicked,
-  ResultsMissingCtaClicked,
-  ResultsReadyCtaClicked,
-]);
+});
 export type CtaClicked = typeof CtaClicked.Type;
 
 export const FormValidationError = Schema.TaggedStruct(
@@ -255,16 +163,16 @@ export type InputFilled = typeof InputFilled.Type;
 
 export const UiEvent = Schema.Union([
   PageLoaded,
-  HomeCtaClicked,
-  FunnelSearchCtaClicked,
-  FunnelChooseCtaClicked,
-  FunnelFilmCtaClicked,
-  FunnelTransportCtaClicked,
-  FunnelReviewCtaClicked,
-  FunnelFailedCtaClicked,
-  ResultsMissingCtaClicked,
-  ResultsReadyCtaClicked,
+  CtaClicked.cases.HomeCtaClicked,
+  CtaClicked.cases.FunnelSearchCtaClicked,
+  CtaClicked.cases.FunnelChooseCtaClicked,
+  CtaClicked.cases.FunnelFilmCtaClicked,
+  CtaClicked.cases.FunnelTransportCtaClicked,
+  CtaClicked.cases.FunnelReviewCtaClicked,
+  CtaClicked.cases.FunnelFailedCtaClicked,
+  CtaClicked.cases.ResultsMissingCtaClicked,
+  CtaClicked.cases.ResultsReadyCtaClicked,
   FormValidationError,
   InputFilled,
-]);
+]).pipe(Schema.toTaggedUnion("_tag"));
 export type UiEvent = typeof UiEvent.Type;

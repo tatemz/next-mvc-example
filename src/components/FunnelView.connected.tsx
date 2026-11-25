@@ -1,38 +1,26 @@
 "use client";
 
-import { Match } from "effect";
 import { useEffect, useActionState } from "react";
 import {
-  FunnelChooseContext,
-  FunnelChooseCtaClicked,
-  FunnelFailedContext,
-  FunnelFailedCtaClicked,
-  FunnelFilmContext,
-  FunnelFilmCtaClicked,
-  FunnelReviewContext,
-  FunnelReviewCtaClicked,
-  FunnelSearchContext,
-  FunnelSearchCtaClicked,
-  FunnelTransportContext,
-  FunnelTransportCtaClicked,
+  CtaClicked,
   FormValidationError,
   InputFilled,
+  PageContext,
   PageLoaded,
   makeTransportChoice,
-  type CtaClicked,
   type FunnelContext,
   type FunnelCta,
   type Universe,
 } from "../ui-events/UiEvent";
 import { useUiEventDispatch } from "../ui-events/UiEventContext";
-import { Funnel, type FunnelViewModel } from "./Funnel";
+import { FunnelView, FunnelViewModel } from "./FunnelView";
 
 type FunnelAction = (
   previous: FunnelViewModel,
   formData: FormData,
 ) => Promise<FunnelViewModel>;
 
-export type ConnectedFunnelProps = {
+export type ConnectedFunnelViewProps = {
   readonly model: FunnelViewModel;
   readonly submitAction: FunnelAction;
   readonly universe: Universe;
@@ -42,29 +30,34 @@ const contextFor = (
   model: FunnelViewModel,
   universe: Universe,
 ): FunnelContext =>
-  Match.valueTags(model, {
-    Search: () => FunnelSearchContext.make({ universe }),
+  FunnelViewModel.match(model, {
+    Search: () =>
+      PageContext.cases.FunnelSearch.make({ universe }),
     Choose: (step) =>
-      FunnelChooseContext.make({ universe, query: step.query }),
+      PageContext.cases.FunnelChoose.make({
+        universe,
+        query: step.query,
+      }),
     Film: (step) =>
-      FunnelFilmContext.make({
+      PageContext.cases.FunnelFilm.make({
         universe,
         characterId: step.person.id,
       }),
     Transport: (step) =>
-      FunnelTransportContext.make({
+      PageContext.cases.FunnelTransport.make({
         universe,
         characterId: step.person.id,
         filmOrder: step.film.order,
       }),
     Review: (step) =>
-      FunnelReviewContext.make({
+      PageContext.cases.FunnelReview.make({
         universe,
         characterId: step.person.id,
         filmOrder: step.film.order,
         transport: makeTransportChoice(step.transport),
       }),
-    Failed: () => FunnelFailedContext.make({ universe }),
+    Failed: () =>
+      PageContext.cases.FunnelFailed.make({ universe }),
   });
 
 const ctaEventFor = (
@@ -72,31 +65,33 @@ const ctaEventFor = (
   universe: Universe,
   cta: FunnelCta,
 ): CtaClicked =>
-  Match.valueTags(model, {
+  FunnelViewModel.match(model, {
     Search: () =>
-      FunnelSearchCtaClicked.make({
-        context: FunnelSearchContext.make({ universe }),
+      CtaClicked.cases.FunnelSearchCtaClicked.make({
+        context: PageContext.cases.FunnelSearch.make({
+          universe,
+        }),
         cta: "search",
       }),
     Choose: (step) =>
-      FunnelChooseCtaClicked.make({
-        context: FunnelChooseContext.make({
+      CtaClicked.cases.FunnelChooseCtaClicked.make({
+        context: PageContext.cases.FunnelChoose.make({
           universe,
           query: step.query,
         }),
         cta: "choose_character",
       }),
     Film: (step) =>
-      FunnelFilmCtaClicked.make({
-        context: FunnelFilmContext.make({
+      CtaClicked.cases.FunnelFilmCtaClicked.make({
+        context: PageContext.cases.FunnelFilm.make({
           universe,
           characterId: step.person.id,
         }),
         cta: "next_transport",
       }),
     Transport: (step) =>
-      FunnelTransportCtaClicked.make({
-        context: FunnelTransportContext.make({
+      CtaClicked.cases.FunnelTransportCtaClicked.make({
+        context: PageContext.cases.FunnelTransport.make({
           universe,
           characterId: step.person.id,
           filmOrder: step.film.order,
@@ -104,8 +99,8 @@ const ctaEventFor = (
         cta: "review_dossier",
       }),
     Review: (step) =>
-      FunnelReviewCtaClicked.make({
-        context: FunnelReviewContext.make({
+      CtaClicked.cases.FunnelReviewCtaClicked.make({
+        context: PageContext.cases.FunnelReview.make({
           universe,
           characterId: step.person.id,
           filmOrder: step.film.order,
@@ -114,17 +109,19 @@ const ctaEventFor = (
         cta: cta === "start_over" ? "start_over" : "open_dossier",
       }),
     Failed: () =>
-      FunnelFailedCtaClicked.make({
-        context: FunnelFailedContext.make({ universe }),
+      CtaClicked.cases.FunnelFailedCtaClicked.make({
+        context: PageContext.cases.FunnelFailed.make({
+          universe,
+        }),
         cta: "start_over",
       }),
   });
 
-export const ConnectedFunnel = ({
+export const ConnectedFunnelView = ({
   model,
   submitAction,
   universe,
-}: ConnectedFunnelProps) => {
+}: ConnectedFunnelViewProps) => {
   const emit = useUiEventDispatch();
   const [state, dispatch, isPending] = useActionState(submitAction, model);
 
@@ -162,8 +159,8 @@ export const ConnectedFunnel = ({
     );
 
   return (
-    <Funnel
-      {...state}
+    <FunnelView
+      model={state}
       dispatch={dispatch}
       isPending={isPending}
       onCtaClick={onCtaClick}

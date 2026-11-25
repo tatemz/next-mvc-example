@@ -2,35 +2,44 @@
 
 import { useEffect } from "react";
 import {
-  HomeContext,
-  HomeCtaClicked,
+  CtaClicked,
+  PageContext,
   PageLoaded,
+  type Universe,
 } from "../ui-events/UiEvent";
 import { useUiEventDispatch } from "../ui-events/UiEventContext";
 import { HomePage, type HomePageViewModel } from "./HomePage";
 
 export type ConnectedHomePageProps = {
   readonly model: HomePageViewModel;
+  readonly universe: Universe;
 };
 
-export const ConnectedHomePage = ({ model }: ConnectedHomePageProps) => {
+export const ConnectedHomePage = ({
+  model,
+  universe,
+}: ConnectedHomePageProps) => {
   const emit = useUiEventDispatch();
 
   useEffect(() => {
     emit(
       PageLoaded.make({
-        context: HomeContext.make({ universe: model.universe }),
+        context: PageContext.cases.Home.make({
+          universe,
+        }),
       }),
     );
-  }, [emit, model.universe]);
+  }, [emit, universe]);
 
   const onCtaClick = () =>
     emit(
-      HomeCtaClicked.make({
-        context: HomeContext.make({ universe: model.universe }),
+      CtaClicked.cases.HomeCtaClicked.make({
+        context: PageContext.cases.Home.make({
+          universe,
+        }),
         cta: "build_dossier",
       }),
     );
 
-  return <HomePage {...model} onCtaClick={onCtaClick} />;
+  return <HomePage model={model} onCtaClick={onCtaClick} />;
 };

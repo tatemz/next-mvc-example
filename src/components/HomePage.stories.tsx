@@ -18,9 +18,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const SplashStarWars: Story = {
-  args: homeSplash(starWars),
+  args: { model: homeSplash(starWars) },
 };
 
 export const SplashGhibli: Story = {
-  args: homeSplash(ghibli),
+  args: { model: homeSplash(ghibli) },
 };

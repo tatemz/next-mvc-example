@@ -19,7 +19,7 @@ vi.mock("../../server/Runtime", async () => {
   return { ghibliRuntime: runtime };
 });
 
-import { ConnectedFunnel } from "../../components/Funnel.connected";
+import { ConnectedFunnelView } from "../../components/FunnelView.connected";
 import { GhibliFunnelPage } from "./GhibliFunnel.page";
 
 describe("Ghibli funnel page", () => {
@@ -35,7 +35,7 @@ describe("Ghibli funnel page", () => {
       ) {
         throw new Error("expected an element");
       }
-      expect(element.type).toBe(ConnectedFunnel);
+      expect(element.type).toBe(ConnectedFunnelView);
       expect(element.props.model).toMatchObject({
         _tag: "Search",
         shell: { theme: "autumn" },

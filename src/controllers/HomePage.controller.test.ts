@@ -34,7 +34,6 @@ describe("loadHomePage", () => {
 
       expect(model).toMatchObject({
         _tag: "HomePageViewModel",
-        universe: "star-wars",
         shell: { theme: "night" },
         hero: {
           kicker: "Star Wars",
@@ -52,7 +51,6 @@ describe("loadHomePage", () => {
 
       expect(model).toMatchObject({
         _tag: "HomePageViewModel",
-        universe: "ghibli",
         shell: { theme: "autumn" },
         hero: {
           kicker: "Ghibli",

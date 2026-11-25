@@ -1,4 +1,4 @@
-import { Match, Option, Schema } from "effect";
+import { Option, Schema } from "effect";
 import type { ReactNode } from "react";
 import type { I18n } from "../i18n/I18n.service";
 import type { FunnelCta } from "../ui-events/UiEvent";
@@ -25,76 +25,65 @@ const StepCopy = {
   subtitle: Schema.NonEmptyString,
 };
 
-const FunnelSearchViewModel = Schema.TaggedStruct("Search", {
-  ...StepCopy,
-  query: Schema.String,
-  label: Schema.NonEmptyString,
-  placeholder: Schema.NonEmptyString,
-  submitLabel: Schema.NonEmptyString,
-  pendingLabel: Schema.NonEmptyString,
-  error: Schema.optional(Schema.String),
+export const FunnelViewModel = Schema.TaggedUnion({
+  Search: {
+    ...StepCopy,
+    query: Schema.String,
+    label: Schema.NonEmptyString,
+    placeholder: Schema.NonEmptyString,
+    submitLabel: Schema.NonEmptyString,
+    pendingLabel: Schema.NonEmptyString,
+    error: Schema.optional(Schema.String),
+  },
+  Choose: {
+    ...StepCopy,
+    query: Schema.NonEmptyString,
+    results: Schema.NonEmptyArray(PersonChoiceViewModel),
+    submitLabel: Schema.NonEmptyString,
+    pendingLabel: Schema.NonEmptyString,
+  },
+  Film: {
+    ...StepCopy,
+    person: PersonViewModel,
+    submitLabel: Schema.NonEmptyString,
+    pendingLabel: Schema.NonEmptyString,
+  },
+  Transport: {
+    ...StepCopy,
+    person: PersonViewModel,
+    film: FilmListItemViewModel,
+    submitLabel: Schema.NonEmptyString,
+    pendingLabel: Schema.NonEmptyString,
+    noneLabel: Schema.NonEmptyString,
+  },
+  Review: {
+    ...StepCopy,
+    person: PersonViewModel,
+    film: FilmListItemViewModel,
+    transport: Schema.NullOr(TransportViewModel),
+    filmLabel: Schema.NonEmptyString,
+    transportLabel: Schema.NonEmptyString,
+    noneLabel: Schema.NonEmptyString,
+    openLabel: Schema.NonEmptyString,
+    startOverLabel: Schema.NonEmptyString,
+    startOverHref: Schema.NonEmptyString,
+    resultsHref: Schema.NonEmptyString,
+  },
+  Failed: {
+    ...StepCopy,
+    message: Schema.NonEmptyString,
+    startOverLabel: Schema.NonEmptyString,
+    startOverHref: Schema.NonEmptyString,
+  },
 });
-type FunnelSearchViewModel = typeof FunnelSearchViewModel.Type;
-
-const FunnelChooseViewModel = Schema.TaggedStruct("Choose", {
-  ...StepCopy,
-  query: Schema.NonEmptyString,
-  results: Schema.NonEmptyArray(PersonChoiceViewModel),
-  submitLabel: Schema.NonEmptyString,
-  pendingLabel: Schema.NonEmptyString,
-});
-type FunnelChooseViewModel = typeof FunnelChooseViewModel.Type;
-
-const FunnelFilmViewModel = Schema.TaggedStruct("Film", {
-  ...StepCopy,
-  person: PersonViewModel,
-  submitLabel: Schema.NonEmptyString,
-  pendingLabel: Schema.NonEmptyString,
-});
-type FunnelFilmViewModel = typeof FunnelFilmViewModel.Type;
-
-const FunnelTransportViewModel = Schema.TaggedStruct("Transport", {
-  ...StepCopy,
-  person: PersonViewModel,
-  film: FilmListItemViewModel,
-  submitLabel: Schema.NonEmptyString,
-  pendingLabel: Schema.NonEmptyString,
-  noneLabel: Schema.NonEmptyString,
-});
-type FunnelTransportViewModel = typeof FunnelTransportViewModel.Type;
-
-const FunnelReviewViewModel = Schema.TaggedStruct("Review", {
-  ...StepCopy,
-  person: PersonViewModel,
-  film: FilmListItemViewModel,
-  transport: Schema.NullOr(TransportViewModel),
-  filmLabel: Schema.NonEmptyString,
-  transportLabel: Schema.NonEmptyString,
-  noneLabel: Schema.NonEmptyString,
-  openLabel: Schema.NonEmptyString,
-  startOverLabel: Schema.NonEmptyString,
-  startOverHref: Schema.NonEmptyString,
-  resultsHref: Schema.NonEmptyString,
-});
-type FunnelReviewViewModel = typeof FunnelReviewViewModel.Type;
-
-const FunnelFailedViewModel = Schema.TaggedStruct("Failed", {
-  ...StepCopy,
-  message: Schema.NonEmptyString,
-  startOverLabel: Schema.NonEmptyString,
-  startOverHref: Schema.NonEmptyString,
-});
-type FunnelFailedViewModel = typeof FunnelFailedViewModel.Type;
-
-export const FunnelViewModel = Schema.Union([
-  FunnelSearchViewModel,
-  FunnelChooseViewModel,
-  FunnelFilmViewModel,
-  FunnelTransportViewModel,
-  FunnelReviewViewModel,
-  FunnelFailedViewModel,
-]);
 export type FunnelViewModel = typeof FunnelViewModel.Type;
+
+type FunnelSearchViewModel = typeof FunnelViewModel.cases.Search.Type;
+type FunnelChooseViewModel = typeof FunnelViewModel.cases.Choose.Type;
+type FunnelFilmViewModel = typeof FunnelViewModel.cases.Film.Type;
+type FunnelTransportViewModel = typeof FunnelViewModel.cases.Transport.Type;
+type FunnelReviewViewModel = typeof FunnelViewModel.cases.Review.Type;
+type FunnelFailedViewModel = typeof FunnelViewModel.cases.Failed.Type;
 
 export const makeFunnelSearchViewModel = (
   i18n: I18n,
@@ -102,7 +91,7 @@ export const makeFunnelSearchViewModel = (
   query: string,
   error: string | undefined,
 ) =>
-  FunnelSearchViewModel.make({
+  FunnelViewModel.cases.Search.make({
     shell,
     stepLabel: i18n._({ id: "funnel.step.search" }),
     heading: i18n._({ id: "funnel.search.heading" }),
@@ -124,7 +113,7 @@ export const makeFunnelChooseViewModel = (
     ...PersonChoiceViewModel[],
   ],
 ) =>
-  FunnelChooseViewModel.make({
+  FunnelViewModel.cases.Choose.make({
     shell,
     stepLabel: i18n._({ id: "funnel.step.choose" }),
     heading: i18n._({ id: "funnel.choose.heading" }),
@@ -140,7 +129,7 @@ export const makeFunnelFilmViewModel = (
   shell: AppShellViewModel,
   person: PersonViewModel,
 ) =>
-  FunnelFilmViewModel.make({
+  FunnelViewModel.cases.Film.make({
     shell,
     stepLabel: i18n._({ id: "funnel.step.film" }),
     heading: i18n._({ id: "funnel.film.heading" }),
@@ -156,7 +145,7 @@ export const makeFunnelTransportViewModel = (
   person: PersonViewModel,
   film: FilmListItemViewModel,
 ) =>
-  FunnelTransportViewModel.make({
+  FunnelViewModel.cases.Transport.make({
     shell,
     stepLabel: i18n._({ id: "funnel.step.transport" }),
     heading: i18n._({ id: "funnel.transport.heading" }),
@@ -184,7 +173,7 @@ export const makeFunnelReviewViewModel = (
     }),
   });
 
-  return FunnelReviewViewModel.make({
+  return FunnelViewModel.cases.Review.make({
     shell,
     stepLabel: i18n._({ id: "funnel.step.review" }),
     heading: i18n._({ id: "funnel.review.heading" }),
@@ -207,7 +196,7 @@ export const makeFunnelFailedViewModel = (
   shell: AppShellViewModel,
   message: string,
 ) =>
-  FunnelFailedViewModel.make({
+  FunnelViewModel.cases.Failed.make({
     shell,
     stepLabel: i18n._({ id: "funnel.step.failed" }),
     heading: i18n._({ id: "funnel.failed.heading" }),
@@ -224,7 +213,9 @@ type FunnelExtras = {
   readonly onQueryChange: (value: string) => void;
 };
 
-export type FunnelProps = FunnelViewModel & FunnelExtras;
+export type FunnelViewProps = FunnelExtras & {
+  readonly model: FunnelViewModel;
+};
 
 type StepShellProps = {
   readonly step: {
@@ -511,15 +502,15 @@ const FailedStep = ({
   </StepShell>
 );
 
-export const Funnel = ({
+export const FunnelView = ({
   dispatch,
   isPending,
+  model,
   onCtaClick,
   onQueryChange,
-  ...model
-}: FunnelProps) => (
+}: FunnelViewProps) => (
   <AppShell {...model.shell}>
-    {Match.valueTags(model, {
+    {FunnelViewModel.match(model, {
       Search: (step) => (
         <SearchStep
           step={step}

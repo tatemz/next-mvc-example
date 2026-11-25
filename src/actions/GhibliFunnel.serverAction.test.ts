@@ -30,7 +30,7 @@ vi.mock("../server/Runtime", async () => {
   return { ghibliRuntime: runtime };
 });
 
-import { makeFunnelSearchViewModel } from "../components/Funnel";
+import { makeFunnelSearchViewModel } from "../components/FunnelView";
 import { makeEn } from "../i18n/I18n.service";
 import { makeAppShellViewModel } from "../components/AppShell";
 import { submitGhibliFunnel } from "./GhibliFunnel.serverAction";

@@ -1,30 +1,19 @@
 import { it } from "@effect/vitest";
 import { afterEach, describe, expect, vi } from "vitest";
 import {
-  FunnelChooseContext,
-  FunnelChooseCtaClicked,
-  FunnelFailedContext,
-  FunnelFilmContext,
-  FunnelReviewContext,
-  FunnelSearchContext,
-  FunnelTransportContext,
+  CtaClicked,
   FormValidationError,
-  HomeContext,
-  HomeCtaClicked,
   InputFilled,
-  NoTransport,
+  PageContext,
   PageLoaded,
-  ResultsMissingContext,
-  ResultsReadyContext,
-  ResultsReadyCtaClicked,
-  TransportChosen,
+  TransportChoice,
 } from "./UiEvent";
 import { makeUiEventHandler, toUiEventPayload } from "./UiEventHandler";
 
 const occurredAt = "2026-11-24T12:00:00.000Z";
 
-const transportChosen = TransportChosen.make({ key: "starship-12" });
-const noTransport = NoTransport.make({});
+const transportChosen = TransportChoice.cases.TransportChosen.make({ key: "starship-12" });
+const noTransport = TransportChoice.cases.NoTransport.make({});
 
 const payloadOf = (event: Parameters<typeof toUiEventPayload>[0]) =>
   toUiEventPayload(event, occurredAt);
@@ -34,7 +23,7 @@ describe("toUiEventPayload", () => {
     expect(
       payloadOf(
         PageLoaded.make({
-          context: HomeContext.make({ universe: "star-wars" }),
+          context: PageContext.cases.Home.make({ universe: "star-wars" }),
         }),
       ),
     ).toEqual({
@@ -50,7 +39,7 @@ describe("toUiEventPayload", () => {
     expect(
       payloadOf(
         PageLoaded.make({
-          context: FunnelSearchContext.make({ universe: "ghibli" }),
+          context: PageContext.cases.FunnelSearch.make({ universe: "ghibli" }),
         }),
       ),
     ).toMatchObject({
@@ -65,7 +54,7 @@ describe("toUiEventPayload", () => {
     expect(
       payloadOf(
         PageLoaded.make({
-          context: FunnelChooseContext.make({
+          context: PageContext.cases.FunnelChoose.make({
             universe: "star-wars",
             query: "Luke",
           }),
@@ -82,7 +71,7 @@ describe("toUiEventPayload", () => {
     expect(
       payloadOf(
         PageLoaded.make({
-          context: FunnelFilmContext.make({
+          context: PageContext.cases.FunnelFilm.make({
             universe: "star-wars",
             characterId: "1",
           }),
@@ -99,7 +88,7 @@ describe("toUiEventPayload", () => {
     expect(
       payloadOf(
         PageLoaded.make({
-          context: FunnelTransportContext.make({
+          context: PageContext.cases.FunnelTransport.make({
             universe: "star-wars",
             characterId: "1",
             filmOrder: 4,
@@ -117,7 +106,7 @@ describe("toUiEventPayload", () => {
     expect(
       payloadOf(
         PageLoaded.make({
-          context: FunnelReviewContext.make({
+          context: PageContext.cases.FunnelReview.make({
             universe: "star-wars",
             characterId: "1",
             filmOrder: 4,
@@ -140,7 +129,7 @@ describe("toUiEventPayload", () => {
     expect(
       payloadOf(
         PageLoaded.make({
-          context: FunnelReviewContext.make({
+          context: PageContext.cases.FunnelReview.make({
             universe: "ghibli",
             characterId: "1",
             filmOrder: 1,
@@ -159,7 +148,7 @@ describe("toUiEventPayload", () => {
     expect(
       payloadOf(
         PageLoaded.make({
-          context: FunnelFailedContext.make({ universe: "star-wars" }),
+          context: PageContext.cases.FunnelFailed.make({ universe: "star-wars" }),
         }),
       ),
     ).toMatchObject({
@@ -173,7 +162,7 @@ describe("toUiEventPayload", () => {
     expect(
       payloadOf(
         PageLoaded.make({
-          context: ResultsMissingContext.make({ universe: "ghibli" }),
+          context: PageContext.cases.ResultsMissing.make({ universe: "ghibli" }),
         }),
       ),
     ).toMatchObject({
@@ -188,7 +177,7 @@ describe("toUiEventPayload", () => {
     expect(
       payloadOf(
         PageLoaded.make({
-          context: ResultsReadyContext.make({
+          context: PageContext.cases.ResultsReady.make({
             universe: "star-wars",
             characterId: "1",
             filmOrder: 4,
@@ -211,7 +200,7 @@ describe("toUiEventPayload", () => {
     expect(
       payloadOf(
         PageLoaded.make({
-          context: ResultsReadyContext.make({
+          context: PageContext.cases.ResultsReady.make({
             universe: "ghibli",
             characterId: "1",
             filmOrder: 1,
@@ -229,8 +218,8 @@ describe("toUiEventPayload", () => {
   it("maps the home CTA click", () => {
     expect(
       payloadOf(
-        HomeCtaClicked.make({
-          context: HomeContext.make({ universe: "star-wars" }),
+        CtaClicked.cases.HomeCtaClicked.make({
+          context: PageContext.cases.Home.make({ universe: "star-wars" }),
           cta: "build_dossier",
         }),
       ),
@@ -246,8 +235,8 @@ describe("toUiEventPayload", () => {
   it("maps a funnel CTA click with its stage facts", () => {
     expect(
       payloadOf(
-        FunnelChooseCtaClicked.make({
-          context: FunnelChooseContext.make({
+        CtaClicked.cases.FunnelChooseCtaClicked.make({
+          context: PageContext.cases.FunnelChoose.make({
             universe: "star-wars",
             query: "Luke",
           }),
@@ -264,8 +253,8 @@ describe("toUiEventPayload", () => {
   it("maps a results CTA click with its dossier facts", () => {
     expect(
       payloadOf(
-        ResultsReadyCtaClicked.make({
-          context: ResultsReadyContext.make({
+        CtaClicked.cases.ResultsReadyCtaClicked.make({
+          context: PageContext.cases.ResultsReady.make({
             universe: "star-wars",
             characterId: "1",
             filmOrder: 4,
@@ -284,6 +273,139 @@ describe("toUiEventPayload", () => {
         transportKey: "starship-12",
       },
     });
+  });
+
+  it("maps every CTA variant", () => {
+    const cases = [
+      {
+        event: CtaClicked.cases.HomeCtaClicked.make({
+          context: PageContext.cases.Home.make({
+            universe: "star-wars",
+          }),
+          cta: "build_dossier",
+        }),
+        page: "home",
+        properties: { cta: "build_dossier" },
+      },
+      {
+        event: CtaClicked.cases.FunnelSearchCtaClicked.make({
+          context: PageContext.cases.FunnelSearch.make({
+            universe: "star-wars",
+          }),
+          cta: "search",
+        }),
+        page: "funnel",
+        properties: { cta: "search" },
+      },
+      {
+        event: CtaClicked.cases.FunnelChooseCtaClicked.make({
+          context: PageContext.cases.FunnelChoose.make({
+            universe: "star-wars",
+            query: "Luke",
+          }),
+          cta: "choose_character",
+        }),
+        page: "funnel",
+        properties: {
+          cta: "choose_character",
+          query: "Luke",
+        },
+      },
+      {
+        event: CtaClicked.cases.FunnelFilmCtaClicked.make({
+          context: PageContext.cases.FunnelFilm.make({
+            universe: "star-wars",
+            characterId: "1",
+          }),
+          cta: "next_transport",
+        }),
+        page: "funnel",
+        properties: {
+          cta: "next_transport",
+          characterId: "1",
+        },
+      },
+      {
+        event: CtaClicked.cases.FunnelTransportCtaClicked.make({
+          context: PageContext.cases.FunnelTransport.make({
+            universe: "star-wars",
+            characterId: "1",
+            filmOrder: 4,
+          }),
+          cta: "review_dossier",
+        }),
+        page: "funnel",
+        properties: {
+          cta: "review_dossier",
+          characterId: "1",
+          filmOrder: 4,
+        },
+      },
+      {
+        event: CtaClicked.cases.FunnelReviewCtaClicked.make({
+          context: PageContext.cases.FunnelReview.make({
+            universe: "star-wars",
+            characterId: "1",
+            filmOrder: 4,
+            transport: transportChosen,
+          }),
+          cta: "open_dossier",
+        }),
+        page: "funnel",
+        properties: {
+          cta: "open_dossier",
+          characterId: "1",
+          filmOrder: 4,
+          transportKey: "starship-12",
+        },
+      },
+      {
+        event: CtaClicked.cases.FunnelFailedCtaClicked.make({
+          context: PageContext.cases.FunnelFailed.make({
+            universe: "star-wars",
+          }),
+          cta: "start_over",
+        }),
+        page: "funnel",
+        properties: { cta: "start_over" },
+      },
+      {
+        event: CtaClicked.cases.ResultsMissingCtaClicked.make({
+          context: PageContext.cases.ResultsMissing.make({
+            universe: "star-wars",
+          }),
+          cta: "build_another_dossier",
+        }),
+        page: "results",
+        properties: { cta: "build_another_dossier" },
+      },
+      {
+        event: CtaClicked.cases.ResultsReadyCtaClicked.make({
+          context: PageContext.cases.ResultsReady.make({
+            universe: "star-wars",
+            characterId: "1",
+            filmOrder: 4,
+            transport: transportChosen,
+          }),
+          cta: "back_home",
+        }),
+        page: "results",
+        properties: {
+          cta: "back_home",
+          characterId: "1",
+          filmOrder: 4,
+          transportKey: "starship-12",
+        },
+      },
+    ];
+
+    for (const { event, page, properties } of cases) {
+      expect(payloadOf(event)).toMatchObject({
+        event: "cta_clicked",
+        page,
+        properties,
+      });
+    }
   });
 
   it("maps the funnel validation error", () => {
@@ -329,7 +451,7 @@ describe("toUiEventPayload", () => {
 });
 
 const pageLoaded = PageLoaded.make({
-  context: FunnelSearchContext.make({ universe: "star-wars" }),
+  context: PageContext.cases.FunnelSearch.make({ universe: "star-wars" }),
 });
 
 const pageLoadedPayload = {

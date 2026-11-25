@@ -13,7 +13,7 @@ import {
   makeFunnelTransportViewModel,
   PersonChoiceViewModel,
   type FunnelViewModel,
-} from "../src/components/Funnel";
+} from "../src/components/FunnelView";
 import type { FilmListItemViewModel } from "../src/components/FilmListItem";
 import {
   ghibliSplashImage,
@@ -21,7 +21,6 @@ import {
   starWarsSplashImage,
   type HomeHeroImageViewModel,
   type HomePageViewModel,
-  type HomeUniverse,
 } from "../src/components/HomePage";
 import {
   makePersonViewModel,
@@ -34,6 +33,7 @@ import {
   type ResultsViewModel,
 } from "../src/components/Results";
 import { luke, makeCharacterId } from "../src/domain/FilmUniverse.fixture";
+import type { Universe } from "../src/ui-events/UiEvent";
 import type { Person } from "../src/domain/FilmUniverse.model";
 import { makeEn } from "../src/i18n/I18n.service";
 
@@ -122,7 +122,7 @@ const humanLuke: Person = {
 };
 
 export type PageDataset = {
-  readonly universe: HomeUniverse;
+  readonly universe: Universe;
   readonly image: HomeHeroImageViewModel;
   readonly shell: AppShellViewModel;
   readonly person: Person;
@@ -136,7 +136,7 @@ export type PageDataset = {
 
 const datasetFor = (
   person: Person,
-  universe: HomeUniverse,
+  universe: Universe,
   theme: ExperienceTheme,
   basePath: string,
   query: string,

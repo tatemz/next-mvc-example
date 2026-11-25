@@ -1,7 +1,7 @@
-import { Array, Effect, Function, Match, Option, Schema } from "effect";
+import { Array, Effect, Function, Option, Schema } from "effect";
 import type { ExperienceTheme } from "../components/AppShell";
 import {
-  type FunnelViewModel,
+  FunnelViewModel,
   PersonChoiceViewModel,
   makeFunnelChooseViewModel,
   makeFunnelFailedViewModel,
@@ -9,7 +9,7 @@ import {
   makeFunnelReviewViewModel,
   makeFunnelSearchViewModel,
   makeFunnelTransportViewModel,
-} from "../components/Funnel";
+} from "../components/FunnelView";
 import { makePersonViewModel } from "../components/PersonCard";
 import { loadAppShell } from "./AppShell.controller";
 import { CharacterId } from "../domain/FilmUniverse.model";
@@ -188,7 +188,7 @@ export const advanceFunnel = (
   previous: FunnelViewModel,
   formData: FormData,
 ) =>
-  Match.valueTags(previous, {
+  FunnelViewModel.match(previous, {
     Search: (step) => searchStep(step, formData),
     Choose: (step) => chooseStep(step, formData),
     Film: (step) => filmStep(step, formData),

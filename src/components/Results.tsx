@@ -1,4 +1,4 @@
-import { Match, Schema } from "effect";
+import { Schema } from "effect";
 import type { I18n } from "../i18n/I18n.service";
 import type { ResultsCta } from "../ui-events/UiEvent";
 import { AppShell, AppShellViewModel } from "./AppShell";
@@ -9,37 +9,34 @@ import {
   TransportViewModel,
 } from "./PersonCard";
 
-const ResultsReadyViewModel = Schema.TaggedStruct("Ready", {
-  shell: AppShellViewModel,
-  heading: Schema.NonEmptyString,
-  subtitle: Schema.NonEmptyString,
-  person: PersonViewModel,
-  film: FilmListItemViewModel,
-  transport: Schema.NullOr(TransportViewModel),
-  filmLabel: Schema.NonEmptyString,
-  transportLabel: Schema.NonEmptyString,
-  noneLabel: Schema.NonEmptyString,
-  startOverLabel: Schema.NonEmptyString,
-  homeLabel: Schema.NonEmptyString,
-  startOverHref: Schema.NonEmptyString,
-  homeHref: Schema.NonEmptyString,
+export const ResultsViewModel = Schema.TaggedUnion({
+  Ready: {
+    shell: AppShellViewModel,
+    heading: Schema.NonEmptyString,
+    subtitle: Schema.NonEmptyString,
+    person: PersonViewModel,
+    film: FilmListItemViewModel,
+    transport: Schema.NullOr(TransportViewModel),
+    filmLabel: Schema.NonEmptyString,
+    transportLabel: Schema.NonEmptyString,
+    noneLabel: Schema.NonEmptyString,
+    startOverLabel: Schema.NonEmptyString,
+    homeLabel: Schema.NonEmptyString,
+    startOverHref: Schema.NonEmptyString,
+    homeHref: Schema.NonEmptyString,
+  },
+  Missing: {
+    shell: AppShellViewModel,
+    heading: Schema.NonEmptyString,
+    message: Schema.NonEmptyString,
+    startOverLabel: Schema.NonEmptyString,
+    startOverHref: Schema.NonEmptyString,
+  },
 });
-type ResultsReadyViewModel = typeof ResultsReadyViewModel.Type;
-
-const ResultsMissingViewModel = Schema.TaggedStruct("Missing", {
-  shell: AppShellViewModel,
-  heading: Schema.NonEmptyString,
-  message: Schema.NonEmptyString,
-  startOverLabel: Schema.NonEmptyString,
-  startOverHref: Schema.NonEmptyString,
-});
-type ResultsMissingViewModel = typeof ResultsMissingViewModel.Type;
-
-export const ResultsViewModel = Schema.Union([
-  ResultsReadyViewModel,
-  ResultsMissingViewModel,
-]);
 export type ResultsViewModel = typeof ResultsViewModel.Type;
+
+type ResultsReadyViewModel = typeof ResultsViewModel.cases.Ready.Type;
+type ResultsMissingViewModel = typeof ResultsViewModel.cases.Missing.Type;
 
 export const makeResultsReadyViewModel = (
   i18n: I18n,
@@ -50,7 +47,7 @@ export const makeResultsReadyViewModel = (
   startOverHref: string,
   homeHref: string,
 ) =>
-  ResultsReadyViewModel.make({
+  ResultsViewModel.cases.Ready.make({
     shell,
     heading: i18n._({ id: "results.ready.heading" }),
     subtitle: i18n._({ id: "results.ready.subtitle" }),
@@ -71,7 +68,7 @@ export const makeResultsMissingViewModel = (
   shell: AppShellViewModel,
   startOverHref: string,
 ) =>
-  ResultsMissingViewModel.make({
+  ResultsViewModel.cases.Missing.make({
     shell,
     heading: i18n._({ id: "results.missing.heading" }),
     message: i18n._({ id: "results.missing.message" }),
@@ -170,7 +167,7 @@ const MissingResults = ({
 
 export const Results = ({ model, onCtaClick }: ResultsProps) => (
   <AppShell {...model.shell}>
-    {Match.valueTags(model, {
+    {ResultsViewModel.match(model, {
       Ready: (ready) => (
         <ReadyResults model={ready} onCtaClick={onCtaClick} />
       ),

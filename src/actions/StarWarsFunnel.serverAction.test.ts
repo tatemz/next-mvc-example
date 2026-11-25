@@ -30,19 +30,19 @@ vi.mock("../server/Runtime", async () => {
   return { swapiRuntime: runtime };
 });
 
-import { makeFunnelSearchViewModel } from "../components/Funnel";
+import { makeFunnelSearchViewModel } from "../components/FunnelView";
 import { makeEn } from "../i18n/I18n.service";
 import { makeAppShellViewModel } from "../components/AppShell";
-import { submitFunnel } from "./Funnel.serverAction";
+import { submitStarWarsFunnel } from "./StarWarsFunnel.serverAction";
 
-describe("submitFunnel server action", () => {
+describe("submitStarWarsFunnel server action", () => {
   it.effect("runs the funnel controller through the runtime", () =>
     Effect.gen(function*() {
       const formData = new FormData();
       formData.set("query", "Luke");
 
       const result = yield* Effect.promise(() =>
-        submitFunnel((() => {
+        submitStarWarsFunnel((() => {
         const i18n = makeEn();
         return makeFunnelSearchViewModel(
           i18n,

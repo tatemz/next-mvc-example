@@ -1,6 +1,6 @@
 "use server";
 
-import type { FunnelViewModel } from "../components/Funnel";
+import type { FunnelViewModel } from "../components/FunnelView";
 import { advanceFunnel } from "../controllers/Funnel.controller";
 import { ghibliRuntime } from "../server/Runtime";
 

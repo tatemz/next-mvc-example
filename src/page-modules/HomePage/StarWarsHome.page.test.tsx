@@ -23,13 +23,13 @@ describe("StarWars home page", () => {
       );
 
       expect(isValidElement(element)).toBe(true);
-      if (!isValidElement<{ model: unknown }>(element)) {
+      if (!isValidElement<{ model: unknown; universe: unknown }>(element)) {
         throw new Error("expected an element");
       }
       expect(element.type).toBe(ConnectedHomePage);
+      expect(element.props.universe).toBe("star-wars");
       expect(element.props.model).toMatchObject({
         _tag: "HomePageViewModel",
-        universe: "star-wars",
         hero: {
           title: "Star Wars character dossier",
           funnelHref: "/star-wars/funnel",

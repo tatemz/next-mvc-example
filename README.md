@@ -37,7 +37,7 @@ composition point: it passes a `ManagedRuntime` and a program to
 export const StarWarsFunnelPage = makeNextPage(
   swapiRuntime,
   Effect.map(startFunnel("night"), (model) => (
-    <ConnectedFunnel model={model} submitAction={submitFunnel} />
+    <ConnectedFunnelView model={model} submitAction={submitStarWarsFunnel} />
   )),
 );
 ```
@@ -80,8 +80,8 @@ export const StarWarsFunnelPage = makeNextPage(
   choice, not a default.
 - The review link is relative (`results?...`); the results page's links use the
   selected universe's base path.
-- `submitFunnel` and `submitGhibliFunnel` are the server actions.
-  `HomePage.connected.tsx`, `Funnel.connected.tsx`, and
+- `submitStarWarsFunnel` and `submitGhibliFunnel` are the server actions.
+  `HomePage.connected.tsx`, `FunnelView.connected.tsx`, and
   `Results.connected.tsx` are the client event boundaries.
 
 ## UI events
@@ -130,7 +130,7 @@ pnpm storybook
 ```
 
 The stories in `src/components/*.stories.tsx` render the three top-level page
-views. Every tagged view-model variant is represented, including pending,
+views, split by universe. Every tagged view-model variant is represented, including pending,
 validation-error, known-species, film-poster, transport/no-transport, and both
 `night` and `autumn` shells. `.storybook/pageFixtures.ts` builds the models from
 the app fixtures and view-model factories.

@@ -60,7 +60,7 @@ describe("ConnectedResults events", () => {
     );
     expect(events).toContainEqual(
       expect.objectContaining({
-        _tag: "CtaClicked",
+        _tag: "ResultsReadyCtaClicked",
         context: {
           _tag: "ResultsReady",
           universe: "star-wars",
@@ -76,7 +76,7 @@ describe("ConnectedResults events", () => {
     );
     expect(events).toContainEqual(
       expect.objectContaining({
-        _tag: "CtaClicked",
+        _tag: "ResultsReadyCtaClicked",
         context: {
           _tag: "ResultsReady",
           universe: "star-wars",
@@ -127,7 +127,7 @@ describe("ConnectedResults events", () => {
     );
     expect(events).toContainEqual(
       expect.objectContaining({
-        _tag: "CtaClicked",
+        _tag: "ResultsMissingCtaClicked",
         context: {
           _tag: "ResultsMissing",
           universe: "star-wars",

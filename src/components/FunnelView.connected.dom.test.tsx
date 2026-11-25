@@ -15,8 +15,8 @@ import {
 } from "../../.storybook/pageFixtures";
 import { type Universe, type UiEvent } from "../ui-events/UiEvent";
 import { UiEventProvider } from "../ui-events/UiEventContext";
-import type { FunnelViewModel } from "./Funnel";
-import { ConnectedFunnel } from "./Funnel.connected";
+import type { FunnelViewModel } from "./FunnelView";
+import { ConnectedFunnelView } from "./FunnelView.connected";
 
 afterEach(cleanup);
 
@@ -29,7 +29,7 @@ const renderFunnel = (
   const events: UiEvent[] = [];
   render(
     <UiEventProvider handler={(event) => events.push(event)}>
-      <ConnectedFunnel
+      <ConnectedFunnelView
         model={model}
         submitAction={action}
         universe={universe}
@@ -42,7 +42,7 @@ const renderFunnel = (
 const preventNavigation = (element: HTMLElement) =>
   element.addEventListener("click", (event) => event.preventDefault());
 
-describe("ConnectedFunnel events", () => {
+describe("ConnectedFunnelView events", () => {
   it("emits page load, input, and search CTA events", async () => {
     const events = renderFunnel(funnelSearch(starWars));
 
@@ -72,7 +72,7 @@ describe("ConnectedFunnel events", () => {
     );
     expect(events).toContainEqual(
       expect.objectContaining({
-        _tag: "CtaClicked",
+        _tag: "FunnelSearchCtaClicked",
         context: {
           _tag: "FunnelSearch",
           universe: "star-wars",
@@ -105,7 +105,7 @@ describe("ConnectedFunnel events", () => {
 
     expect(events).toContainEqual(
       expect.objectContaining({
-        _tag: "CtaClicked",
+        _tag: "FunnelChooseCtaClicked",
         context: {
           _tag: "FunnelChoose",
           universe: "star-wars",
@@ -124,7 +124,7 @@ describe("ConnectedFunnel events", () => {
 
     expect(events).toContainEqual(
       expect.objectContaining({
-        _tag: "CtaClicked",
+        _tag: "FunnelFilmCtaClicked",
         context: {
           _tag: "FunnelFilm",
           universe: "star-wars",
@@ -143,7 +143,7 @@ describe("ConnectedFunnel events", () => {
 
     expect(events).toContainEqual(
       expect.objectContaining({
-        _tag: "CtaClicked",
+        _tag: "FunnelTransportCtaClicked",
         context: {
           _tag: "FunnelTransport",
           universe: "star-wars",
@@ -167,7 +167,7 @@ describe("ConnectedFunnel events", () => {
 
     expect(events).toContainEqual(
       expect.objectContaining({
-        _tag: "CtaClicked",
+        _tag: "FunnelReviewCtaClicked",
         context: {
           _tag: "FunnelReview",
           universe: "star-wars",
@@ -183,7 +183,7 @@ describe("ConnectedFunnel events", () => {
     );
     expect(events).toContainEqual(
       expect.objectContaining({
-        _tag: "CtaClicked",
+        _tag: "FunnelReviewCtaClicked",
         context: {
           _tag: "FunnelReview",
           universe: "star-wars",
@@ -206,7 +206,7 @@ describe("ConnectedFunnel events", () => {
     fireEvent.click(open);
     expect(reviewEvents).toContainEqual(
       expect.objectContaining({
-        _tag: "CtaClicked",
+        _tag: "FunnelReviewCtaClicked",
         context: expect.objectContaining({
           _tag: "FunnelReview",
           universe: "ghibli",
@@ -224,7 +224,7 @@ describe("ConnectedFunnel events", () => {
     fireEvent.click(startOver);
     expect(failedEvents).toContainEqual(
       expect.objectContaining({
-        _tag: "CtaClicked",
+        _tag: "FunnelFailedCtaClicked",
         context: {
           _tag: "FunnelFailed",
           universe: "star-wars",

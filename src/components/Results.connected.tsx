@@ -1,21 +1,17 @@
 "use client";
 
-import { Match } from "effect";
 import { useEffect } from "react";
 import {
+  CtaClicked,
+  PageContext,
   PageLoaded,
-  ResultsMissingContext,
-  ResultsMissingCtaClicked,
-  ResultsReadyContext,
-  ResultsReadyCtaClicked,
   makeTransportChoice,
-  type CtaClicked,
   type ResultsContext,
   type ResultsCta,
   type Universe,
 } from "../ui-events/UiEvent";
 import { useUiEventDispatch } from "../ui-events/UiEventContext";
-import { Results, type ResultsViewModel } from "./Results";
+import { Results, ResultsViewModel } from "./Results";
 
 export type ConnectedResultsProps = {
   readonly model: ResultsViewModel;
@@ -26,15 +22,16 @@ const contextFor = (
   model: ResultsViewModel,
   universe: Universe,
 ): ResultsContext =>
-  Match.valueTags(model, {
+  ResultsViewModel.match(model, {
     Ready: (ready) =>
-      ResultsReadyContext.make({
+      PageContext.cases.ResultsReady.make({
         universe,
         characterId: ready.person.id,
         filmOrder: ready.film.order,
         transport: makeTransportChoice(ready.transport),
       }),
-    Missing: () => ResultsMissingContext.make({ universe }),
+    Missing: () =>
+      PageContext.cases.ResultsMissing.make({ universe }),
   });
 
 const ctaEventFor = (
@@ -42,10 +39,10 @@ const ctaEventFor = (
   universe: Universe,
   cta: ResultsCta,
 ): CtaClicked =>
-  Match.valueTags(model, {
+  ResultsViewModel.match(model, {
     Ready: (ready) =>
-      ResultsReadyCtaClicked.make({
-        context: ResultsReadyContext.make({
+      CtaClicked.cases.ResultsReadyCtaClicked.make({
+        context: PageContext.cases.ResultsReady.make({
           universe,
           characterId: ready.person.id,
           filmOrder: ready.film.order,
@@ -54,8 +51,10 @@ const ctaEventFor = (
         cta,
       }),
     Missing: () =>
-      ResultsMissingCtaClicked.make({
-        context: ResultsMissingContext.make({ universe }),
+      CtaClicked.cases.ResultsMissingCtaClicked.make({
+        context: PageContext.cases.ResultsMissing.make({
+          universe,
+        }),
         cta: "build_another_dossier",
       }),
   });

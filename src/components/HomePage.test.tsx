@@ -6,7 +6,7 @@ import { HomePage } from "./HomePage";
 
 const render = (dataset: typeof starWars) =>
   renderToStaticMarkup(
-    <HomePage {...homeSplash(dataset)} onCtaClick={() => {}} />,
+    <HomePage model={homeSplash(dataset)} onCtaClick={() => {}} />,
   );
 
 describe("HomePage", () => {

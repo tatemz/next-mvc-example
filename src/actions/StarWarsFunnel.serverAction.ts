@@ -1,10 +1,10 @@
 "use server";
 
-import type { FunnelViewModel } from "../components/Funnel";
+import type { FunnelViewModel } from "../components/FunnelView";
 import { advanceFunnel } from "../controllers/Funnel.controller";
 import { swapiRuntime } from "../server/Runtime";
 
-export async function submitFunnel(
+export async function submitStarWarsFunnel(
   previous: FunnelViewModel,
   formData: FormData,
 ) {

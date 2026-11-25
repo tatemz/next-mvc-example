@@ -20,7 +20,7 @@ describe("ConnectedHomePage events", () => {
     const events: UiEvent[] = [];
     render(
       <UiEventProvider handler={(event) => events.push(event)}>
-        <ConnectedHomePage model={homeSplash(starWars)} />
+        <ConnectedHomePage model={homeSplash(starWars)} universe="star-wars" />
       </UiEventProvider>,
     );
     const link = screen.getByRole("link", { name: "Build a dossier" });
@@ -37,7 +37,7 @@ describe("ConnectedHomePage events", () => {
     );
     expect(events).toContainEqual(
       expect.objectContaining({
-        _tag: "CtaClicked",
+        _tag: "HomeCtaClicked",
         context: { _tag: "Home", universe: "star-wars" },
         cta: "build_dossier",
       }),

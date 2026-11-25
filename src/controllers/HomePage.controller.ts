@@ -3,13 +3,13 @@ import type { ExperienceTheme } from "../components/AppShell";
 import {
   makeHomePageViewModel,
   type HomeHeroImageViewModel,
-  type HomeUniverse,
 } from "../components/HomePage";
 import { I18n } from "../i18n/I18n.service";
+import type { Universe } from "../ui-events/UiEvent";
 import { loadAppShell } from "./AppShell.controller";
 
 export const loadHomePage = (
-  universe: HomeUniverse,
+  universe: Universe,
   funnelHref: string,
   theme: ExperienceTheme,
   image: HomeHeroImageViewModel,

@@ -9,7 +9,7 @@ import {
   makeFunnelReviewViewModel,
   makeFunnelSearchViewModel,
   makeFunnelTransportViewModel,
-} from "../components/Funnel";
+} from "../components/FunnelView";
 import { makePersonViewModel } from "../components/PersonCard";
 import { makeAppShellViewModel } from "../components/AppShell";
 import { luke, makeCharacterId } from "../domain/FilmUniverse.fixture";

@@ -14,6 +14,6 @@ export const GhibliHomePage = makeNextPage(
       "autumn",
       ghibliSplashImage,
     ),
-    (model) => <ConnectedHomePage model={model} />,
+    (model) => <ConnectedHomePage model={model} universe="ghibli" />,
   ),
 );

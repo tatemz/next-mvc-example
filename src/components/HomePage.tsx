@@ -1,9 +1,7 @@
 import { Schema } from "effect";
 import type { I18n } from "../i18n/I18n.service";
+import type { Universe } from "../ui-events/UiEvent";
 import { AppShell, AppShellViewModel } from "./AppShell";
-
-export const HomeUniverse = Schema.Literals(["star-wars", "ghibli"]);
-export type HomeUniverse = typeof HomeUniverse.Type;
 
 export const HomeHeroImageViewModel = Schema.TaggedStruct(
   "HomeHeroImageViewModel",
@@ -42,13 +40,12 @@ const HomeHeroViewModel = Schema.TaggedStruct("HomeHeroViewModel", {
 type HomeHeroViewModel = typeof HomeHeroViewModel.Type;
 
 export const HomePageViewModel = Schema.TaggedStruct("HomePageViewModel", {
-  universe: HomeUniverse,
   shell: AppShellViewModel,
   hero: HomeHeroViewModel,
 });
 export type HomePageViewModel = typeof HomePageViewModel.Type;
 
-const copyFor = (i18n: I18n, universe: HomeUniverse) =>
+const copyFor = (i18n: I18n, universe: Universe) =>
   universe === "star-wars"
     ? {
         kicker: i18n._({ id: "shell.starWars" }),
@@ -63,13 +60,12 @@ const copyFor = (i18n: I18n, universe: HomeUniverse) =>
 
 export const makeHomePageViewModel = (
   i18n: I18n,
-  universe: HomeUniverse,
+  universe: Universe,
   funnelHref: string,
   shell: AppShellViewModel,
   image: HomeHeroImageViewModel,
 ) =>
   HomePageViewModel.make({
-    universe,
     shell,
     hero: HomeHeroViewModel.make({
       ...copyFor(i18n, universe),
@@ -79,7 +75,8 @@ export const makeHomePageViewModel = (
     }),
   });
 
-export type HomePageProps = HomePageViewModel & {
+export type HomePageProps = {
+  readonly model: HomePageViewModel;
   readonly onCtaClick: () => void;
 };
 
@@ -127,10 +124,7 @@ const HomeHero = ({
   </section>
 );
 
-export const HomePage = ({
-  onCtaClick,
-  ...model
-}: HomePageProps) => (
+export const HomePage = ({ model, onCtaClick }: HomePageProps) => (
   <AppShell {...model.shell}>
     <HomeHero hero={model.hero} onCtaClick={onCtaClick} />
   </AppShell>

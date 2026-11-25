@@ -19,7 +19,7 @@ vi.mock("../../server/Runtime", async () => {
   return { swapiRuntime: runtime };
 });
 
-import { ConnectedFunnel } from "../../components/Funnel.connected";
+import { ConnectedFunnelView } from "../../components/FunnelView.connected";
 import { StarWarsFunnelPage } from "./StarWarsFunnel.page";
 
 describe("StarWars funnel page", () => {
@@ -35,7 +35,7 @@ describe("StarWars funnel page", () => {
       ) {
         throw new Error("expected an element");
       }
-      expect(element.type).toBe(ConnectedFunnel);
+      expect(element.type).toBe(ConnectedFunnelView);
       expect(element.props).toMatchObject({
         model: { _tag: "Search", stepLabel: "Step 1 of 4" },
       });

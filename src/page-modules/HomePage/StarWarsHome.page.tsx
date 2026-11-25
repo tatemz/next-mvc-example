@@ -14,6 +14,6 @@ export const StarWarsHomePage = makeNextPage(
       "night",
       starWarsSplashImage,
     ),
-    (model) => <ConnectedHomePage model={model} />,
+    (model) => <ConnectedHomePage model={model} universe="star-wars" />,
   ),
 );

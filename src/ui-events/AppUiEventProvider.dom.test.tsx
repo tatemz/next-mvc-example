@@ -5,7 +5,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, vi } from "vitest";
 import { AppUiEventProvider } from "./AppUiEventProvider";
 import { UI_EVENT_ROUTE } from "./BeaconUiEventSink";
-import { FunnelChooseContext, PageLoaded } from "./UiEvent";
+import { PageContext, PageLoaded } from "./UiEvent";
 import { useUiEventDispatch } from "./UiEventContext";
 
 afterEach(() => {
@@ -20,7 +20,7 @@ const Trigger = () => {
       onClick={() =>
         emit(
           PageLoaded.make({
-            context: FunnelChooseContext.make({
+            context: PageContext.cases.FunnelChoose.make({
               universe: "ghibli",
               query: "Leia",
             }),

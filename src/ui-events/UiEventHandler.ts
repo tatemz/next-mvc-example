@@ -1,10 +1,10 @@
-import { Match } from "effect";
-import type {
-  Page,
+import {
   PageContext,
   TransportChoice,
   UiEvent,
-  Universe,
+  type CtaClicked,
+  type Page,
+  type Universe,
 } from "./UiEvent";
 
 export type UiEventProperty = string | number | boolean;
@@ -29,13 +29,13 @@ type ContextPayload = {
 const transportProperties = (
   transport: TransportChoice,
 ): Readonly<Record<string, UiEventProperty>> =>
-  Match.valueTags(transport, {
+  TransportChoice.match(transport, {
     TransportChosen: (chosen) => ({ transportKey: chosen.key }),
     NoTransport: () => ({}),
   });
 
 const contextPayload = (context: PageContext): ContextPayload =>
-  Match.valueTags(context, {
+  PageContext.match(context, {
     Home: (home) => ({
       page: "home" as const,
       universe: home.universe,
@@ -94,29 +94,50 @@ const contextPayload = (context: PageContext): ContextPayload =>
     }),
   });
 
+const ctaPayload = (
+  clicked: CtaClicked,
+  occurredAt: string,
+): UiEventPayload => {
+  const context = contextPayload(clicked.context);
+  return {
+    event: "cta_clicked",
+    page: context.page,
+    universe: context.universe,
+    occurredAt,
+    properties: {
+      ...context.properties,
+      cta: clicked.cta,
+    },
+  };
+};
+
 export const toUiEventPayload = (
   event: UiEvent,
   occurredAt: string,
 ): UiEventPayload =>
-  Match.valueTags(event, {
+  UiEvent.match(event, {
     PageLoaded: (loaded) => ({
       event: "page_loaded",
       ...contextPayload(loaded.context),
       occurredAt,
     }),
-    CtaClicked: (clicked) => {
-      const context = contextPayload(clicked.context);
-      return {
-        event: "cta_clicked",
-        page: context.page,
-        universe: context.universe,
-        occurredAt,
-        properties: {
-          ...context.properties,
-          cta: clicked.cta,
-        },
-      };
-    },
+    HomeCtaClicked: (clicked) => ctaPayload(clicked, occurredAt),
+    FunnelSearchCtaClicked: (clicked) =>
+      ctaPayload(clicked, occurredAt),
+    FunnelChooseCtaClicked: (clicked) =>
+      ctaPayload(clicked, occurredAt),
+    FunnelFilmCtaClicked: (clicked) =>
+      ctaPayload(clicked, occurredAt),
+    FunnelTransportCtaClicked: (clicked) =>
+      ctaPayload(clicked, occurredAt),
+    FunnelReviewCtaClicked: (clicked) =>
+      ctaPayload(clicked, occurredAt),
+    FunnelFailedCtaClicked: (clicked) =>
+      ctaPayload(clicked, occurredAt),
+    ResultsMissingCtaClicked: (clicked) =>
+      ctaPayload(clicked, occurredAt),
+    ResultsReadyCtaClicked: (clicked) =>
+      ctaPayload(clicked, occurredAt),
     FormValidationError: (error) => ({
       event: "form_validation_error",
       page: "funnel" as const,
