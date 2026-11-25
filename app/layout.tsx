@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import "./globals.css";
+import { AppUiEventProvider } from "../src/ui-events/AppUiEventProvider";
 
 export default function RootLayout({
   children,
@@ -8,7 +9,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AppUiEventProvider>{children}</AppUiEventProvider>
+      </body>
     </html>
   );
 }

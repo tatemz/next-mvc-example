@@ -41,16 +41,21 @@ export const makeRetrySearchFormViewModel = (
 export type SearchFormProps = SearchFormViewModel & {
   readonly dispatch: (formData: FormData) => void;
   readonly isPending: boolean;
+  readonly onValueChange: (value: string) => void;
+  readonly onSubmit: () => void;
 };
 
 export const SearchForm = ({
   dispatch,
   isPending,
+  onValueChange,
+  onSubmit,
   ...model
 }: SearchFormProps) => (
   <form
     action={dispatch}
     method="POST"
+    onSubmit={onSubmit}
     className="card bg-base-100 shadow-xl"
   >
     <div className="card-body gap-3">
@@ -62,6 +67,7 @@ export const SearchForm = ({
         id="characterId"
         name="characterId"
         defaultValue={model.value}
+        onChange={(event) => onValueChange(event.currentTarget.value)}
         inputMode="numeric"
         className={`input input-bordered w-full${
           model.error === undefined ? "" : " input-error"

@@ -8,6 +8,10 @@ import { swapiRuntime } from "../../server/Runtime";
 export const StarWarsHomePage = makeNextPage(
   swapiRuntime,
   Effect.map(loadHomePage("/star-wars/funnel", "night"), (model) => (
-    <ConnectedHomePage model={model} searchAction={searchPerson} />
+    <ConnectedHomePage
+      model={model}
+      searchAction={searchPerson}
+      universe="star-wars"
+    />
   )),
 );

@@ -8,6 +8,10 @@ import { ghibliRuntime } from "../../server/Runtime";
 export const GhibliFunnelPage = makeNextPage(
   ghibliRuntime,
   Effect.map(startFunnel("autumn"), (model) => (
-    <ConnectedFunnel model={model} submitAction={submitGhibliFunnel} />
+    <ConnectedFunnel
+      model={model}
+      submitAction={submitGhibliFunnel}
+      universe="ghibli"
+    />
   )),
 );

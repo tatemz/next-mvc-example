@@ -13,6 +13,7 @@ import {
   makeFailedHomePageModel,
 } from "./HomePage";
 import { ConnectedHomePage } from "./HomePage.connected";
+import { UiEventProvider } from "../ui-events/UiEventContext";
 
 const i18n = makeEn();
 const shell = makeAppShellViewModel(i18n, "night");
@@ -95,6 +96,9 @@ describe("HomePage", () => {
         {...presentLoadedHomePage(i18n, luke, "/star-wars/funnel", shell)}
         dispatch={() => {}}
         isPending={false}
+        onCtaClick={() => {}}
+        onCharacterIdChange={() => {}}
+        onSubmit={() => {}}
       />,
     );
 
@@ -122,7 +126,14 @@ describe("HomePage", () => {
     });
 
     const html = renderToStaticMarkup(
-      <HomePage {...model} dispatch={() => {}} isPending={false} />,
+      <HomePage
+        {...model}
+        dispatch={() => {}}
+        isPending={false}
+        onCtaClick={() => {}}
+        onCharacterIdChange={() => {}}
+        onSubmit={() => {}}
+      />,
     );
 
     expect(html).toContain('role="alert"');
@@ -137,6 +148,9 @@ describe("HomePage", () => {
         {...presentLoadedHomePage(i18n, luke, "/star-wars/funnel", shell)}
         dispatch={() => {}}
         isPending={true}
+        onCtaClick={() => {}}
+        onCharacterIdChange={() => {}}
+        onSubmit={() => {}}
       />,
     );
 
@@ -148,12 +162,20 @@ describe("HomePage", () => {
 describe("ConnectedHomePage", () => {
   it("renders the initial model", () => {
     const html = renderToStaticMarkup(
-      <ConnectedHomePage
-        model={presentLoadedHomePage(makeEn(), luke, "/star-wars/funnel", shell)}
-        searchAction={async () => {
-          throw new Error("not submitted");
-        }}
-      />,
+      <UiEventProvider handler={() => {}}>
+        <ConnectedHomePage
+          model={presentLoadedHomePage(
+            makeEn(),
+            luke,
+            "/star-wars/funnel",
+            shell,
+          )}
+          searchAction={async () => {
+            throw new Error("not submitted");
+          }}
+          universe="star-wars"
+        />
+      </UiEventProvider>,
     );
 
     expect(html).toContain("Luke Skywalker");

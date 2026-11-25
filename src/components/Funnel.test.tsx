@@ -17,6 +17,7 @@ import {
   PersonChoiceViewModel,
 } from "./Funnel";
 import { ConnectedFunnel } from "./Funnel.connected";
+import { UiEventProvider } from "../ui-events/UiEventContext";
 
 const i18n = makeEn();
 const shell = makeAppShellViewModel(i18n, "night");
@@ -37,7 +38,13 @@ const choice = PersonChoiceViewModel.make({
 
 const render = (model: FunnelViewModel, isPending = false) =>
   renderToStaticMarkup(
-    <Funnel {...model} dispatch={() => {}} isPending={isPending} />,
+    <Funnel
+      {...model}
+      dispatch={() => {}}
+      isPending={isPending}
+      onCtaClick={() => {}}
+      onQueryChange={() => {}}
+    />,
   );
 
 describe("Funnel", () => {
@@ -217,10 +224,13 @@ describe("Funnel", () => {
 
   it("renders the connected funnel with its initial model", () => {
     const html = renderToStaticMarkup(
-      <ConnectedFunnel
-        model={makeFunnelSearchViewModel(i18n, shell, "", undefined)}
-        submitAction={async (previous) => previous}
-      />,
+      <UiEventProvider handler={() => {}}>
+        <ConnectedFunnel
+          model={makeFunnelSearchViewModel(i18n, shell, "", undefined)}
+          submitAction={async (previous) => previous}
+          universe="ghibli"
+        />
+      </UiEventProvider>,
     );
 
     expect(html).toContain("Find a character");

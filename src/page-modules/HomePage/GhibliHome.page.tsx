@@ -8,6 +8,10 @@ import { ghibliRuntime } from "../../server/Runtime";
 export const GhibliHomePage = makeNextPage(
   ghibliRuntime,
   Effect.map(loadHomePage("/ghibli/funnel", "autumn"), (model) => (
-    <ConnectedHomePage model={model} searchAction={searchGhibliPerson} />
+    <ConnectedHomePage
+      model={model}
+      searchAction={searchGhibliPerson}
+      universe="ghibli"
+    />
   )),
 );

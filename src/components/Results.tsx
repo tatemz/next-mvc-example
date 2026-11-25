@@ -78,7 +78,20 @@ export const makeResultsMissingViewModel = (
     startOverHref,
   });
 
-const ReadyResults = ({ model }: { readonly model: ResultsReadyViewModel }) => (
+export type ResultsCta = "build_another_dossier" | "back_home";
+
+export type ResultsProps = {
+  readonly model: ResultsViewModel;
+  readonly onCtaClick: (cta: ResultsCta) => void;
+};
+
+const ReadyResults = ({
+  model,
+  onCtaClick,
+}: {
+  readonly model: ResultsReadyViewModel;
+  readonly onCtaClick: (cta: ResultsCta) => void;
+}) => (
   <div className="flex flex-col gap-6">
     <section className="hero rounded-box bg-base-100 shadow-xl">
       <div className="hero-content py-8 text-center">
@@ -116,10 +129,18 @@ const ReadyResults = ({ model }: { readonly model: ResultsReadyViewModel }) => (
       </section>
     </div>
     <div className="flex flex-wrap gap-3">
-      <a href={model.startOverHref} className="btn btn-primary">
+      <a
+        href={model.startOverHref}
+        onClick={() => onCtaClick("build_another_dossier")}
+        className="btn btn-primary"
+      >
         {model.startOverLabel}
       </a>
-      <a href={model.homeHref} className="btn btn-ghost">
+      <a
+        href={model.homeHref}
+        onClick={() => onCtaClick("back_home")}
+        className="btn btn-ghost"
+      >
         {model.homeLabel}
       </a>
     </div>
@@ -128,25 +149,35 @@ const ReadyResults = ({ model }: { readonly model: ResultsReadyViewModel }) => (
 
 const MissingResults = ({
   model,
+  onCtaClick,
 }: {
   readonly model: ResultsMissingViewModel;
+  readonly onCtaClick: (cta: ResultsCta) => void;
 }) => (
   <div className="flex flex-col gap-6">
     <h1 className="text-3xl font-bold">{model.heading}</h1>
     <div role="alert" className="alert alert-error">
       {model.message}
     </div>
-    <a href={model.startOverHref} className="btn btn-primary">
+    <a
+      href={model.startOverHref}
+      onClick={() => onCtaClick("build_another_dossier")}
+      className="btn btn-primary"
+    >
       {model.startOverLabel}
     </a>
   </div>
 );
 
-export const Results = (model: ResultsViewModel) => (
+export const Results = ({ model, onCtaClick }: ResultsProps) => (
   <AppShell {...model.shell}>
     {Match.valueTags(model, {
-      Ready: (ready) => <ReadyResults model={ready} />,
-      Missing: (missing) => <MissingResults model={missing} />,
+      Ready: (ready) => (
+        <ReadyResults model={ready} onCtaClick={onCtaClick} />
+      ),
+      Missing: (missing) => (
+        <MissingResults model={missing} onCtaClick={onCtaClick} />
+      ),
     })}
   </AppShell>
 );

@@ -16,6 +16,9 @@ const meta = {
   args: {
     dispatch: () => {},
     isPending: false,
+    onCtaClick: () => {},
+    onCharacterIdChange: () => {},
+    onSubmit: () => {},
   },
 } satisfies Meta<typeof HomePage>;
 

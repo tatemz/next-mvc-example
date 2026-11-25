@@ -21,6 +21,8 @@ const meta = {
   args: {
     dispatch: () => {},
     isPending: false,
+    onCtaClick: () => {},
+    onQueryChange: () => {},
   },
 } satisfies Meta<typeof Funnel>;
 

@@ -8,6 +8,10 @@ import { swapiRuntime } from "../../server/Runtime";
 export const StarWarsFunnelPage = makeNextPage(
   swapiRuntime,
   Effect.map(startFunnel("night"), (model) => (
-    <ConnectedFunnel model={model} submitAction={submitFunnel} />
+    <ConnectedFunnel
+      model={model}
+      submitAction={submitFunnel}
+      universe="star-wars"
+    />
   )),
 );

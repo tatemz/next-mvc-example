@@ -45,13 +45,17 @@ describe("SearchForm", () => {
     });
 
     const idle = renderToStaticMarkup(
-      <SearchForm {...model} dispatch={() => {}} isPending={false} />,
+      <SearchForm {...model} dispatch={() => {}}
+          onValueChange={() => {}}
+          onSubmit={() => {}} isPending={false} />,
     );
     expect(idle).toContain("Sith id");
     expect(idle).toContain("Find them");
 
     const pending = renderToStaticMarkup(
-      <SearchForm {...model} dispatch={() => {}} isPending={true} />,
+      <SearchForm {...model} dispatch={() => {}}
+          onValueChange={() => {}}
+          onSubmit={() => {}} isPending={true} />,
     );
     expect(pending).toContain("Searching...");
     expect(pending).not.toContain("Find them");
@@ -67,7 +71,9 @@ describe("SearchForm", () => {
     });
 
     const html = renderToStaticMarkup(
-      <SearchForm {...model} dispatch={() => {}} isPending={false} />,
+      <SearchForm {...model} dispatch={() => {}}
+          onValueChange={() => {}}
+          onSubmit={() => {}} isPending={false} />,
     );
 
     expect(html).toContain('role="alert"');

@@ -103,6 +103,9 @@ export const makeFailedHomePageModel = (
 type HomePageExtras = {
   readonly dispatch: (formData: FormData) => void;
   readonly isPending: boolean;
+  readonly onCtaClick: () => void;
+  readonly onCharacterIdChange: (value: string) => void;
+  readonly onSubmit: () => void;
 };
 
 export type HomePageProps = HomePageViewModel & HomePageExtras;
@@ -121,13 +124,19 @@ type LoadedHomePageProps = LoadedHomePageViewModel & HomePageExtras;
 
 type FailedHomePageProps = FailedHomePageViewModel & HomePageExtras;
 
-const HomeHero = ({ hero }: { readonly hero: HomeHeroViewModel }) => (
+const HomeHero = ({
+  hero,
+  onCtaClick,
+}: {
+  readonly hero: HomeHeroViewModel;
+  readonly onCtaClick: () => void;
+}) => (
   <section className="hero rounded-box bg-base-100 shadow-xl">
     <div className="hero-content py-10 text-center">
       <div className="max-w-2xl">
         <h1 className="text-4xl font-bold">{hero.title}</h1>
         <p className="py-4 text-base-content/70">{hero.subtitle}</p>
-        <a href={hero.funnelHref} className="btn btn-primary">
+        <a href={hero.funnelHref} onClick={onCtaClick} className="btn btn-primary">
           {hero.funnelLabel}
         </a>
       </div>
@@ -138,10 +147,13 @@ const HomeHero = ({ hero }: { readonly hero: HomeHeroViewModel }) => (
 const LoadedHomePage = ({
   dispatch,
   isPending,
+  onCtaClick,
+  onCharacterIdChange,
+  onSubmit,
   ...model
 }: LoadedHomePageProps) => (
   <div className="flex flex-col gap-6">
-    <HomeHero hero={model.hero} />
+    <HomeHero hero={model.hero} onCtaClick={onCtaClick} />
     <div className="grid gap-6 lg:grid-cols-2">
       <PersonCard {...model.person} />
       <div className="flex flex-col gap-6">
@@ -150,6 +162,8 @@ const LoadedHomePage = ({
           {...model.form}
           dispatch={dispatch}
           isPending={isPending}
+          onValueChange={onCharacterIdChange}
+          onSubmit={onSubmit}
         />
       </div>
     </div>
@@ -159,10 +173,13 @@ const LoadedHomePage = ({
 const FailedHomePage = ({
   dispatch,
   isPending,
+  onCtaClick,
+  onCharacterIdChange,
+  onSubmit,
   ...model
 }: FailedHomePageProps) => (
   <div className="flex flex-col gap-6">
-    <HomeHero hero={model.hero} />
+    <HomeHero hero={model.hero} onCtaClick={onCtaClick} />
     <div role="alert" className="alert alert-error">
       {model.message}
     </div>
@@ -170,6 +187,8 @@ const FailedHomePage = ({
       {...model.form}
       dispatch={dispatch}
       isPending={isPending}
+      onValueChange={onCharacterIdChange}
+      onSubmit={onSubmit}
     />
   </div>
 );
@@ -177,6 +196,9 @@ const FailedHomePage = ({
 export const HomePage = ({
   dispatch,
   isPending,
+  onCtaClick,
+  onCharacterIdChange,
+  onSubmit,
   ...model
 }: HomePageProps) =>
   HomePageViewModel.match(model, {
@@ -186,6 +208,9 @@ export const HomePage = ({
           {...loaded}
           dispatch={dispatch}
           isPending={isPending}
+          onCtaClick={onCtaClick}
+          onCharacterIdChange={onCharacterIdChange}
+          onSubmit={onSubmit}
         />
       </AppShell>
     ),
@@ -195,6 +220,9 @@ export const HomePage = ({
           {...failed}
           dispatch={dispatch}
           isPending={isPending}
+          onCtaClick={onCtaClick}
+          onCharacterIdChange={onCharacterIdChange}
+          onSubmit={onSubmit}
         />
       </AppShell>
     ),

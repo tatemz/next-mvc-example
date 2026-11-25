@@ -23,7 +23,7 @@ vi.mock("../../server/Runtime", async () => {
   return { ghibliRuntime: runtime };
 });
 
-import { Results } from "../../components/Results";
+import { ConnectedResults } from "../../components/Results.connected";
 import { GhibliResultsPage } from "./GhibliResults.page";
 
 describe("Ghibli results page", () => {
@@ -41,13 +41,16 @@ describe("Ghibli results page", () => {
 
       expect(isValidElement(element)).toBe(true);
       if (!isValidElement(element)) throw new Error("expected an element");
-      expect(element.type).toBe(Results);
+      expect(element.type).toBe(ConnectedResults);
       expect(element.props).toMatchObject({
-        _tag: "Ready",
-        person: { name: "Haku" },
-        shell: { theme: "autumn" },
-        startOverHref: "/ghibli/funnel",
-        homeHref: "/ghibli",
+        universe: "ghibli",
+        model: {
+          _tag: "Ready",
+          person: { name: "Haku" },
+          shell: { theme: "autumn" },
+          startOverHref: "/ghibli/funnel",
+          homeHref: "/ghibli",
+        },
       });
     }),
   );

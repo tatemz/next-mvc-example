@@ -11,31 +11,34 @@ import { Results } from "./Results";
 const meta = {
   title: "Pages/Results",
   component: Results,
+  args: {
+    onCtaClick: () => {},
+  },
 } satisfies Meta<typeof Results>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const ReadyStarWars: Story = {
-  args: resultsReady(starWars, starWars.transport),
+  args: { model: resultsReady(starWars, starWars.transport) },
 };
 
 export const ReadyGhibli: Story = {
-  args: resultsReady(ghibliPilot, ghibliPilot.transport),
+  args: { model: resultsReady(ghibliPilot, ghibliPilot.transport) },
 };
 
 export const ReadyStarWarsWithoutTransport: Story = {
-  args: resultsReady(starWars, null),
+  args: { model: resultsReady(starWars, null) },
 };
 
 export const ReadyGhibliWithoutTransport: Story = {
-  args: resultsReady(ghibli, null),
+  args: { model: resultsReady(ghibli, null) },
 };
 
 export const MissingStarWars: Story = {
-  args: resultsMissing(starWars),
+  args: { model: resultsMissing(starWars) },
 };
 
 export const MissingGhibli: Story = {
-  args: resultsMissing(ghibli),
+  args: { model: resultsMissing(ghibli) },
 };

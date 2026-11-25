@@ -216,9 +216,19 @@ export const makeFunnelFailedViewModel = (
     startOverHref: "funnel",
   });
 
+export type FunnelCta =
+  | "search"
+  | "choose_character"
+  | "next_transport"
+  | "review_dossier"
+  | "open_dossier"
+  | "start_over";
+
 type FunnelExtras = {
   readonly dispatch: (formData: FormData) => void;
   readonly isPending: boolean;
+  readonly onCtaClick: (cta: FunnelCta) => void;
+  readonly onQueryChange: (value: string) => void;
 };
 
 export type FunnelProps = FunnelViewModel & FunnelExtras;
@@ -247,15 +257,26 @@ type StepProps<T> = {
   readonly step: T;
   readonly dispatch: (formData: FormData) => void;
   readonly isPending: boolean;
+  readonly onCtaClick: (cta: FunnelCta) => void;
+};
+
+type SearchStepProps = StepProps<FunnelSearchViewModel> & {
+  readonly onQueryChange: (value: string) => void;
 };
 
 const SearchStep = ({
   step,
   dispatch,
   isPending,
-}: StepProps<FunnelSearchViewModel>) => (
+  onCtaClick,
+  onQueryChange,
+}: SearchStepProps) => (
   <StepShell step={step}>
-    <form action={dispatch} className="flex flex-col gap-3">
+    <form
+      action={dispatch}
+      onSubmit={() => onCtaClick("search")}
+      className="flex flex-col gap-3"
+    >
       <label htmlFor="funnel-query" className="label-text">
         {step.label}
       </label>
@@ -263,6 +284,7 @@ const SearchStep = ({
         id="funnel-query"
         name="query"
         defaultValue={step.query}
+        onChange={(event) => onQueryChange(event.currentTarget.value)}
         placeholder={step.placeholder}
         className={`input input-bordered w-full${
           step.error === undefined ? "" : " input-error"
@@ -288,9 +310,14 @@ const ChooseStep = ({
   step,
   dispatch,
   isPending,
+  onCtaClick,
 }: StepProps<FunnelChooseViewModel>) => (
   <StepShell step={step}>
-    <form action={dispatch} className="flex flex-col gap-3">
+    <form
+      action={dispatch}
+      onSubmit={() => onCtaClick("choose_character")}
+      className="flex flex-col gap-3"
+    >
       <div className="flex flex-col gap-2">
         {step.results.map((result) => (
           <label
@@ -319,9 +346,14 @@ const FilmStep = ({
   step,
   dispatch,
   isPending,
+  onCtaClick,
 }: StepProps<FunnelFilmViewModel>) => (
   <StepShell step={step}>
-    <form action={dispatch} className="flex flex-col gap-3">
+    <form
+      action={dispatch}
+      onSubmit={() => onCtaClick("next_transport")}
+      className="flex flex-col gap-3"
+    >
       <div className="flex flex-col gap-2">
         {step.person.films.map((film) => (
           <label
@@ -358,9 +390,14 @@ const TransportStep = ({
   step,
   dispatch,
   isPending,
+  onCtaClick,
 }: StepProps<FunnelTransportViewModel>) => (
   <StepShell step={step}>
-    <form action={dispatch} className="flex flex-col gap-3">
+    <form
+      action={dispatch}
+      onSubmit={() => onCtaClick("review_dossier")}
+      className="flex flex-col gap-3"
+    >
       <div className="flex flex-col gap-2">
         {step.person.transports.map((transport) => (
           <label
@@ -397,7 +434,13 @@ const TransportStep = ({
   </StepShell>
 );
 
-const ReviewStep = ({ step }: { readonly step: FunnelReviewViewModel }) => (
+const ReviewStep = ({
+  step,
+  onCtaClick,
+}: {
+  readonly step: FunnelReviewViewModel;
+  readonly onCtaClick: (cta: FunnelCta) => void;
+}) => (
   <StepShell step={step}>
     <div className="rounded-box bg-base-200 p-4">
       <h2 className="text-xl font-bold">{step.person.name}</h2>
@@ -436,22 +479,40 @@ const ReviewStep = ({ step }: { readonly step: FunnelReviewViewModel }) => (
       </div>
     </dl>
     <div className="flex flex-wrap gap-3">
-      <a href={step.resultsHref} className="btn btn-primary">
+      <a
+        href={step.resultsHref}
+        onClick={() => onCtaClick("open_dossier")}
+        className="btn btn-primary"
+      >
         {step.openLabel}
       </a>
-      <a href={step.startOverHref} className="btn btn-ghost">
+      <a
+        href={step.startOverHref}
+        onClick={() => onCtaClick("start_over")}
+        className="btn btn-ghost"
+      >
         {step.startOverLabel}
       </a>
     </div>
   </StepShell>
 );
 
-const FailedStep = ({ step }: { readonly step: FunnelFailedViewModel }) => (
+const FailedStep = ({
+  step,
+  onCtaClick,
+}: {
+  readonly step: FunnelFailedViewModel;
+  readonly onCtaClick: (cta: FunnelCta) => void;
+}) => (
   <StepShell step={step}>
     <div role="alert" className="alert alert-error">
       {step.message}
     </div>
-    <a href={step.startOverHref} className="btn btn-primary">
+    <a
+      href={step.startOverHref}
+      onClick={() => onCtaClick("start_over")}
+      className="btn btn-primary"
+    >
       {step.startOverLabel}
     </a>
   </StepShell>
@@ -460,24 +521,51 @@ const FailedStep = ({ step }: { readonly step: FunnelFailedViewModel }) => (
 export const Funnel = ({
   dispatch,
   isPending,
+  onCtaClick,
+  onQueryChange,
   ...model
 }: FunnelProps) => (
   <AppShell {...model.shell}>
     {Match.valueTags(model, {
       Search: (step) => (
-        <SearchStep step={step} dispatch={dispatch} isPending={isPending} />
+        <SearchStep
+          step={step}
+          dispatch={dispatch}
+          isPending={isPending}
+          onCtaClick={onCtaClick}
+          onQueryChange={onQueryChange}
+        />
       ),
       Choose: (step) => (
-        <ChooseStep step={step} dispatch={dispatch} isPending={isPending} />
+        <ChooseStep
+          step={step}
+          dispatch={dispatch}
+          isPending={isPending}
+          onCtaClick={onCtaClick}
+        />
       ),
       Film: (step) => (
-        <FilmStep step={step} dispatch={dispatch} isPending={isPending} />
+        <FilmStep
+          step={step}
+          dispatch={dispatch}
+          isPending={isPending}
+          onCtaClick={onCtaClick}
+        />
       ),
       Transport: (step) => (
-        <TransportStep step={step} dispatch={dispatch} isPending={isPending} />
+        <TransportStep
+          step={step}
+          dispatch={dispatch}
+          isPending={isPending}
+          onCtaClick={onCtaClick}
+        />
       ),
-      Review: (step) => <ReviewStep step={step} />,
-      Failed: (step) => <FailedStep step={step} />,
+      Review: (step) => (
+        <ReviewStep step={step} onCtaClick={onCtaClick} />
+      ),
+      Failed: (step) => (
+        <FailedStep step={step} onCtaClick={onCtaClick} />
+      ),
     })}
   </AppShell>
 );

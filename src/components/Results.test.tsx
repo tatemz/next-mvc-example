@@ -30,7 +30,7 @@ describe("Results", () => {
       startOverHref,
       homeHref,
     );
-    const html = renderToStaticMarkup(<Results {...model} />);
+    const html = renderToStaticMarkup(<Results model={model} onCtaClick={() => {}} />);
 
     expect(html).toContain("Your dossier");
     expect(html).toContain("Luke Skywalker");
@@ -47,7 +47,7 @@ describe("Results", () => {
     };
     const html = renderToStaticMarkup(
       <Results
-        {...makeResultsReadyViewModel(
+        model={makeResultsReadyViewModel(
           i18n,
           shell,
           person,
@@ -56,6 +56,7 @@ describe("Results", () => {
           startOverHref,
           homeHref,
         )}
+        onCtaClick={() => {}}
       />,
     );
 
@@ -72,14 +73,14 @@ describe("Results", () => {
       startOverHref,
       homeHref,
     );
-    const html = renderToStaticMarkup(<Results {...model} />);
+    const html = renderToStaticMarkup(<Results model={model} onCtaClick={() => {}} />);
 
     expect(html).toContain("No transport selected");
   });
 
   it("renders a missing dossier", () => {
     const model = makeResultsMissingViewModel(i18n, shell, startOverHref);
-    const html = renderToStaticMarkup(<Results {...model} />);
+    const html = renderToStaticMarkup(<Results model={model} onCtaClick={() => {}} />);
 
     expect(html).toContain("Dossier not found");
     expect(html).toContain('role="alert"');

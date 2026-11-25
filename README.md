@@ -82,6 +82,27 @@ export const StarWarsFunnelPage = makeNextPage(
   `submitGhibliFunnel` are server actions. `HomePage.connected.tsx` and
   `Funnel.connected.tsx` are the two `"use client"` boundaries.
 
+## UI events
+
+UI events are typed, JSON-shaped domain facts emitted from the connected page
+components:
+
+- `PageLoaded`
+- `CtaClicked`
+- `FormValidationError`
+- `InputFilled`
+
+Each event can carry `characterId`, `filmOrder`, `transportKey`, and `query`
+metadata. `makeUiEventHandler` transforms an event into a flat
+`UiEventPayload` with `event`, `page`, `universe`, `occurredAt`, and
+`properties`, then sends it to an injected `UiEventSink`.
+
+`AppUiEventProvider` mounts the handler once at the root. The default browser
+sink dispatches a `ui-event` `CustomEvent`; replace the provider or sink to
+route the same events to analytics. The connected `HomePage`, `Funnel`, and
+`Results` components supply the CTA, input, validation, and page-load
+dispatches.
+
 ## Storybook
 
 ```sh
@@ -107,6 +128,7 @@ src/page-modules/            one Next page per route via makeNextPage
 src/platform/                Next adapter, redirect model, parsed params
 src/controllers/             page programs, state machines, view models
 src/components/              flat view models and views (AppShell included)
+src/ui-events/               event model, handler, sink, and React provider
 src/actions/                 "use server" boundaries
 src/domain/                  universe-neutral models
 src/services/                PeopleCatalog port and both adapters
