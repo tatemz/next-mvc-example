@@ -2,11 +2,16 @@
 
 import { it } from "@effect/vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, vi } from "vitest";
+import { afterEach, describe, expect, vi } from "vitest";
 import { AppUiEventProvider } from "./AppUiEventProvider";
-import { UI_EVENT_NAME } from "./BrowserUiEventSink";
+import { UI_EVENT_ROUTE } from "./BeaconUiEventSink";
 import { FunnelChooseContext, PageLoaded } from "./UiEvent";
 import { useUiEventDispatch } from "./UiEventContext";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 
 const Trigger = () => {
   const emit = useUiEventDispatch();
@@ -29,9 +34,10 @@ const Trigger = () => {
 };
 
 describe("AppUiEventProvider", () => {
-  it("sends transformed events through the browser sink", () => {
-    const listener = vi.fn();
-    window.addEventListener(UI_EVENT_NAME, listener);
+  it("sends the payload to the console and the beacon route", async () => {
+    const sendBeacon = vi.fn((_url: string, _body: Blob) => true);
+    vi.stubGlobal("navigator", { sendBeacon });
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
 
     render(
       <AppUiEventProvider>
@@ -40,15 +46,22 @@ describe("AppUiEventProvider", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "emit" }));
 
-    expect(listener).toHaveBeenCalledTimes(1);
-    const browserEvent = listener.mock.calls[0]?.[0] as CustomEvent;
-    expect(browserEvent.detail).toMatchObject({
+    expect(info).toHaveBeenCalledTimes(1);
+    const logged = info.mock.calls[0]?.[1];
+    expect(logged).toMatchObject({
       event: "page_loaded",
       page: "funnel",
       universe: "ghibli",
       properties: { query: "Leia" },
     });
 
-    window.removeEventListener(UI_EVENT_NAME, listener);
+    expect(sendBeacon).toHaveBeenCalledTimes(1);
+    const call = sendBeacon.mock.calls[0];
+    if (call === undefined) {
+      throw new Error("expected a beacon call");
+    }
+    const [url, body] = call;
+    expect(url).toBe(UI_EVENT_ROUTE);
+    expect(await body.text()).toBe(JSON.stringify(logged));
   });
 });

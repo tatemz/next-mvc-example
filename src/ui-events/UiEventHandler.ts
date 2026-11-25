@@ -141,7 +141,16 @@ export const toUiEventPayload = (
   });
 
 export const makeUiEventHandler = (
-  sink: UiEventSink,
+  sinks: ReadonlyArray<UiEventSink>,
   now: () => string,
 ): UiEventHandler =>
-  (event) => sink(toUiEventPayload(event, now()));
+  (event) => {
+    const payload = toUiEventPayload(event, now());
+    for (const sink of sinks) {
+      try {
+        sink(payload);
+      } catch (error) {
+        console.error("ui event sink failed", error);
+      }
+    }
+  };

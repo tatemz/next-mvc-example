@@ -112,11 +112,16 @@ and `properties`, then sends it to every injected `UiEventSink`. The sink
 keeps the flat property names (`characterId`, `filmOrder`, `transportKey`,
 `query`, and so on).
 
-`AppUiEventProvider` mounts the handler once at the root. The default browser
-sink dispatches a `ui-event` `CustomEvent`; replace the provider or sink to
-route the same events to analytics. Connected `HomePage` supplies page-load
-and CTA events, `Funnel` supplies input, validation, and CTA events, and
-`Results` supplies page-load and CTA events.
+`AppUiEventProvider` mounts the handler once at the root. The default list has
+two sinks: `ConsoleUiEventSink.ts` logs the payload, and
+`BeaconUiEventSink.ts` posts it with `navigator.sendBeacon` to
+`/api/ui-events`. A failing sink is logged and does not stop the others, so a
+new destination is one entry in the list. Connected `HomePage` supplies
+page-load and CTA events, `Funnel` supplies input, validation, and CTA events,
+and `Results` supplies page-load and CTA events.
+
+`app/api/ui-events/route.ts` reads the beacon body, logs it through the Effect
+logger with the `uiEvent` annotation, and returns `204`.
 
 ## Storybook
 
@@ -138,11 +143,12 @@ the app fixtures and view-model factories.
 .oxlintrc.json               Effect Oxlint preset and boundary overrides
 .storybook/                  Storybook config and page fixtures
 app/                         route re-exports; html/body layout
+app/api/ui-events/           beacon route; logs payloads with the Effect logger
 src/page-modules/            one Next page per route via makeNextPage
 src/platform/                Next adapter, redirect model, parsed params
 src/controllers/             page programs, state machines, view models
 src/components/              flat view models and views (AppShell included)
-src/ui-events/               event model, handler, sink, and React provider
+src/ui-events/               event model, handler, sinks, and React provider
 src/actions/                 "use server" boundaries
 src/domain/                  universe-neutral models
 src/services/                PeopleCatalog port and both adapters

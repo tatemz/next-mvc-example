@@ -2,12 +2,13 @@
 
 import { DateTime, Effect } from "effect";
 import type { ReactNode } from "react";
-import { browserUiEventSink } from "./BrowserUiEventSink";
+import { beaconUiEventSink } from "./BeaconUiEventSink";
+import { consoleUiEventSink } from "./ConsoleUiEventSink";
 import { UiEventProvider } from "./UiEventContext";
 import { makeUiEventHandler } from "./UiEventHandler";
 
 const handler = makeUiEventHandler(
-  browserUiEventSink,
+  [consoleUiEventSink, beaconUiEventSink],
   () => DateTime.formatIso(Effect.runSync(DateTime.now)),
 );
 

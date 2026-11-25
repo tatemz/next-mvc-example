@@ -1,5 +1,5 @@
 import { it } from "@effect/vitest";
-import { describe, expect } from "vitest";
+import { afterEach, describe, expect, vi } from "vitest";
 import {
   FunnelChooseContext,
   FunnelChooseCtaClicked,
@@ -340,16 +340,47 @@ const pageLoadedPayload = {
   properties: {},
 };
 
+afterEach(() => vi.restoreAllMocks());
+
 describe("makeUiEventHandler", () => {
-  it("adds the timestamp and sends the payload to the sink", () => {
-    const payloads: Array<unknown> = [];
+  it("adds the timestamp and sends the payload to every sink", () => {
+    const first: Array<unknown> = [];
+    const second: Array<unknown> = [];
     const handler = makeUiEventHandler(
-      (payload) => payloads.push(payload),
+      [
+        (payload) => first.push(payload),
+        (payload) => second.push(payload),
+      ],
       () => occurredAt,
     );
 
     handler(pageLoaded);
 
-    expect(payloads).toEqual([pageLoadedPayload]);
+    expect(first).toEqual([pageLoadedPayload]);
+    expect(second).toEqual([pageLoadedPayload]);
+  });
+
+  it("keeps the remaining sinks running when one fails", () => {
+    const surviving = vi.fn();
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const handler = makeUiEventHandler(
+      [
+        () => {
+          throw new Error("boom");
+        },
+        surviving,
+      ],
+      () => occurredAt,
+    );
+
+    handler(pageLoaded);
+
+    expect(surviving).toHaveBeenCalledWith(pageLoadedPayload);
+    expect(consoleError).toHaveBeenCalledWith(
+      "ui event sink failed",
+      expect.any(Error),
+    );
   });
 });
