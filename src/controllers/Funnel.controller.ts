@@ -44,7 +44,7 @@ export const advanceFunnel = (
         );
 
         if (Option.isNone(form)) {
-          return makeFunnelSearchResult(i18n, step, {
+          return makeFunnelSearchResult(i18n, step)({
             form,
             results: Option.none(),
           });
@@ -54,7 +54,7 @@ export const advanceFunnel = (
         const results = yield* Effect.option(
           client.searchPeople(form.value.query),
         );
-        return makeFunnelSearchResult(i18n, step, { form, results });
+        return makeFunnelSearchResult(i18n, step)({ form, results });
       }),
     Choose: (step) =>
       Effect.gen(function*() {
@@ -66,7 +66,7 @@ export const advanceFunnel = (
         const person: Option.Option<Person> = Option.isSome(form)
           ? yield* Effect.option(client.getPerson(form.value.characterId))
           : Option.none();
-        return makeFunnelChooseResult(i18n, step, { form, person });
+        return makeFunnelChooseResult(i18n, step)({ form, person });
       }),
     Film: (step) =>
       Effect.gen(function*() {
@@ -74,7 +74,7 @@ export const advanceFunnel = (
         const form = Schema.decodeUnknownOption(FunnelFilmForm)(
           toRecord(formData),
         );
-        return makeFunnelFilmResult(i18n, step, { form });
+        return makeFunnelFilmResult(i18n, step)({ form });
       }),
     Transport: (step) =>
       Effect.gen(function*() {
@@ -82,7 +82,7 @@ export const advanceFunnel = (
         const form = Schema.decodeUnknownOption(FunnelTransportForm)(
           toRecord(formData),
         );
-        return makeFunnelTransportResult(i18n, step, { form });
+        return makeFunnelTransportResult(i18n, step)({ form });
       }),
     Review: (step) => Effect.succeed<FunnelViewModel>(step),
     Failed: (step) => Effect.succeed<FunnelViewModel>(step),
