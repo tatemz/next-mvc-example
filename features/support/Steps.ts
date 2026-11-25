@@ -6,9 +6,8 @@ import { interactionPause } from "./Debug";
 import {
   type CatalogMode,
   CatalogControl,
-  ScenarioApp,
-  scenarioApp,
-} from "./ScenarioApp";
+} from "./CatalogStub";
+import { ScenarioApp, scenarioApp } from "./ScenarioApp";
 import { ScenarioPage, scenarioPage } from "./ScenarioPage";
 
 export type Session = {
