@@ -88,6 +88,13 @@ wherever an application has effects, models, and a view layer.
   boundary and drive happy paths and failures from data.
 - When two variants share behavior, use one data-driven scenario with a
   variant column.
+- Every browser scenario has at least one Given, one When, and one Then, in
+  that order. Given sets up state, When performs an action, Then asserts an
+  outcome. `And` may extend any block, but keep the blocks contiguous: never
+  interleave When and Then.
+- Keep a scenario small. Several `And` steps may be needed to reach a state,
+  but stop when the remaining steps describe a different outcome. Split the
+  flow instead of stacking unrelated actions and assertions.
 - Coverage gates are part of the contract. Do not lower them to land a change.
 - Run the same checks locally and in CI. Publish a machine-readable report and
   failure artifacts.
@@ -124,4 +131,5 @@ Before calling a change done, ask:
 - Does a file name match its contents?
 - Is there a wrapper with no behavior?
 - Can the integration suite run with no network?
+- Does every browser scenario have Given, When, and Then, in that order?
 - Did the same checks pass locally and in CI?
