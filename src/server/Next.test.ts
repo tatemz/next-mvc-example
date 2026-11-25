@@ -5,21 +5,21 @@ import {
   FetchHttpClient,
   HttpClient,
   HttpClientResponse,
-  HttpRouter,
   HttpServerResponse,
 } from "effect/http";
 import { describe, expect } from "vitest";
+import { app } from "../../boot/app";
 import { serve } from "../../boot/serve";
 import { makeCharacterId } from "../domain/FilmUniverse.fixture";
 import { PersonSummary } from "../domain/FilmUniverse.model";
-import { I18n, makeEn } from "../i18n/I18n.service";
 import {
   GhibliCatalog,
   PeopleCatalog,
   StarWarsCatalog,
 } from "../services/PeopleCatalog";
 import type { RenderServices } from "./RenderContext";
-import { Next, nextCatchAll } from "./Next";
+import { Next } from "./Next";
+import { UiEventLogger, noopUiEventLogger } from "./UiEventLogger";
 
 const catalogServing = (name: string): PeopleCatalog => ({
   getPerson: () => Effect.die("getPerson is not used here"),
@@ -49,32 +49,11 @@ const fakeNext = Layer.succeed(
   }),
 );
 
-const asPeopleCatalog = <I>(
-  tag: Context.Key<I, PeopleCatalog>,
-): Layer.Layer<PeopleCatalog, never, I> =>
-  Layer.effect(PeopleCatalog, Effect.map(tag, (catalog) => catalog));
-
-const universeRoutes = (
-  path: `/${string}`,
-  catalog: Layer.Layer<PeopleCatalog, never, StarWarsCatalog | GhibliCatalog>,
-) =>
-  HttpRouter.provideRequest(
-    Layer.mergeAll(Layer.sync(I18n, makeEn), catalog),
-  )(
-    Layer.mergeAll(nextCatchAll(path), nextCatchAll(`${path}/*`)),
-  );
-
-const app = HttpRouter.serve(
-  Layer.mergeAll(
-    universeRoutes("/star-wars", asPeopleCatalog(StarWarsCatalog)),
-    universeRoutes("/ghibli", asPeopleCatalog(GhibliCatalog)),
-    nextCatchAll("*"),
-  ),
-  { disableLogger: true, disableListenLog: true },
-).pipe(
+const appWithFakes = app.pipe(
   Layer.provide(fakeNext),
   Layer.provide(Layer.succeed(StarWarsCatalog, catalogServing("Luke"))),
   Layer.provide(Layer.succeed(GhibliCatalog, catalogServing("Haku"))),
+  Layer.provide(Layer.succeed(UiEventLogger, noopUiEventLogger)),
   Layer.provide(NodeHttpServer.layerHttpServices),
 );
 
@@ -84,12 +63,12 @@ const body = (url: string) =>
     Effect.flatMap((response) => response.text),
   );
 
-describe("nextCatchAll", () => {
+describe("app routes", () => {
   it.effect(
     "gives each universe route its catalog and other routes none",
     () =>
       Effect.gen(function*() {
-        const url = yield* serve(0)(app);
+        const url = yield* serve(0)(appWithFakes);
 
         expect(yield* body(`${url}/star-wars`)).toBe("Luke");
         expect(yield* body(`${url}/star-wars/funnel`)).toBe("Luke");
