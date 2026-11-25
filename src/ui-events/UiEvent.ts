@@ -85,58 +85,76 @@ export const PageLoaded = Schema.TaggedStruct("PageLoaded", {
 });
 export type PageLoaded = typeof PageLoaded.Type;
 
+export const HomeCtas = {
+  BuildDossier: "build_dossier",
+} as const;
+
+export const FunnelCtas = {
+  Search: "search",
+  ChooseCharacter: "choose_character",
+  NextTransport: "next_transport",
+  ReviewDossier: "review_dossier",
+  OpenDossier: "open_dossier",
+  StartOver: "start_over",
+} as const;
+
 export const FunnelCta = Schema.Literals([
-  "search",
-  "choose_character",
-  "next_transport",
-  "review_dossier",
-  "open_dossier",
-  "start_over",
+  FunnelCtas.Search,
+  FunnelCtas.ChooseCharacter,
+  FunnelCtas.NextTransport,
+  FunnelCtas.ReviewDossier,
+  FunnelCtas.OpenDossier,
+  FunnelCtas.StartOver,
 ]);
 export type FunnelCta = typeof FunnelCta.Type;
 
+export const ResultsCtas = {
+  BuildAnotherDossier: "build_another_dossier",
+  BackHome: "back_home",
+} as const;
+
 export const ResultsCta = Schema.Literals([
-  "build_another_dossier",
-  "back_home",
+  ResultsCtas.BuildAnotherDossier,
+  ResultsCtas.BackHome,
 ]);
 export type ResultsCta = typeof ResultsCta.Type;
 
 export const CtaClicked = Schema.TaggedUnion({
   HomeCtaClicked: {
     context: PageContext.cases.Home,
-    cta: Schema.Literal("build_dossier"),
+    cta: Schema.Literal(HomeCtas.BuildDossier),
   },
   FunnelSearchCtaClicked: {
     context: PageContext.cases.FunnelSearch,
-    cta: Schema.Literal("search"),
+    cta: Schema.Literal(FunnelCtas.Search),
   },
   FunnelChooseCtaClicked: {
     context: PageContext.cases.FunnelChoose,
-    cta: Schema.Literal("choose_character"),
+    cta: Schema.Literal(FunnelCtas.ChooseCharacter),
   },
   FunnelFilmCtaClicked: {
     context: PageContext.cases.FunnelFilm,
-    cta: Schema.Literal("next_transport"),
+    cta: Schema.Literal(FunnelCtas.NextTransport),
   },
   FunnelTransportCtaClicked: {
     context: PageContext.cases.FunnelTransport,
-    cta: Schema.Literal("review_dossier"),
+    cta: Schema.Literal(FunnelCtas.ReviewDossier),
   },
   FunnelReviewCtaClicked: {
     context: PageContext.cases.FunnelReview,
-    cta: Schema.Literals(["open_dossier", "start_over"]),
+    cta: Schema.Literals([FunnelCtas.OpenDossier, FunnelCtas.StartOver]),
   },
   FunnelFailedCtaClicked: {
     context: PageContext.cases.FunnelFailed,
-    cta: Schema.Literal("start_over"),
+    cta: Schema.Literal(FunnelCtas.StartOver),
   },
   ResultsMissingCtaClicked: {
     context: PageContext.cases.ResultsMissing,
-    cta: Schema.Literal("build_another_dossier"),
+    cta: Schema.Literal(ResultsCtas.BuildAnotherDossier),
   },
   ResultsReadyCtaClicked: {
     context: PageContext.cases.ResultsReady,
-    cta: Schema.Literals(["build_another_dossier", "back_home"]),
+    cta: Schema.Literals([ResultsCtas.BuildAnotherDossier, ResultsCtas.BackHome]),
   },
 });
 export type CtaClicked = typeof CtaClicked.Type;

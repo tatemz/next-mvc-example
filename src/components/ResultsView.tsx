@@ -1,7 +1,7 @@
 import { Array, Option, Schema } from "effect";
 import type { Universe } from "../domain/FilmUniverse.model";
 import type { I18n } from "../i18n/I18n.service";
-import type { ResultsCta } from "../ui-events/UiEvent";
+import { ResultsCtas, type ResultsCta } from "../ui-events/UiEvent";
 import {
   AppShell,
   AppShellViewModel,
@@ -124,16 +124,15 @@ export const makeResultsViewModel = (
     return missingViewModel(i18n, shell, universe);
   }
 
-  const transport = query.transport === "none"
-    ? null
-    : Option.getOrNull(
-      Array.findFirst(
+  const transport: Option.Option<TransportInput | null> =
+    query.transport === "none"
+      ? Option.some(null)
+      : Array.findFirst(
         person.value.transports,
         (candidate) => candidate.key === query.transport,
-      ),
-    );
+      );
 
-  if (query.transport !== "none" && transport === null) {
+  if (Option.isNone(transport)) {
     return missingViewModel(i18n, shell, universe);
   }
 
@@ -142,7 +141,7 @@ export const makeResultsViewModel = (
     shell,
     person.value,
     film.value,
-    transport,
+    transport.value,
     universe,
   );
 };
@@ -198,14 +197,14 @@ const ReadyResults = ({
     <div className="flex flex-wrap gap-3">
       <a
         href={model.startOverHref}
-        onClick={() => onCtaClick("build_another_dossier")}
+        onClick={() => onCtaClick(ResultsCtas.BuildAnotherDossier)}
         className="btn btn-primary"
       >
         {model.startOverLabel}
       </a>
       <a
         href={model.homeHref}
-        onClick={() => onCtaClick("back_home")}
+        onClick={() => onCtaClick(ResultsCtas.BackHome)}
         className="btn btn-ghost"
       >
         {model.homeLabel}
@@ -219,7 +218,7 @@ const MissingResults = ({
   onCtaClick,
 }: {
   readonly model: ResultsMissingViewModel;
-  readonly onCtaClick: (cta: "build_another_dossier") => void;
+  readonly onCtaClick: (cta: ResultsCta) => void;
 }) => (
   <div className="flex flex-col gap-6">
     <h1 className="text-3xl font-bold">{model.heading}</h1>
@@ -228,7 +227,7 @@ const MissingResults = ({
     </div>
     <a
       href={model.startOverHref}
-      onClick={() => onCtaClick("build_another_dossier")}
+      onClick={() => onCtaClick(ResultsCtas.BuildAnotherDossier)}
       className="btn btn-primary"
     >
       {model.startOverLabel}

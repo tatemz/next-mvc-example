@@ -1,6 +1,6 @@
-import { Array, Function, Schema } from "effect";
+import { Array, Function, Match, Schema } from "effect";
 import type { ReactNode } from "react";
-import { Universe } from "../domain/FilmUniverse.model";
+import { Universe, Universes } from "../domain/FilmUniverse.model";
 import type { I18n } from "../i18n/I18n.service";
 
 export const ExperienceTheme = Schema.Literals(["night", "autumn"]);
@@ -29,7 +29,11 @@ export const makeAppShellViewModel = (
 ) =>
   AppShellViewModel.make({
     universe,
-    theme: universe === "star-wars" ? "night" : "autumn",
+    theme: Match.value(universe).pipe(
+      Match.when(Universes.StarWars, () => "night" as const),
+      Match.when(Universes.Ghibli, () => "autumn" as const),
+      Match.exhaustive,
+    ),
     brand: AppShellLinkViewModel.make({
       label: i18n._({ id: "shell.brand" }),
       href: "/",

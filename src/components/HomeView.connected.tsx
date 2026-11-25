@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import {
   CtaClicked,
+  HomeCtas,
   PageContext,
   PageLoaded,
 } from "../ui-events/UiEvent";
@@ -33,7 +34,7 @@ export const ConnectedHomeView = ({ model }: ConnectedHomeViewProps) => {
         context: PageContext.cases.Home.make({
           universe,
         }),
-        cta: "build_dossier",
+        cta: HomeCtas.BuildDossier,
       }),
     );
 

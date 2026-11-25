@@ -1,4 +1,4 @@
-import { Effect, Schema } from "effect";
+import { Context, Effect, Schema } from "effect";
 import type { ReactElement } from "react";
 import {
   type RenderServices,
@@ -33,12 +33,15 @@ export const makeNextPage = <E>(
     const search = ParsedSearchParams.fromInput(await searchParams);
     const path = (await params) ?? {};
 
-    return finish(
-      await Effect.runPromiseWith(currentRenderContext())(
-        load.pipe(
-          Effect.provideService(ParsedSearchParams.tag, search),
-          Effect.provideService(ParsedPathParams.tag, path),
-        ),
+    const context = Context.add(
+      Context.add(
+        currentRenderContext(),
+        ParsedSearchParams.tag,
+        search,
       ),
+      ParsedPathParams.tag,
+      path,
     );
+
+    return finish(await Effect.runPromiseWith(context)(load));
   };

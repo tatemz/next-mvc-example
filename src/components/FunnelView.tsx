@@ -1,7 +1,7 @@
 import { Array, Option, Schema } from "effect";
 import type { ReactNode } from "react";
 import type { I18n } from "../i18n/I18n.service";
-import type { FunnelCta } from "../ui-events/UiEvent";
+import { FunnelCtas, type FunnelCta } from "../ui-events/UiEvent";
 import type {
   FunnelChooseForm,
   FunnelFilmForm,
@@ -451,7 +451,7 @@ const SearchStep = ({
   <StepShell step={step}>
     <form
       action={dispatch}
-      onSubmit={() => onCtaClick("search")}
+      onSubmit={() => onCtaClick(FunnelCtas.Search)}
       className="flex flex-col gap-3"
     >
       <label htmlFor="funnel-query" className="label-text">
@@ -488,11 +488,11 @@ const ChooseStep = ({
   dispatch,
   isPending,
   onCtaClick,
-}: StepProps<FunnelChooseViewModel, "choose_character">) => (
+}: StepProps<FunnelChooseViewModel, typeof FunnelCtas.ChooseCharacter>) => (
   <StepShell step={step}>
     <form
       action={dispatch}
-      onSubmit={() => onCtaClick("choose_character")}
+      onSubmit={() => onCtaClick(FunnelCtas.ChooseCharacter)}
       className="flex flex-col gap-3"
     >
       <div className="flex flex-col gap-2">
@@ -524,11 +524,11 @@ const FilmStep = ({
   dispatch,
   isPending,
   onCtaClick,
-}: StepProps<FunnelFilmViewModel, "next_transport">) => (
+}: StepProps<FunnelFilmViewModel, typeof FunnelCtas.NextTransport>) => (
   <StepShell step={step}>
     <form
       action={dispatch}
-      onSubmit={() => onCtaClick("next_transport")}
+      onSubmit={() => onCtaClick(FunnelCtas.NextTransport)}
       className="flex flex-col gap-3"
     >
       <div className="flex flex-col gap-2">
@@ -568,11 +568,11 @@ const TransportStep = ({
   dispatch,
   isPending,
   onCtaClick,
-}: StepProps<FunnelTransportViewModel, "review_dossier">) => (
+}: StepProps<FunnelTransportViewModel, typeof FunnelCtas.ReviewDossier>) => (
   <StepShell step={step}>
     <form
       action={dispatch}
-      onSubmit={() => onCtaClick("review_dossier")}
+      onSubmit={() => onCtaClick(FunnelCtas.ReviewDossier)}
       className="flex flex-col gap-3"
     >
       <div className="flex flex-col gap-2">
@@ -616,7 +616,9 @@ const ReviewStep = ({
   onCtaClick,
 }: {
   readonly step: FunnelReviewViewModel;
-  readonly onCtaClick: (cta: "open_dossier" | "start_over") => void;
+  readonly onCtaClick: (
+    cta: typeof FunnelCtas.OpenDossier | typeof FunnelCtas.StartOver,
+  ) => void;
 }) => (
   <StepShell step={step}>
     <div className="rounded-box bg-base-200 p-4">
@@ -658,14 +660,14 @@ const ReviewStep = ({
     <div className="flex flex-wrap gap-3">
       <a
         href={step.resultsHref}
-        onClick={() => onCtaClick("open_dossier")}
+        onClick={() => onCtaClick(FunnelCtas.OpenDossier)}
         className="btn btn-primary"
       >
         {step.openLabel}
       </a>
       <a
         href={step.startOverHref}
-        onClick={() => onCtaClick("start_over")}
+        onClick={() => onCtaClick(FunnelCtas.StartOver)}
         className="btn btn-ghost"
       >
         {step.startOverLabel}
@@ -679,7 +681,7 @@ const FailedStep = ({
   onCtaClick,
 }: {
   readonly step: FunnelFailedViewModel;
-  readonly onCtaClick: (cta: "start_over") => void;
+  readonly onCtaClick: (cta: typeof FunnelCtas.StartOver) => void;
 }) => (
   <StepShell step={step}>
     <div role="alert" className="alert alert-error">
@@ -687,7 +689,7 @@ const FailedStep = ({
     </div>
     <a
       href={step.startOverHref}
-      onClick={() => onCtaClick("start_over")}
+      onClick={() => onCtaClick(FunnelCtas.StartOver)}
       className="btn btn-primary"
     >
       {step.startOverLabel}

@@ -4,6 +4,7 @@ import { useEffect, useActionState } from "react";
 import {
   CtaClicked,
   FormValidationError,
+  FunnelCtas,
   InputFilled,
   PageContext,
   PageLoaded,
@@ -78,7 +79,7 @@ const ctaEventFor = (
           universe,
           query: step.query,
         }),
-        cta: "choose_character",
+        cta: FunnelCtas.ChooseCharacter,
       }),
     Film: (step) =>
       CtaClicked.cases.FunnelFilmCtaClicked.make({
@@ -86,7 +87,7 @@ const ctaEventFor = (
           universe,
           characterId: step.person.id,
         }),
-        cta: "next_transport",
+        cta: FunnelCtas.NextTransport,
       }),
     Transport: (step) =>
       CtaClicked.cases.FunnelTransportCtaClicked.make({
@@ -95,7 +96,7 @@ const ctaEventFor = (
           characterId: step.person.id,
           filmOrder: step.film.order,
         }),
-        cta: "review_dossier",
+        cta: FunnelCtas.ReviewDossier,
       }),
     Review: (step) =>
       CtaClicked.cases.FunnelReviewCtaClicked.make({
@@ -105,14 +106,16 @@ const ctaEventFor = (
           filmOrder: step.film.order,
           transport: makeTransportChoice(step.transport),
         }),
-        cta: cta === "start_over" ? "start_over" : "open_dossier",
+        cta: cta === FunnelCtas.StartOver
+          ? FunnelCtas.StartOver
+          : FunnelCtas.OpenDossier,
       }),
     Failed: () =>
       CtaClicked.cases.FunnelFailedCtaClicked.make({
         context: PageContext.cases.FunnelFailed.make({
           universe,
         }),
-        cta: "start_over",
+        cta: FunnelCtas.StartOver,
       }),
   });
 

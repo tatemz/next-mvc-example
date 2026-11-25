@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import {
   CtaClicked,
   PageContext,
+  ResultsCtas,
   PageLoaded,
   makeTransportChoice,
   type ResultsContext,
@@ -54,7 +55,7 @@ const ctaEventFor = (
         context: PageContext.cases.ResultsMissing.make({
           universe,
         }),
-        cta: "build_another_dossier",
+        cta: ResultsCtas.BuildAnotherDossier,
       }),
   });
 
