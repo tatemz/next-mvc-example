@@ -1,4 +1,5 @@
 import { Array, Effect, Function, Option, Schema } from "effect";
+import { makeAppShellViewModel } from "../components/AppShell";
 import {
   FunnelViewModel,
   makeFunnelChooseViewModel,
@@ -8,7 +9,6 @@ import {
   makeFunnelSearchViewModel,
   makeFunnelTransportViewModel,
 } from "../components/FunnelView";
-import { loadAppShell } from "./AppShell.controller";
 import { CharacterId, type Universe } from "../domain/FilmUniverse.model";
 import { getStringOrEmpty, toRecord } from "../forms/FormData";
 import { I18n } from "../i18n/I18n.service";
@@ -17,7 +17,7 @@ import { PeopleCatalog } from "../services/PeopleCatalog";
 export const startFunnel = (universe: Universe) =>
   Effect.gen(function*() {
     const i18n = yield* I18n;
-    const shell = yield* loadAppShell(universe);
+    const shell = makeAppShellViewModel(i18n, universe);
     return makeFunnelSearchViewModel(i18n, shell, "", undefined);
   });
 

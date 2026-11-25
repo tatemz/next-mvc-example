@@ -1,5 +1,8 @@
 import { Effect, Option, Schema } from "effect";
-import type { AppShellViewModel } from "../components/AppShell";
+import {
+  makeAppShellViewModel,
+  type AppShellViewModel,
+} from "../components/AppShell";
 import {
   makeResultsMissingViewModel,
   makeResultsViewModel,
@@ -8,7 +11,6 @@ import { CharacterId, type Universe } from "../domain/FilmUniverse.model";
 import { I18n } from "../i18n/I18n.service";
 import { decodeOption } from "../platform/ParsedSearchParams";
 import { PeopleCatalog } from "../services/PeopleCatalog";
-import { loadAppShell } from "./AppShell.controller";
 
 export const ResultsParams = Schema.Struct({
   character: CharacterId,
@@ -33,7 +35,7 @@ export const loadResults = (
 export const loadResultsPage = (universe: Universe) =>
   Effect.gen(function*() {
     const i18n = yield* I18n;
-    const shell = yield* loadAppShell(universe);
+    const shell = makeAppShellViewModel(i18n, universe);
     const params = yield* decodeOption(ResultsParams);
 
     if (Option.isNone(params)) {
