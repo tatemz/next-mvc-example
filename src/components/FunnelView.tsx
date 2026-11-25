@@ -8,6 +8,10 @@ import type {
   FunnelTransportForm,
 } from "../forms/FunnelForm";
 import {
+  NotFoundViewModel,
+  makeNotFoundViewModel,
+} from "./NotFoundView";
+import {
   AppShell,
   AppShellViewModel,
   makeAppShellViewModel,
@@ -426,6 +430,19 @@ export const makeFunnelTransportResult =
         );
       },
     });
+
+export const FunnelPageViewModel = Schema.Union([NotFoundViewModel, FunnelViewModel]);
+export type FunnelPageViewModel = typeof FunnelPageViewModel.Type;
+
+export const makeFunnelPageViewModel = (
+  i18n: I18n,
+  universe: Option.Option<Universe>,
+): FunnelPageViewModel =>
+  Option.match(universe, {
+    onNone: () => makeNotFoundViewModel(i18n),
+    onSome: (value) =>
+      makeFunnelSearchViewModel(i18n, value, "", undefined),
+  });
 
 type FunnelExtras = {
   readonly dispatch: (formData: FormData) => void;

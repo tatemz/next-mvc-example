@@ -1,6 +1,10 @@
-import { Match, Schema } from "effect";
+import { Match, Option, Schema } from "effect";
 import type { I18n } from "../i18n/I18n.service";
 import { Universes, type Universe } from "../domain/FilmUniverse.model";
+import {
+  NotFoundViewModel,
+  makeNotFoundViewModel,
+} from "./NotFoundView";
 import {
   AppShell,
   AppShellViewModel,
@@ -52,6 +56,18 @@ export const makeHomeViewModel = (
       funnelHref: `/${universe}/funnel`,
       image: splashImageFor(universe),
     }),
+  });
+
+export const HomePageViewModel = Schema.Union([NotFoundViewModel, HomeViewModel]);
+export type HomePageViewModel = typeof HomePageViewModel.Type;
+
+export const makeHomePageViewModel = (
+  i18n: I18n,
+  universe: Option.Option<Universe>,
+): HomePageViewModel =>
+  Option.match(universe, {
+    onNone: () => makeNotFoundViewModel(i18n),
+    onSome: (value) => makeHomeViewModel(i18n, value),
   });
 
 export type HomeViewProps = {

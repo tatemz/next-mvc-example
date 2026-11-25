@@ -1,9 +1,5 @@
 import { Effect, Option, Schema } from "effect";
-import { makeNotFoundViewModel } from "../components/NotFoundView";
-import {
-  makeResultsMissingViewModel,
-  makeResultsViewModel,
-} from "../components/ResultsView";
+import { makeResultsPageViewModel } from "../components/ResultsView";
 import { CharacterId } from "../domain/FilmUniverse.model";
 import { I18n } from "../i18n/I18n.service";
 import { decodeOption } from "../platform/ParsedSearchParams";
@@ -20,25 +16,16 @@ export type ResultsParams = typeof ResultsParams.Type;
 export const loadResults = Effect.gen(function*() {
   const i18n = yield* I18n;
   const universe = yield* currentUniverse;
-
-  if (Option.isNone(universe)) {
-    return makeNotFoundViewModel(i18n);
-  }
-
   const params = yield* decodeOption(ResultsParams);
-
-  if (Option.isNone(params)) {
-    return makeResultsMissingViewModel(i18n, universe.value);
-  }
-
   const client = yield* PeopleCatalog;
-  const person = yield* Effect.option(
-    client.getPerson(params.value.character),
-  );
-  return makeResultsViewModel(
+  const person = Option.isSome(universe) && Option.isSome(params)
+    ? yield* Effect.option(client.getPerson(params.value.character))
+    : Option.none();
+
+  return makeResultsPageViewModel(
     i18n,
-    universe.value,
+    universe,
+    Option.map(params, ({ film, transport }) => ({ film, transport })),
     person,
-    params.value,
   );
 });

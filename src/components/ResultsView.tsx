@@ -3,6 +3,10 @@ import type { Universe } from "../domain/FilmUniverse.model";
 import type { I18n } from "../i18n/I18n.service";
 import type { ResultsCta } from "../ui-events/UiEvent";
 import {
+  NotFoundViewModel,
+  makeNotFoundViewModel,
+} from "./NotFoundView";
+import {
   AppShell,
   AppShellViewModel,
   makeAppShellViewModel,
@@ -143,6 +147,25 @@ export const makeResultsViewModel = (
     universe,
   );
 };
+
+export const ResultsPageViewModel = Schema.Union([NotFoundViewModel, ResultsViewModel]);
+export type ResultsPageViewModel = typeof ResultsPageViewModel.Type;
+
+export const makeResultsPageViewModel = (
+  i18n: I18n,
+  universe: Option.Option<Universe>,
+  query: Option.Option<ResultsQuery>,
+  person: Option.Option<PersonCardInput>,
+): ResultsPageViewModel =>
+  Option.match(universe, {
+    onNone: () => makeNotFoundViewModel(i18n),
+    onSome: (value) =>
+      Option.match(query, {
+        onNone: () => makeResultsMissingViewModel(i18n, value),
+        onSome: (resultsQuery) =>
+          makeResultsViewModel(i18n, value, person, resultsQuery),
+      }),
+  });
 
 export type ResultsViewProps = {
   readonly model: ResultsViewModel;

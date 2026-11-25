@@ -5,6 +5,7 @@ import {
   makeFunnelChooseResult,
   makeFunnelFilmResult,
   makeFunnelSearchResult,
+  makeFunnelPageViewModel,
   makeFunnelSearchViewModel,
   makeFunnelTransportResult,
 } from "../components/FunnelView";
@@ -17,18 +18,13 @@ import {
 } from "../forms/FunnelForm";
 import { toRecord } from "../forms/FormData";
 import { I18n } from "../i18n/I18n.service";
-import { makeNotFoundViewModel } from "../components/NotFoundView";
 import { currentUniverse } from "./Universe.controller";
 import { PeopleCatalog } from "../services/PeopleCatalog";
 
 export const startFunnel = Effect.gen(function*() {
   const i18n = yield* I18n;
   const universe = yield* currentUniverse;
-  return Option.match(universe, {
-    onNone: () => makeNotFoundViewModel(i18n),
-    onSome: (value) =>
-      makeFunnelSearchViewModel(i18n, value, "", undefined),
-  });
+  return makeFunnelPageViewModel(i18n, universe);
 });
 
 export const advanceFunnel = (
