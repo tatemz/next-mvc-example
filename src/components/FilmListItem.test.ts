@@ -36,4 +36,17 @@ describe("FilmListItem", () => {
 
     expect(html).toContain("poster.jpg");
   });
+
+  it("renders no poster when the film has none", () => {
+    const html = renderToStaticMarkup(
+      FilmListItem(
+        FilmListItemViewModel.make({
+          order: 4,
+          text: "A New Hope",
+        }),
+      ),
+    );
+
+    expect(html).not.toContain("<img");
+  });
 });
