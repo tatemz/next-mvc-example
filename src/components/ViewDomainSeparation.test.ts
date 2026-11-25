@@ -15,7 +15,12 @@ const viewModelFiles = ["src/components", "src/page-modules"]
 
 const domainImport =
   /import\s+(?:type\s+)?\{([^}]*)\}\s+from\s+["'][^"']*\/domain\//g;
-const allowedDomainImports = new Set(["Universe", "Universes"]);
+const allowedDomainImports = new Set([
+  "Universe",
+  "Universes",
+  "NoTransportKey",
+  "TransportKinds",
+]);
 const importedDomainNames = (source: string): string[] =>
   [...source.matchAll(domainImport)].flatMap((match) =>
     match[1]

@@ -17,6 +17,8 @@ import {
   Origin,
   Species,
   Transport,
+  TransportKinds,
+  type TransportKind,
 } from "../domain/FilmUniverse.model";
 import type {
   SwapiFilmResponse,
@@ -107,20 +109,20 @@ export const make = (swapi: SwapiApiClient) => {
     );
 
   const getTransport = (
-    kind: "Starship" | "Vehicle",
+    kind: TransportKind,
     url: string,
     id: CharacterId,
   ) =>
     Effect.gen(function*() {
       const transportId = yield* resourceId(kind.toLowerCase(), id)(url);
       const response = yield* Function.pipe(
-        kind === "Starship"
+        kind === TransportKinds.Starship
           ? swapi.starships.get({ params: { id: transportId } })
           : swapi.vehicles.get({ params: { id: transportId } }),
         Effect.mapError(() => unavailable(kind.toLowerCase(), id)),
       );
       return Transport.make({
-        key: `${kind === "Starship" ? "starship" : "vehicle"}-${transportId}`,
+        key: `${kind === TransportKinds.Starship ? "starship" : "vehicle"}-${transportId}`,
         kind,
         name: response.name,
         model: response.model,
@@ -131,9 +133,9 @@ export const make = (swapi: SwapiApiClient) => {
     Effect.all(
       [
         ...Array.map(person.starships, (url) =>
-          getTransport("Starship", url, id),
+          getTransport(TransportKinds.Starship, url, id),
         ),
-        ...Array.map(person.vehicles, (url) => getTransport("Vehicle", url, id)),
+        ...Array.map(person.vehicles, (url) => getTransport(TransportKinds.Vehicle, url, id)),
       ],
       { concurrency: "unbounded" },
     );

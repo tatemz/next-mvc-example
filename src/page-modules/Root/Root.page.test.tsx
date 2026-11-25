@@ -1,3 +1,4 @@
+import { RedirectTypes } from "../../platform/NextRedirect";
 import { it } from "@effect/vitest";
 import { describe, expect, vi } from "vitest";
 
@@ -21,6 +22,6 @@ describe("RootPage", () => {
         () => RootPage({ searchParams: Promise.resolve({}) }),
       ),
     ).rejects.toThrow("NEXT_REDIRECT;replace;/star-wars");
-    expect(redirect).toHaveBeenCalledWith("/star-wars", "replace");
+    expect(redirect).toHaveBeenCalledWith("/star-wars", RedirectTypes.Replace);
   });
 });

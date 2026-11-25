@@ -1,4 +1,5 @@
 import { Array, Function, Match, Option, Schema } from "effect";
+import { TransportKinds } from "../domain/FilmUniverse.model";
 import type { I18n } from "../i18n/I18n.service";
 import {
   FilmListItemViewModel,
@@ -20,12 +21,14 @@ const SpeciesViewModel = Schema.TaggedStruct("SpeciesViewModel", {
 });
 type SpeciesViewModel = typeof SpeciesViewModel.Type;
 
-const TransportKind = Schema.Literals(["Starship", "Vehicle"]);
-type TransportKind = typeof TransportKind.Type;
+const TransportKindSchema = Schema.Literals([
+  TransportKinds.Starship,
+  TransportKinds.Vehicle,
+]);
 
 export const TransportViewModel = Schema.TaggedStruct("TransportViewModel", {
   key: Schema.NonEmptyString,
-  kind: TransportKind,
+  kind: TransportKindSchema,
   name: Schema.NonEmptyString,
   model: Schema.NonEmptyString,
 });
@@ -66,7 +69,7 @@ const SpeciesInput = Schema.Struct({
 
 export const TransportInput = Schema.Struct({
   key: Schema.NonEmptyString,
-  kind: TransportKind,
+  kind: TransportKindSchema,
   name: Schema.NonEmptyString,
   model: Schema.NonEmptyString,
 });

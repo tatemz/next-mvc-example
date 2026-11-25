@@ -1,12 +1,15 @@
 import { Schema, SchemaGetter } from "effect";
 
-export const Universe = Schema.Literals(["star-wars", "ghibli"]);
-export type Universe = typeof Universe.Type;
-
 export const Universes = {
   StarWars: "star-wars",
   Ghibli: "ghibli",
-} as const satisfies Record<string, Universe>;
+} as const;
+
+export const Universe = Schema.Literals([
+  Universes.StarWars,
+  Universes.Ghibli,
+]);
+export type Universe = typeof Universe.Type;
 
 export const CharacterId = Schema.NumberFromString.check(
   Schema.isInt(),
@@ -41,12 +44,23 @@ export const Species = Schema.TaggedStruct("Species", {
 });
 export type Species = typeof Species.Type;
 
-const TransportKind = Schema.Literals(["Starship", "Vehicle"]);
-type TransportKind = typeof TransportKind.Type;
+export const TransportKinds = {
+  Starship: "Starship",
+  Vehicle: "Vehicle",
+} as const;
+export type TransportKind =
+  (typeof TransportKinds)[keyof typeof TransportKinds];
+
+const TransportKindSchema = Schema.Literals([
+  TransportKinds.Starship,
+  TransportKinds.Vehicle,
+]);
+
+export const NoTransportKey = "none";
 
 export const Transport = Schema.TaggedStruct("Transport", {
   key: Schema.NonEmptyString,
-  kind: TransportKind,
+  kind: TransportKindSchema,
   name: Schema.NonEmptyString,
   model: Schema.NonEmptyString,
 });

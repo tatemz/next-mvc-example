@@ -16,7 +16,10 @@ import {
   AppShellViewModel,
   makeAppShellViewModel,
 } from "./AppShell";
-import type { Universe } from "../domain/FilmUniverse.model";
+import {
+  NoTransportKey,
+  type Universe,
+} from "../domain/FilmUniverse.model";
 import { FilmListItemViewModel } from "./FilmListItem";
 import { FunnelChooseStep } from "./FunnelChooseStep";
 import { FunnelFailedStep } from "./FunnelFailedStep";
@@ -127,8 +130,6 @@ type FunnelSearchViewModel = typeof FunnelViewModel.cases.Search.Type;
 type FunnelChooseViewModel = typeof FunnelViewModel.cases.Choose.Type;
 type FunnelFilmViewModel = typeof FunnelViewModel.cases.Film.Type;
 type FunnelTransportViewModel = typeof FunnelViewModel.cases.Transport.Type;
-type FunnelReviewViewModel = typeof FunnelViewModel.cases.Review.Type;
-type FunnelFailedViewModel = typeof FunnelViewModel.cases.Failed.Type;
 
 const searchViewModel = (
   i18n: I18n,
@@ -246,7 +247,7 @@ export const makeFunnelReviewViewModel = (
     character: person.id,
     film: String(film.order),
     transport: Option.match(Option.fromNullishOr(transport), {
-      onNone: () => "none",
+      onNone: () => NoTransportKey,
       onSome: (selected) => selected.key,
     }),
   });
@@ -269,10 +270,15 @@ export const makeFunnelReviewViewModel = (
   });
 };
 
-export type FunnelFailure = "unavailable" | "invalidChoice";
+export const FunnelFailures = {
+  Unavailable: "unavailable",
+  InvalidChoice: "invalidChoice",
+} as const;
+export type FunnelFailure =
+  (typeof FunnelFailures)[keyof typeof FunnelFailures];
 
 const failureMessage = (i18n: I18n, failure: FunnelFailure): string =>
-  failure === "unavailable"
+  failure === FunnelFailures.Unavailable
     ? i18n._({ id: "funnel.failed.message" })
     : i18n._({ id: "funnel.failed.invalidChoice" });
 
@@ -314,7 +320,7 @@ export const makeFunnelSearchResult =
             makeFunnelFailedViewModel(
               i18n,
               step.shell,
-              "unavailable",
+              FunnelFailures.Unavailable,
             ),
           onSome: (results) =>
             Array.matchLeft(results, {
@@ -344,14 +350,14 @@ export const makeFunnelChooseResult =
         makeFunnelFailedViewModel(
           i18n,
           step.shell,
-          "invalidChoice",
+          FunnelFailures.InvalidChoice,
         ),
       onSome: (form) => {
         if (!isAvailableChoice(step, form.characterId)) {
           return makeFunnelFailedViewModel(
             i18n,
             step.shell,
-            "invalidChoice",
+            FunnelFailures.InvalidChoice,
           );
         }
 
@@ -360,7 +366,7 @@ export const makeFunnelChooseResult =
             makeFunnelFailedViewModel(
               i18n,
               step.shell,
-              "unavailable",
+              FunnelFailures.Unavailable,
             ),
           onSome: (person) =>
             makeFunnelFilmViewModel(i18n, step.shell, person),
@@ -383,7 +389,7 @@ export const makeFunnelFilmResult =
           makeFunnelFailedViewModel(
             i18n,
             step.shell,
-            "invalidChoice",
+            FunnelFailures.InvalidChoice,
           ),
         onSome: (film) =>
           makeFunnelTransportViewModel(
@@ -403,21 +409,21 @@ export const makeFunnelTransportResult =
         makeFunnelFailedViewModel(
           i18n,
           step.shell,
-          "invalidChoice",
+          FunnelFailures.InvalidChoice,
         ),
       onSome: ({ transportKey }) => {
-        const transport = transportKey === "none"
+        const transport = transportKey === NoTransportKey
           ? Option.none<TransportViewModel>()
           : Array.findFirst(
             step.person.transports,
             (candidate) => candidate.key === transportKey,
           );
 
-        if (transportKey !== "none" && Option.isNone(transport)) {
+        if (transportKey !== NoTransportKey && Option.isNone(transport)) {
           return makeFunnelFailedViewModel(
             i18n,
             step.shell,
-            "invalidChoice",
+            FunnelFailures.InvalidChoice,
           );
         }
 

@@ -1,3 +1,5 @@
+import { ExperienceThemes } from "./AppShell";
+import { Universes } from "../domain/FilmUniverse.model";
 import { it } from "@effect/vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect } from "vitest";
@@ -8,10 +10,10 @@ const i18n = makeEn();
 
 describe("makeAppShellViewModel", () => {
   it("builds the theme, brand, and dataset links", () => {
-    expect(makeAppShellViewModel(i18n, "ghibli")).toEqual({
+    expect(makeAppShellViewModel(i18n, Universes.Ghibli)).toEqual({
       _tag: "AppShellViewModel",
-      universe: "ghibli",
-      theme: "autumn",
+      universe: Universes.Ghibli,
+      theme: ExperienceThemes.Autumn,
       brand: {
         _tag: "AppShellLinkViewModel",
         label: "Character Dossier",
@@ -36,12 +38,12 @@ describe("makeAppShellViewModel", () => {
 describe("AppShell", () => {
   it("renders the shared frame around children", () => {
     const html = renderToStaticMarkup(
-      <AppShell {...makeAppShellViewModel(i18n, "star-wars")}>
+      <AppShell {...makeAppShellViewModel(i18n, Universes.StarWars)}>
         <p>child</p>
       </AppShell>,
     );
 
-    expect(html).toContain('data-theme="night"');
+    expect(html).toContain(`data-theme="${ExperienceThemes.Night}"`);
     expect(html).toContain("Character Dossier");
     expect(html).toContain('href="/star-wars"');
     expect(html).toContain('href="/ghibli"');

@@ -1,5 +1,9 @@
 import { Schema } from "effect";
-import { CharacterId, type Person } from "./FilmUniverse.model";
+import {
+  CharacterId,
+  TransportKinds,
+  type Person,
+} from "./FilmUniverse.model";
 
 export const makeCharacterId = (value: string): CharacterId =>
   Schema.decodeSync(CharacterId)(value);
@@ -27,14 +31,14 @@ export const luke: Person = {
     {
       _tag: "Transport",
       key: "starship-12",
-      kind: "Starship",
+      kind: TransportKinds.Starship,
       name: "X-wing",
       model: "T-65 X-wing",
     },
     {
       _tag: "Transport",
       key: "vehicle-14",
-      kind: "Vehicle",
+      kind: TransportKinds.Vehicle,
       name: "Snowspeeder",
       model: "t-47 airspeeder",
     },
@@ -91,7 +95,7 @@ export const muska: Person = {
     {
       _tag: "Transport",
       key: "4e09b023-f650-4747-9ab9-eacf14540cfb",
-      kind: "Vehicle",
+      kind: TransportKinds.Vehicle,
       name: "Air Destroyer Goliath",
       model: "Goliath",
     },

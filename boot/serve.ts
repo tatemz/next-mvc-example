@@ -1,7 +1,6 @@
 import { NodeHttpServer } from "@effect/platform-node";
-import { Effect, Layer, type Scope } from "effect";
+import { Effect, Layer } from "effect";
 import * as HttpServer from "effect/http/HttpServer";
-import type { ServeError } from "effect/http/HttpServerError";
 import { createServer } from "node:http";
 
 export const serve =

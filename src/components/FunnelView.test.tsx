@@ -1,3 +1,5 @@
+import { FunnelFailures } from "./FunnelView";
+import { Universes, TransportKinds } from "../domain/FilmUniverse.model";
 import { it } from "@effect/vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect } from "vitest";
@@ -22,7 +24,7 @@ import { ConnectedFunnelView } from "./FunnelView.connected";
 import { UiEventProvider } from "../ui-events/UiEventContext";
 
 const i18n = makeEn();
-const shell = makeAppShellViewModel(i18n, "star-wars");
+const shell = makeAppShellViewModel(i18n, Universes.StarWars);
 const person = makePersonViewModel(i18n, luke);
 const film = person.films[0];
 const transport = person.transports[0];
@@ -49,7 +51,7 @@ const render = (model: FunnelViewModel, isPending = false) =>
 
 describe("Funnel", () => {
   it("renders the search step", () => {
-    const model = makeFunnelSearchViewModel(i18n, "star-wars", "Luke", undefined);
+    const model = makeFunnelSearchViewModel(i18n, Universes.StarWars, "Luke", undefined);
 
     expect(model).toMatchObject({
       _tag: "Search",
@@ -68,7 +70,7 @@ describe("Funnel", () => {
 
   it("renders the search error", () => {
     const html = render(
-      makeFunnelSearchViewModel(i18n, "star-wars", "", "Enter a character name."),
+      makeFunnelSearchViewModel(i18n, Universes.StarWars, "", "Enter a character name."),
     );
 
     expect(html).toContain('role="alert"');
@@ -116,8 +118,8 @@ describe("Funnel", () => {
 
     expect(html).toContain("X-wing");
     expect(html).toContain("Snowspeeder");
-    expect(html).toContain("Starship");
-    expect(html).toContain("Vehicle");
+    expect(html).toContain(TransportKinds.Starship);
+    expect(html).toContain(TransportKinds.Vehicle);
     expect(html).toContain("No transport");
     expect(html).toContain("Review dossier");
 
@@ -209,7 +211,7 @@ describe("Funnel", () => {
 
   it("renders the failure", () => {
     const html = render(
-      makeFunnelFailedViewModel(i18n, shell, "unavailable"),
+      makeFunnelFailedViewModel(i18n, shell, FunnelFailures.Unavailable),
     );
 
     expect(html).toContain('role="alert"');
@@ -222,7 +224,7 @@ describe("Funnel", () => {
     const html = renderToStaticMarkup(
       <UiEventProvider handler={() => {}}>
         <ConnectedFunnelView
-          model={makeFunnelSearchViewModel(i18n, "star-wars", "", undefined)}
+          model={makeFunnelSearchViewModel(i18n, Universes.StarWars, "", undefined)}
           submitAction={async (previous) => previous}
         />
       </UiEventProvider>,

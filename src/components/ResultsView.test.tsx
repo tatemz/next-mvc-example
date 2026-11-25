@@ -1,3 +1,4 @@
+import { Universes } from "../domain/FilmUniverse.model";
 import { it } from "@effect/vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect } from "vitest";
@@ -11,7 +12,7 @@ import {
 } from "./ResultsView";
 
 const i18n = makeEn();
-const shell = makeAppShellViewModel(i18n, "star-wars");
+const shell = makeAppShellViewModel(i18n, Universes.StarWars);
 const person = luke;
 const film = luke.films[0];
 const transport = luke.transports[0];
@@ -24,7 +25,7 @@ describe("ResultsView", () => {
       person,
       film,
       transport,
-      "star-wars",
+      Universes.StarWars,
     );
     const html = renderToStaticMarkup(<ResultsView model={model} onCtaClick={() => {}} />);
 
@@ -49,7 +50,7 @@ describe("ResultsView", () => {
           person,
           illustratedFilm,
           transport,
-          "star-wars",
+          Universes.StarWars,
         )}
         onCtaClick={() => {}}
       />,
@@ -65,7 +66,7 @@ describe("ResultsView", () => {
       person,
       film,
       null,
-      "star-wars",
+      Universes.StarWars,
     );
     const html = renderToStaticMarkup(<ResultsView model={model} onCtaClick={() => {}} />);
 
@@ -73,7 +74,7 @@ describe("ResultsView", () => {
   });
 
   it("renders a missing dossier", () => {
-    const model = makeResultsMissingViewModel(i18n, "star-wars");
+    const model = makeResultsMissingViewModel(i18n, Universes.StarWars);
     const html = renderToStaticMarkup(<ResultsView model={model} onCtaClick={() => {}} />);
 
     expect(html).toContain("Dossier not found");

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { Universes } from "../domain/FilmUniverse.model";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   cleanup,
@@ -9,7 +10,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { homeSplash, starWars } from "../../.storybook/pageFixtures";
-import { type UiEvent } from "../ui-events/UiEvent";
+import { type UiEvent, HomeCtas } from "../ui-events/UiEvent";
 import { UiEventProvider } from "../ui-events/UiEventContext";
 import { ConnectedHomeView } from "./HomeView.connected";
 
@@ -31,15 +32,15 @@ describe("ConnectedHomeView events", () => {
       expect(events).toContainEqual(
         expect.objectContaining({
           _tag: "PageLoaded",
-          context: { _tag: "Home", universe: "star-wars" },
+          context: { _tag: "Home", universe: Universes.StarWars },
         }),
       ),
     );
     expect(events).toContainEqual(
       expect.objectContaining({
         _tag: "HomeCtaClicked",
-        context: { _tag: "Home", universe: "star-wars" },
-        cta: "build_dossier",
+        context: { _tag: "Home", universe: Universes.StarWars },
+        cta: HomeCtas.BuildDossier,
       }),
     );
   });

@@ -1,3 +1,4 @@
+import { FunnelFields } from "../forms/FunnelForm";
 import { FunnelCtas } from "../ui-events/UiEvent";
 import { FunnelStepProps, FunnelStepShell } from "./FunnelStep";
 import type { FunnelViewModel } from "./FunnelView";
@@ -27,7 +28,7 @@ export const FunnelSearchStep = ({
       </label>
       <input
         id="funnel-query"
-        name="query"
+        name={FunnelFields.Query}
         defaultValue={step.query}
         onChange={(event) => onQueryChange(event.currentTarget.value)}
         placeholder={step.placeholder}

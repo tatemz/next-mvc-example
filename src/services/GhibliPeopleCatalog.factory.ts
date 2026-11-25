@@ -7,6 +7,7 @@ import {
   Origin,
   Species,
   Transport,
+  TransportKinds,
 } from "../domain/FilmUniverse.model";
 import type {
   GhibliFilmResponse,
@@ -163,7 +164,7 @@ export const make = (ghibli: GhibliSource) => {
                     ? [
                         Transport.make({
                           key: vehicle.id,
-                          kind: "Vehicle",
+                          kind: TransportKinds.Vehicle,
                           name: vehicle.name,
                           model: vehicle.vehicle_class,
                         }),

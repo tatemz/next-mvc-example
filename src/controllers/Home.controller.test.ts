@@ -1,3 +1,5 @@
+import { ExperienceThemes } from "../components/AppShell";
+import { Universes } from "../domain/FilmUniverse.model";
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
@@ -18,11 +20,11 @@ const run = (universe: string) =>
 describe("loadHome", () => {
   it.effect("builds the Star Wars splash", () =>
     Effect.gen(function*() {
-      const model = yield* run("star-wars");
+      const model = yield* run(Universes.StarWars);
 
       expect(model).toMatchObject({
         _tag: "HomeViewModel",
-        shell: { theme: "night" },
+        shell: { theme: ExperienceThemes.Night },
         hero: {
           kicker: "Star Wars",
           title: "Star Wars character dossier",
@@ -42,11 +44,11 @@ describe("loadHome", () => {
 
   it.effect("builds the Ghibli splash", () =>
     Effect.gen(function*() {
-      const model = yield* run("ghibli");
+      const model = yield* run(Universes.Ghibli);
 
       expect(model).toMatchObject({
         _tag: "HomeViewModel",
-        shell: { theme: "autumn" },
+        shell: { theme: ExperienceThemes.Autumn },
         hero: {
           kicker: "Ghibli",
           title: "Studio Ghibli character dossier",

@@ -3,7 +3,15 @@ import type { ReactNode } from "react";
 import { Universe, Universes } from "../domain/FilmUniverse.model";
 import type { I18n } from "../i18n/I18n.service";
 
-export const ExperienceTheme = Schema.Literals(["night", "autumn"]);
+export const ExperienceThemes = {
+  Night: "night",
+  Autumn: "autumn",
+} as const;
+
+export const ExperienceTheme = Schema.Literals([
+  ExperienceThemes.Night,
+  ExperienceThemes.Autumn,
+]);
 export type ExperienceTheme = typeof ExperienceTheme.Type;
 
 const AppShellLinkViewModel = Schema.TaggedStruct(
@@ -30,8 +38,8 @@ export const makeAppShellViewModel = (
   AppShellViewModel.make({
     universe,
     theme: Match.value(universe).pipe(
-      Match.when(Universes.StarWars, () => "night" as const),
-      Match.when(Universes.Ghibli, () => "autumn" as const),
+      Match.when(Universes.StarWars, () => ExperienceThemes.Night),
+      Match.when(Universes.Ghibli, () => ExperienceThemes.Autumn),
       Match.exhaustive,
     ),
     brand: AppShellLinkViewModel.make({

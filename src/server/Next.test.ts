@@ -14,6 +14,7 @@ import {
   personNamed,
 } from "../domain/FilmUniverse.fixture";
 import { catalogOf } from "../services/PeopleCatalog.fixture";
+import { Universes } from "../domain/FilmUniverse.model";
 import { PeopleCatalog } from "../services/PeopleCatalog";
 import type { RenderServices } from "./RenderContext";
 import { Next } from "./Next";
@@ -44,8 +45,8 @@ const fakeNext = Layer.succeed(
 const appWithFakes = appWith({
   next: fakeNext,
   catalogs: {
-    "star-wars": catalogServing("Luke"),
-    ghibli: catalogServing("Haku"),
+    [Universes.StarWars]: catalogServing("Luke"),
+    [Universes.Ghibli]: catalogServing("Haku"),
   },
 });
 

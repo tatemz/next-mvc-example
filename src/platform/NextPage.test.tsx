@@ -15,7 +15,7 @@ import { I18n } from "../i18n/I18n.service";
 import { PeopleCatalog } from "../services/PeopleCatalog";
 import { catalogOf } from "../services/PeopleCatalog.fixture";
 import { makeNextPage } from "./NextPage";
-import { NextRedirect } from "./NextRedirect";
+import { NextRedirect, RedirectTypes } from "./NextRedirect";
 import { type ParsedSearchParams, decodeOption } from "./ParsedSearchParams";
 import { renderContext } from "../server/RenderContext.fixture";
 import { runInRenderContext } from "../server/RenderContext";
@@ -80,7 +80,7 @@ describe("makeNextPage", () => {
 
 const RedirectPage = makeNextPage(
   Effect.succeed(
-    NextRedirect.make({ url: "/star-wars", type: "replace" }),
+    NextRedirect.make({ url: "/star-wars", type: RedirectTypes.Replace }),
   ),
 );
 
@@ -97,7 +97,7 @@ describe("makeNextPage with a redirect outcome", () => {
       );
 
       expect(exit._tag).toBe("Failure");
-      expect(redirect).toHaveBeenCalledWith("/star-wars", "replace");
+      expect(redirect).toHaveBeenCalledWith("/star-wars", RedirectTypes.Replace);
     }),
   );
 });

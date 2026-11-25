@@ -10,6 +10,7 @@ import {
   makeFunnelReviewViewModel,
   makeFunnelSearchViewModel,
   makeFunnelTransportViewModel,
+  FunnelFailures,
   type FunnelViewModel,
 } from "../src/components/FunnelView";
 import type { FilmListItemViewModel } from "../src/components/FilmListItem";
@@ -27,10 +28,13 @@ import {
   type ResultsViewModel,
 } from "../src/components/ResultsView";
 import { luke, makeCharacterId } from "../src/domain/FilmUniverse.fixture";
-import type {
-  Person,
-  Transport,
-  Universe,
+import {
+  NoTransportKey,
+  TransportKinds,
+  Universes,
+  type Person,
+  type Transport,
+  type Universe,
 } from "../src/domain/FilmUniverse.model";
 import { makeEn } from "../src/i18n/I18n.service";
 
@@ -101,7 +105,7 @@ const porco: Person = {
     {
       _tag: "Transport",
       key: "red-wing",
-      kind: "Vehicle",
+      kind: TransportKinds.Vehicle,
       name: "Red Wing",
       model: "Airplane",
     },
@@ -148,10 +152,10 @@ const datasetFor = (
   };
 };
 
-export const starWars = datasetFor(luke, "star-wars", "Luke");
-export const starWarsHuman = datasetFor(humanLuke, "star-wars", "Luke");
-export const ghibli = datasetFor(haku, "ghibli", "Haku");
-export const ghibliPilot = datasetFor(porco, "ghibli", "Porco");
+export const starWars = datasetFor(luke, Universes.StarWars, "Luke");
+export const starWarsHuman = datasetFor(humanLuke, Universes.StarWars, "Luke");
+export const ghibli = datasetFor(haku, Universes.Ghibli, "Haku");
+export const ghibliPilot = datasetFor(porco, Universes.Ghibli, "Porco");
 
 export const homeSplash = (dataset: PageDataset): HomeViewModel =>
   makeHomeViewModel(i18n, dataset.universe);
@@ -207,12 +211,20 @@ export const funnelReview = (
   );
 
 export const funnelFailed = (dataset: PageDataset): FunnelViewModel =>
-  makeFunnelFailedViewModel(i18n, dataset.shell, "unavailable");
+  makeFunnelFailedViewModel(
+    i18n,
+    dataset.shell,
+    FunnelFailures.Unavailable,
+  );
 
 export const funnelFailedInvalidChoice = (
   dataset: PageDataset,
 ): FunnelViewModel =>
-  makeFunnelFailedViewModel(i18n, dataset.shell, "invalidChoice");
+  makeFunnelFailedViewModel(
+    i18n,
+    dataset.shell,
+    FunnelFailures.InvalidChoice,
+  );
 
 export const resultsReady = (
   dataset: PageDataset,
@@ -226,7 +238,7 @@ export const resultsReady = (
     Option.some(dataset.person),
     {
       film: Option.getOrThrow(Array.head(dataset.person.films)).order,
-      transport: transport?.key ?? "none",
+      transport: transport?.key ?? NoTransportKey,
     },
   );
 
@@ -235,5 +247,5 @@ export const resultsMissing = (dataset: PageDataset): ResultsViewModel =>
     i18n,
     dataset.universe,
     Option.none(),
-    { film: 0, transport: "none" },
+    { film: 0, transport: NoTransportKey },
   );

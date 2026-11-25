@@ -1,3 +1,4 @@
+import { ExperienceThemes } from "./AppShell";
 import { it } from "@effect/vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect } from "vitest";
@@ -16,7 +17,7 @@ describe("HomeView", () => {
     expect(html).toContain("Star Wars character dossier");
     expect(html).toContain("Build a dossier");
     expect(html).toContain('href="/star-wars/funnel"');
-    expect(html).toContain('data-theme="night"');
+    expect(html).toContain(`data-theme="${ExperienceThemes.Night}"`);
     expect(html).toContain("Pillars of Creation");
     expect(html).toContain("NASA, ESA, and the Hubble Heritage Team");
   });
@@ -27,7 +28,7 @@ describe("HomeView", () => {
     expect(html).toContain("Studio Ghibli character dossier");
     expect(html).toContain("Build a dossier");
     expect(html).toContain('href="/ghibli/funnel"');
-    expect(html).toContain('data-theme="autumn"');
+    expect(html).toContain(`data-theme="${ExperienceThemes.Autumn}"`);
     expect(html).toContain("Spirited Away film poster");
     expect(html).toContain("Studio Ghibli, via TMDB");
   });

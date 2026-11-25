@@ -1,3 +1,4 @@
+import { Universes } from "../domain/FilmUniverse.model";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { consoleUiEventSink } from "./ConsoleUiEventSink";
 import type { UiEventPayload } from "./UiEventPayload";
@@ -5,7 +6,7 @@ import type { UiEventPayload } from "./UiEventPayload";
 const payload: UiEventPayload = {
   event: "page_loaded",
   page: "home",
-  universe: "star-wars",
+  universe: Universes.StarWars,
   occurredAt: "2026-11-24T12:00:00.000Z",
   properties: {},
 };

@@ -8,16 +8,16 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { redirect } from "next/navigation";
-import { NextRedirect, handleNextRedirect } from "./NextRedirect";
+import { NextRedirect, handleNextRedirect, RedirectTypes } from "./NextRedirect";
 
 describe("handleNextRedirect", () => {
   it("throws Next's redirect for a redirect outcome", () => {
     expect(() =>
       handleNextRedirect(
-        NextRedirect.make({ url: "/star-wars", type: "replace" }),
+        NextRedirect.make({ url: "/star-wars", type: RedirectTypes.Replace }),
       ),
     ).toThrow("NEXT_REDIRECT;replace;/star-wars");
-    expect(redirect).toHaveBeenCalledWith("/star-wars", "replace");
+    expect(redirect).toHaveBeenCalledWith("/star-wars", RedirectTypes.Replace);
   });
 
   it("returns a non-redirect result unchanged", () => {

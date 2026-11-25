@@ -1,3 +1,4 @@
+import { Universes } from "../domain/FilmUniverse.model";
 import {
   NodeFileSystem,
   NodeHttpServer,
@@ -11,7 +12,7 @@ import { layer } from "./UiEventApi.layer";
 const payload = {
   event: "page_loaded",
   page: "home",
-  universe: "star-wars",
+  universe: Universes.StarWars,
   occurredAt: "2026-11-24T12:00:00.000Z",
   properties: {},
 };

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { Universes } from "../domain/FilmUniverse.model";
 import { it } from "@effect/vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, vi } from "vitest";
@@ -21,7 +22,7 @@ const Trigger = () => {
         emit(
           PageLoaded.make({
             context: PageContext.cases.FunnelChoose.make({
-              universe: "ghibli",
+              universe: Universes.Ghibli,
               query: "Leia",
             }),
           }),
@@ -51,7 +52,7 @@ describe("AppUiEventProvider", () => {
     expect(logged).toMatchObject({
       event: "page_loaded",
       page: "funnel",
-      universe: "ghibli",
+      universe: Universes.Ghibli,
       properties: { query: "Leia" },
     });
 

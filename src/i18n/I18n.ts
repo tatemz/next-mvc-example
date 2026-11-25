@@ -1,7 +1,6 @@
 import { createIntl, type IntlConfig } from "@formatjs/intl";
 import type { InferInterpolations } from "@typesafe-intl/core";
 import { Record } from "effect";
-import type { Types } from "effect";
 
 export type AnyMessages = Record.ReadonlyRecord<string, string>;
 

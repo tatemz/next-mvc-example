@@ -1,3 +1,4 @@
+import { TransportKinds } from "../domain/FilmUniverse.model";
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
@@ -217,7 +218,7 @@ describe("GhibliPeopleCatalog", () => {
         {
           _tag: "Transport",
           key: "red-wing",
-          kind: "Vehicle",
+          kind: TransportKinds.Vehicle,
           name: "Red Wing",
           model: "Airplane",
         },

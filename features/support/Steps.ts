@@ -1,11 +1,15 @@
 import { Expect, type Page } from "@usestrider/browser";
 import { Effect, Layer, Schema } from "effect";
 import { Bdd } from "effect-bdd";
-import { Universe } from "../../src/domain/FilmUniverse.model";
+import {
+  Universe,
+  Universes,
+} from "../../src/domain/FilmUniverse.model";
 import { interactionPause } from "./Debug";
 import {
   type CatalogMode,
   CatalogControl,
+  CatalogModes,
 } from "./CatalogStub";
 import { ScenarioApp, scenarioApp } from "./ScenarioApp";
 import { ScenarioPage, scenarioPage } from "./ScenarioPage";
@@ -27,7 +31,10 @@ const filmOrder = Bdd.capture("filmOrder", Schema.String);
 const transportKey = Bdd.capture("transportKey", Schema.String);
 const catalogMode = Bdd.capture(
   "catalogMode",
-  Schema.Literals(["working", "unavailable"]),
+  Schema.Literals([
+    CatalogModes.Working,
+    CatalogModes.Unavailable,
+  ]),
 );
 
 export const givenTheAppIsRunning = Bdd.given`the app is running`(
@@ -126,7 +133,7 @@ export const openFunnelFromHome =
 export const chooseUniverse =
   Bdd.when`I choose the universe from the header`(
     Effect.fn("chooseUniverse")(function*(session: Session) {
-      const label = session.universe === "star-wars"
+      const label = session.universe === Universes.StarWars
         ? "Star Wars"
         : "Ghibli";
       yield* session.page.getByRole("link", { name: label }).click();

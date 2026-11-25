@@ -1,3 +1,5 @@
+import { ExperienceThemes } from "../../components/AppShell";
+import { Universes } from "../../domain/FilmUniverse.model";
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { isValidElement } from "react";
@@ -22,7 +24,7 @@ const render = (universe: string) =>
 describe("Home page", () => {
   it.effect("loads the Star Wars splash", () =>
     Effect.gen(function*() {
-      const element = yield* render("star-wars");
+      const element = yield* render(Universes.StarWars);
 
       expect(isValidElement(element)).toBe(true);
       if (!isValidElement<{ model: unknown }>(element)) {
@@ -35,7 +37,7 @@ describe("Home page", () => {
           title: "Star Wars character dossier",
           funnelHref: "/star-wars/funnel",
         },
-        shell: { universe: "star-wars", theme: "night" },
+        shell: { universe: Universes.StarWars, theme: ExperienceThemes.Night },
       });
     }));
 
@@ -53,7 +55,7 @@ describe("Home page", () => {
 
   it.effect("loads the Ghibli splash", () =>
     Effect.gen(function*() {
-      const element = yield* render("ghibli");
+      const element = yield* render(Universes.Ghibli);
 
       expect(isValidElement(element)).toBe(true);
       if (!isValidElement<{ model: unknown }>(element)) {
@@ -65,7 +67,7 @@ describe("Home page", () => {
           title: "Studio Ghibli character dossier",
           funnelHref: "/ghibli/funnel",
         },
-        shell: { universe: "ghibli", theme: "autumn" },
+        shell: { universe: Universes.Ghibli, theme: ExperienceThemes.Autumn },
       });
     }));
 });

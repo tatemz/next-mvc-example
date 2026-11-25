@@ -1,3 +1,5 @@
+import { ExperienceThemes } from "../../components/AppShell";
+import { Universes, NoTransportKey } from "../../domain/FilmUniverse.model";
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { isValidElement } from "react";
@@ -29,7 +31,7 @@ describe("Results page", () => {
   it.effect("loads a Star Wars dossier", () =>
     Effect.gen(function*() {
       const element = yield* render(
-        "star-wars",
+        Universes.StarWars,
         { character: "1", film: "4", transport: "starship-12" },
         [luke],
       );
@@ -46,7 +48,7 @@ describe("Results page", () => {
         transport: { key: "starship-12" },
         startOverHref: "/star-wars/funnel",
         homeHref: "/star-wars",
-        shell: { universe: "star-wars", theme: "night" },
+        shell: { universe: Universes.StarWars, theme: ExperienceThemes.Night },
       });
     }));
 
@@ -65,8 +67,8 @@ describe("Results page", () => {
   it.effect("loads a Ghibli dossier", () =>
     Effect.gen(function*() {
       const element = yield* render(
-        "ghibli",
-        { character: "1", film: "1", transport: "none" },
+        Universes.Ghibli,
+        { character: "1", film: "1", transport: NoTransportKey },
         [haku],
       );
 
@@ -77,7 +79,7 @@ describe("Results page", () => {
       expect(element.props.model).toMatchObject({
         _tag: "Ready",
         person: { name: "Haku" },
-        shell: { universe: "ghibli", theme: "autumn" },
+        shell: { universe: Universes.Ghibli, theme: ExperienceThemes.Autumn },
         startOverHref: "/ghibli/funnel",
         homeHref: "/ghibli",
       });
@@ -86,7 +88,7 @@ describe("Results page", () => {
   it.effect("renders a missing dossier when params do not decode", () =>
     Effect.gen(function*() {
       const element = yield* render(
-        "star-wars",
+        Universes.StarWars,
         { character: "1" },
         [luke],
       );

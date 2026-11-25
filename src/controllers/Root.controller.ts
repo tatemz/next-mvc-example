@@ -1,6 +1,9 @@
 import { Effect } from "effect";
-import { NextRedirect } from "../platform/NextRedirect";
+import {
+  NextRedirect,
+  RedirectTypes,
+} from "../platform/NextRedirect";
 
 export const loadRootPage = Effect.succeed(
-  NextRedirect.make({ url: "/star-wars", type: "replace" }),
+  NextRedirect.make({ url: "/star-wars", type: RedirectTypes.Replace }),
 );

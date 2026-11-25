@@ -15,7 +15,12 @@ import {
   unavailableCatalog,
 } from "../../src/services/PeopleCatalog.fixture";
 
-export type CatalogMode = "working" | "unavailable";
+export const CatalogModes = {
+  Working: "working",
+  Unavailable: "unavailable",
+} as const;
+export type CatalogMode =
+  (typeof CatalogModes)[keyof typeof CatalogModes];
 
 export class CatalogControl extends Context.Service<
   CatalogControl,
@@ -34,13 +39,13 @@ const catalog = (
   return {
     getPerson: (id) =>
       Effect.flatMap(Ref.get(mode), (current) =>
-        current === "unavailable"
+        current === CatalogModes.Unavailable
           ? unavailableCatalog.getPerson(id)
           : working.getPerson(id)
       ),
     searchPeople: (query) =>
       Effect.flatMap(Ref.get(mode), (current) =>
-        current === "unavailable"
+        current === CatalogModes.Unavailable
           ? unavailableCatalog.searchPeople(query)
           : working.searchPeople(query)
       ),

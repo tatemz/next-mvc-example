@@ -1,3 +1,5 @@
+import { ExperienceThemes } from "../../components/AppShell";
+import { Universes } from "../../domain/FilmUniverse.model";
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { isValidElement } from "react";
@@ -22,7 +24,7 @@ const render = (universe: string) =>
 describe("Funnel page", () => {
   it.effect("loads the Star Wars funnel", () =>
     Effect.gen(function*() {
-      const element = yield* render("star-wars");
+      const element = yield* render(Universes.StarWars);
 
       expect(isValidElement(element)).toBe(true);
       if (
@@ -34,7 +36,7 @@ describe("Funnel page", () => {
       expect(element.props.model).toMatchObject({
         _tag: "Search",
         stepLabel: "Step 1 of 4",
-        shell: { universe: "star-wars", theme: "night" },
+        shell: { universe: Universes.StarWars, theme: ExperienceThemes.Night },
       });
       expect(typeof element.props.submitAction).toBe("function");
     }));
@@ -53,7 +55,7 @@ describe("Funnel page", () => {
 
   it.effect("loads the Ghibli funnel", () =>
     Effect.gen(function*() {
-      const element = yield* render("ghibli");
+      const element = yield* render(Universes.Ghibli);
 
       expect(isValidElement(element)).toBe(true);
       if (
@@ -64,7 +66,7 @@ describe("Funnel page", () => {
       expect(element.props.model).toMatchObject({
         _tag: "Search",
         stepLabel: "Step 1 of 4",
-        shell: { universe: "ghibli", theme: "autumn" },
+        shell: { universe: Universes.Ghibli, theme: ExperienceThemes.Autumn },
       });
     }));
 });

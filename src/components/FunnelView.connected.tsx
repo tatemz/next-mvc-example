@@ -71,7 +71,7 @@ const ctaEventFor = (
         context: PageContext.cases.FunnelSearch.make({
           universe,
         }),
-        cta: "search",
+        cta: FunnelCtas.Search,
       }),
     Choose: (step) =>
       CtaClicked.cases.FunnelChooseCtaClicked.make({

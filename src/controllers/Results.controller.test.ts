@@ -1,3 +1,4 @@
+import { Universes, NoTransportKey } from "../domain/FilmUniverse.model";
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
@@ -21,7 +22,7 @@ const run = (
   loadResults.pipe(
     Effect.provide(layerStub(getPerson)),
     Effect.provideService(I18n, i18n),
-    Effect.provideService(pathParamsTag, { universe: "star-wars" }),
+    Effect.provideService(pathParamsTag, { universe: Universes.StarWars }),
     Effect.provideService(parsedSearchParamsTag, params),
   );
 
@@ -35,7 +36,7 @@ describe("loadResults", () => {
         Effect.provideService(parsedSearchParamsTag, {
           character: "1",
           film: "4",
-          transport: "none",
+          transport: NoTransportKey,
         }),
       );
 
@@ -66,7 +67,7 @@ describe("loadResults", () => {
       const model = yield* run({
         character: "1",
         film: "4",
-        transport: "none",
+        transport: NoTransportKey,
       });
 
       expect(model).toMatchObject({
@@ -87,7 +88,7 @@ describe("loadResults", () => {
   it.effect("rejects a person load failure", () =>
     Effect.gen(function*() {
       const model = yield* run(
-        { character: "1", film: "4", transport: "none" },
+        { character: "1", film: "4", transport: NoTransportKey },
         () => Effect.fail(new PeopleCatalogError({ message: "down" })),
       );
 
@@ -103,7 +104,7 @@ describe("loadResults", () => {
       const model = yield* run({
         character: "1",
         film: "99",
-        transport: "none",
+        transport: NoTransportKey,
       });
 
       expect(model).toMatchObject({ _tag: "Missing" });

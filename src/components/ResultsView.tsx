@@ -1,5 +1,8 @@
 import { Array, Option, Schema } from "effect";
-import type { Universe } from "../domain/FilmUniverse.model";
+import {
+  NoTransportKey,
+  type Universe,
+} from "../domain/FilmUniverse.model";
 import type { I18n } from "../i18n/I18n.service";
 import type { ResultsCta } from "../ui-events/UiEvent";
 import {
@@ -127,7 +130,7 @@ export const makeResultsViewModel = (
   }
 
   const transport: Option.Option<TransportInput | null> =
-    query.transport === "none"
+    query.transport === NoTransportKey
       ? Option.some(null)
       : Array.findFirst(
         person.value.transports,

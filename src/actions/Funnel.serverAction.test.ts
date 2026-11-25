@@ -1,8 +1,10 @@
+import { Universes } from "../domain/FilmUniverse.model";
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
 import { makeFunnelSearchViewModel } from "../components/FunnelView";
 import { haku, luke } from "../domain/FilmUniverse.fixture";
+import { FunnelFields } from "../forms/FunnelForm";
 import type { Person, Universe } from "../domain/FilmUniverse.model";
 import { makeEn } from "../i18n/I18n.service";
 import { catalogOf } from "../services/PeopleCatalog.fixture";
@@ -17,7 +19,7 @@ const run = (
 ) =>
   Effect.gen(function*() {
     const formData = new FormData();
-    formData.set("query", query);
+    formData.set(FunnelFields.Query, query);
 
     const previous = makeFunnelSearchViewModel(
       makeEn(),
@@ -37,7 +39,7 @@ const run = (
 describe("submitFunnel server action", () => {
   it.effect("runs against the Star Wars catalog", () =>
     Effect.gen(function*() {
-      const result = yield* run("star-wars", "Luke", [luke]);
+      const result = yield* run(Universes.StarWars, "Luke", [luke]);
 
       expect(result).toMatchObject({
         _tag: "Choose",
@@ -47,7 +49,7 @@ describe("submitFunnel server action", () => {
 
   it.effect("runs against the Ghibli catalog", () =>
     Effect.gen(function*() {
-      const result = yield* run("ghibli", "Haku", [haku]);
+      const result = yield* run(Universes.Ghibli, "Haku", [haku]);
 
       expect(result).toMatchObject({
         _tag: "Choose",

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { Universes } from "../domain/FilmUniverse.model";
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
@@ -7,7 +8,7 @@ import {
   resultsReady,
   starWars,
 } from "../../.storybook/pageFixtures";
-import { type UiEvent } from "../ui-events/UiEvent";
+import { type UiEvent, ResultsCtas } from "../ui-events/UiEvent";
 import { UiEventProvider } from "../ui-events/UiEventContext";
 import { ConnectedResultsView } from "./ResultsView.connected";
 
@@ -47,7 +48,7 @@ describe("ConnectedResultsView events", () => {
           _tag: "PageLoaded",
           context: {
             _tag: "ResultsReady",
-            universe: "star-wars",
+            universe: Universes.StarWars,
             characterId: "1",
             filmOrder: 4,
             transport: {
@@ -63,7 +64,7 @@ describe("ConnectedResultsView events", () => {
         _tag: "ResultsReadyCtaClicked",
         context: {
           _tag: "ResultsReady",
-          universe: "star-wars",
+          universe: Universes.StarWars,
           characterId: "1",
           filmOrder: 4,
           transport: {
@@ -71,7 +72,7 @@ describe("ConnectedResultsView events", () => {
             key: "starship-12",
           },
         },
-        cta: "build_another_dossier",
+        cta: ResultsCtas.BuildAnotherDossier,
       }),
     );
     expect(events).toContainEqual(
@@ -79,7 +80,7 @@ describe("ConnectedResultsView events", () => {
         _tag: "ResultsReadyCtaClicked",
         context: {
           _tag: "ResultsReady",
-          universe: "star-wars",
+          universe: Universes.StarWars,
           characterId: "1",
           filmOrder: 4,
           transport: {
@@ -87,7 +88,7 @@ describe("ConnectedResultsView events", () => {
             key: "starship-12",
           },
         },
-        cta: "back_home",
+        cta: ResultsCtas.BackHome,
       }),
     );
   });
@@ -100,7 +101,7 @@ describe("ConnectedResultsView events", () => {
         _tag: "PageLoaded",
         context: {
           _tag: "ResultsReady",
-          universe: "star-wars",
+          universe: Universes.StarWars,
           characterId: "1",
           filmOrder: 4,
           transport: { _tag: "NoTransport" },
@@ -121,7 +122,7 @@ describe("ConnectedResultsView events", () => {
         _tag: "PageLoaded",
         context: {
           _tag: "ResultsMissing",
-          universe: "star-wars",
+          universe: Universes.StarWars,
         },
       }),
     );
@@ -130,9 +131,9 @@ describe("ConnectedResultsView events", () => {
         _tag: "ResultsMissingCtaClicked",
         context: {
           _tag: "ResultsMissing",
-          universe: "star-wars",
+          universe: Universes.StarWars,
         },
-        cta: "build_another_dossier",
+        cta: ResultsCtas.BuildAnotherDossier,
       }),
     );
   });

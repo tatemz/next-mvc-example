@@ -1,3 +1,5 @@
+import { FunnelFailures } from "../components/FunnelView";
+import { Universes, NoTransportKey } from "../domain/FilmUniverse.model";
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
@@ -19,7 +21,7 @@ import { tag as pathParamsTag } from "../platform/ParsedPathParams";
 import { advanceFunnel, startFunnel } from "./Funnel.controller";
 
 const i18n = makeEn();
-const shell = makeAppShellViewModel(i18n, "star-wars");
+const shell = makeAppShellViewModel(i18n, Universes.StarWars);
 
 const form = (values: Record<string, string>) => {
   const data = new FormData();
@@ -40,7 +42,7 @@ const run = (
     Effect.provideService(I18n, i18n),
   );
 
-const search = makeFunnelSearchViewModel(i18n, "star-wars", "", undefined);
+const search = makeFunnelSearchViewModel(i18n, Universes.StarWars, "", undefined);
 const person = makePersonViewModel(i18n, luke);
 const film = person.films[0];
 const transport = person.transports[0];
@@ -49,7 +51,7 @@ const choose = makeFunnelChooseViewModel(i18n, shell, "Luke", [choice]);
 const filmStep = makeFunnelFilmViewModel(i18n, shell, luke);
 const transportStep = makeFunnelTransportViewModel(i18n, shell, person, film);
 const review = makeFunnelReviewViewModel(i18n, shell, person, film, transport);
-const failed = makeFunnelFailedViewModel(i18n, shell, "unavailable");
+const failed = makeFunnelFailedViewModel(i18n, shell, FunnelFailures.Unavailable);
 
 describe("startFunnel", () => {
   it.effect("returns not found for an unknown universe", () =>
@@ -67,7 +69,7 @@ describe("startFunnel", () => {
       const model = yield* startFunnel.pipe(
         Effect.provideService(I18n, i18n),
         Effect.provideService(pathParamsTag, {
-          universe: "star-wars",
+          universe: Universes.StarWars,
         }),
       );
 
@@ -216,7 +218,7 @@ describe("advanceFunnel", () => {
     Effect.gen(function*() {
       const model = yield* run(
         transportStep,
-        form({ transportKey: "none" }),
+        form({ transportKey: NoTransportKey }),
       );
 
       expect(model).toMatchObject({

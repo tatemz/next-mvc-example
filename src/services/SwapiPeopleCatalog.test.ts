@@ -1,3 +1,4 @@
+import { TransportKinds } from "../domain/FilmUniverse.model";
 import { it } from "@effect/vitest";
 import { ConfigProvider, Effect, Layer } from "effect";
 import { HttpClient, HttpClientResponse } from "effect/http";
@@ -168,14 +169,14 @@ describe("PeopleCatalog", () => {
         {
           _tag: "Transport",
           key: "starship-12",
-          kind: "Starship",
+          kind: TransportKinds.Starship,
           name: "X-wing",
           model: "T-65 X-wing",
         },
         {
           _tag: "Transport",
           key: "vehicle-14",
-          kind: "Vehicle",
+          kind: TransportKinds.Vehicle,
           name: "Snowspeeder",
           model: "t-47 airspeeder",
         },

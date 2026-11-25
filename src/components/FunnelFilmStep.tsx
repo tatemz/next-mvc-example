@@ -1,3 +1,4 @@
+import { FunnelFields } from "../forms/FunnelForm";
 import { FunnelCtas } from "../ui-events/UiEvent";
 import { FunnelStepProps, FunnelStepShell } from "./FunnelStep";
 import type { FunnelViewModel } from "./FunnelView";
@@ -27,7 +28,7 @@ export const FunnelFilmStep = ({
           >
             <input
               type="radio"
-              name="order"
+              name={FunnelFields.Order}
               value={film.order}
               className="radio radio-primary"
               required

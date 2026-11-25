@@ -1,3 +1,5 @@
+import { NoTransportKey } from "../domain/FilmUniverse.model";
+import { FunnelFields } from "../forms/FunnelForm";
 import { FunnelCtas } from "../ui-events/UiEvent";
 import { FunnelStepProps, FunnelStepShell } from "./FunnelStep";
 import type { FunnelViewModel } from "./FunnelView";
@@ -27,7 +29,7 @@ export const FunnelTransportStep = ({
           >
             <input
               type="radio"
-              name="transportKey"
+              name={FunnelFields.TransportKey}
               value={transport.key}
               className="radio radio-primary"
               required
@@ -39,8 +41,8 @@ export const FunnelTransportStep = ({
         <label className="flex cursor-pointer items-center gap-3 rounded-box bg-base-200 p-4">
           <input
             type="radio"
-            name="transportKey"
-            value="none"
+            name={FunnelFields.TransportKey}
+            value={NoTransportKey}
             defaultChecked={step.person.transports.length === 0}
             className="radio radio-primary"
             required

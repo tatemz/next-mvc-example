@@ -1,12 +1,10 @@
 import { Effect, Option, Schema } from "effect";
-import { makeAppShellViewModel } from "../components/AppShell";
 import {
   FunnelViewModel,
   makeFunnelChooseResult,
   makeFunnelFilmResult,
   makeFunnelSearchResult,
   makeFunnelPageViewModel,
-  makeFunnelSearchViewModel,
   makeFunnelTransportResult,
 } from "../components/FunnelView";
 import type { Person } from "../domain/FilmUniverse.model";

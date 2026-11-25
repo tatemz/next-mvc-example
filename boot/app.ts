@@ -1,5 +1,5 @@
 import { NodeHttpServer } from "@effect/platform-node";
-import { Effect, Layer } from "effect";
+import { Layer } from "effect";
 import { HttpRouter } from "effect/http";
 import { layer as UiEventApiLayer } from "../src/api/UiEventApi.layer";
 import {
