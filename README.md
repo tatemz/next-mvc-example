@@ -189,9 +189,10 @@ export const loadResults = (universe, params, shell) =>
 `makeResultsViewModel` is the only place that decides between `Ready` and
 `Missing` and builds the person, film, and transport view models. The funnel
 keeps its in-progress state in `FunnelViewModel` because the server action
-serializes that state between steps. Its search and choose controllers load
-and pass domain values; the film, transport, and review factories build from
-the previous step's model, which is the data the action actually receives.
+serializes that state between steps. Its controller parses the form and loads
+the catalog; pure step-result factories decide the next state. The transport
+and review factories build from the previous step's model, which is the data
+the action actually receives.
 
 ### UI events
 

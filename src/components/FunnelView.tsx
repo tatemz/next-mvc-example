@@ -233,6 +233,126 @@ export const makeFunnelFailedViewModel = (
     startOverHref: "funnel",
   });
 
+export const makeFunnelSearchResult = (
+  i18n: I18n,
+  step: FunnelSearchViewModel,
+  query: string,
+  results: Option.Option<readonly PersonChoiceInput[]>,
+): FunnelViewModel => {
+  if (Option.isNone(results)) {
+    return makeFunnelFailedViewModel(
+      i18n,
+      step.shell,
+      i18n._({ id: "funnel.failed.message" }),
+    );
+  }
+
+  return Array.matchLeft(results.value, {
+    onEmpty: () =>
+      makeFunnelSearchViewModel(
+        i18n,
+        step.shell,
+        query,
+        i18n._({ id: "funnel.search.noResults" }),
+      ),
+    onNonEmpty: (first, rest) =>
+      makeFunnelChooseViewModel(
+        i18n,
+        step.shell,
+        query,
+        [first, ...rest],
+      ),
+  });
+};
+
+export const makeFunnelChooseResult = (
+  i18n: I18n,
+  step: FunnelChooseViewModel,
+  characterId: Option.Option<string>,
+  person: Option.Option<PersonCardInput>,
+): FunnelViewModel => {
+  if (
+    Option.isNone(characterId) ||
+    !Array.some(
+      step.results,
+      (result) => result.id === characterId.value,
+    )
+  ) {
+    return makeFunnelFailedViewModel(
+      i18n,
+      step.shell,
+      i18n._({ id: "funnel.failed.invalidChoice" }),
+    );
+  }
+
+  if (Option.isNone(person)) {
+    return makeFunnelFailedViewModel(
+      i18n,
+      step.shell,
+      i18n._({ id: "funnel.failed.message" }),
+    );
+  }
+
+  return makeFunnelFilmViewModel(i18n, step.shell, person.value);
+};
+
+export const makeFunnelFilmResult = (
+  i18n: I18n,
+  step: FunnelFilmViewModel,
+  order: Option.Option<number>,
+): FunnelViewModel => {
+  const film = Option.flatMap(order, (value) =>
+    Array.findFirst(
+      step.person.films,
+      (candidate) => candidate.order === value,
+    )
+  );
+
+  if (Option.isNone(film)) {
+    return makeFunnelFailedViewModel(
+      i18n,
+      step.shell,
+      i18n._({ id: "funnel.failed.invalidChoice" }),
+    );
+  }
+
+  return makeFunnelTransportViewModel(
+    i18n,
+    step.shell,
+    step.person,
+    film.value,
+  );
+};
+
+export const makeFunnelTransportResult = (
+  i18n: I18n,
+  step: FunnelTransportViewModel,
+  transportKey: string,
+): FunnelViewModel => {
+  const transport = transportKey === "none"
+    ? Option.none<TransportViewModel>()
+    : Array.findFirst(
+      step.person.transports,
+      (candidate) => candidate.key === transportKey,
+    );
+
+  if (transportKey !== "none" && Option.isNone(transport)) {
+    return makeFunnelFailedViewModel(
+      i18n,
+      step.shell,
+      i18n._({ id: "funnel.failed.invalidChoice" }),
+    );
+  }
+
+  return makeFunnelReviewViewModel(
+    i18n,
+    step.shell,
+    step.person,
+    step.film,
+    Option.getOrNull(transport),
+  );
+};
+
 type FunnelExtras = {
   readonly dispatch: (formData: FormData) => void;
   readonly isPending: boolean;

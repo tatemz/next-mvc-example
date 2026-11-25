@@ -1,15 +1,18 @@
-import { Array, Effect, Function, Option, Schema } from "effect";
+import { Effect, Option, Schema } from "effect";
 import { makeAppShellViewModel } from "../components/AppShell";
 import {
   FunnelViewModel,
-  makeFunnelChooseViewModel,
-  makeFunnelFailedViewModel,
-  makeFunnelFilmViewModel,
-  makeFunnelReviewViewModel,
+  makeFunnelChooseResult,
+  makeFunnelFilmResult,
+  makeFunnelSearchResult,
   makeFunnelSearchViewModel,
-  makeFunnelTransportViewModel,
+  makeFunnelTransportResult,
 } from "../components/FunnelView";
-import { CharacterId, type Universe } from "../domain/FilmUniverse.model";
+import {
+  CharacterId,
+  type Person,
+  type Universe,
+} from "../domain/FilmUniverse.model";
 import { getStringOrEmpty, toRecord } from "../forms/FormData";
 import { I18n } from "../i18n/I18n.service";
 import { PeopleCatalog } from "../services/PeopleCatalog";
@@ -21,167 +24,57 @@ export const startFunnel = (universe: Universe) =>
     return makeFunnelSearchViewModel(i18n, shell, "", undefined);
   });
 
-const searchStep = (
-  step: Extract<FunnelViewModel, { _tag: "Search" }>,
-  formData: FormData,
-) =>
-  Effect.gen(function*() {
-    const i18n = yield* I18n;
-    const data = toRecord(formData);
-    const query = getStringOrEmpty("query")(data).trim();
-
-    if (query === "") {
-      return makeFunnelSearchViewModel(
-        i18n,
-        step.shell,
-        query,
-        i18n._({ id: "funnel.search.required" }),
-      );
-    }
-
-    const client = yield* PeopleCatalog;
-    const results = yield* Effect.option(client.searchPeople(query));
-
-    if (Option.isNone(results)) {
-      return makeFunnelFailedViewModel(
-        i18n,
-        step.shell,
-        i18n._({ id: "funnel.failed.message" }),
-      );
-    }
-
-    return Function.pipe(
-      results.value,
-      Array.matchLeft({
-        onEmpty: () =>
-          makeFunnelSearchViewModel(
-            i18n,
-            step.shell,
-            query,
-            i18n._({ id: "funnel.search.noResults" }),
-          ),
-        onNonEmpty: (first, rest) =>
-          makeFunnelChooseViewModel(i18n, step.shell, query, [first, ...rest]),
-      }),
-    );
-  });
-
-const chooseStep = (
-  step: Extract<FunnelViewModel, { _tag: "Choose" }>,
-  formData: FormData,
-) =>
-  Effect.gen(function*() {
-    const i18n = yield* I18n;
-    const data = toRecord(formData);
-    const characterId = Schema.decodeOption(CharacterId)(
-      getStringOrEmpty("characterId")(data),
-    );
-
-    if (
-      Option.isNone(characterId) ||
-      !Array.some(
-        step.results,
-        (result) => result.id === characterId.value,
-      )
-    ) {
-      return makeFunnelFailedViewModel(
-        i18n,
-        step.shell,
-        i18n._({ id: "funnel.failed.invalidChoice" }),
-      );
-    }
-
-    const client = yield* PeopleCatalog;
-    const person = yield* Effect.option(
-      client.getPerson(characterId.value),
-    );
-
-    if (Option.isNone(person)) {
-      return makeFunnelFailedViewModel(
-        i18n,
-        step.shell,
-        i18n._({ id: "funnel.failed.message" }),
-      );
-    }
-
-    return makeFunnelFilmViewModel(i18n, step.shell, person.value);
-  });
-
-const filmStep = (
-  step: Extract<FunnelViewModel, { _tag: "Film" }>,
-  formData: FormData,
-) =>
-  Effect.gen(function*() {
-    const i18n = yield* I18n;
-    const data = toRecord(formData);
-    const film = Option.flatMap(
-      Schema.decodeOption(
-        Schema.NumberFromString.check(Schema.isInt()),
-      )(getStringOrEmpty("order")(data)),
-      (order) =>
-        Array.findFirst(
-          step.person.films,
-          (candidate) => candidate.order === order,
-        ),
-    );
-
-    if (Option.isNone(film)) {
-      return makeFunnelFailedViewModel(
-        i18n,
-        step.shell,
-        i18n._({ id: "funnel.failed.invalidChoice" }),
-      );
-    }
-
-    return makeFunnelTransportViewModel(
-      i18n,
-      step.shell,
-      step.person,
-      film.value,
-    );
-  });
-
-const transportStep = (
-  step: Extract<FunnelViewModel, { _tag: "Transport" }>,
-  formData: FormData,
-) =>
-  Effect.gen(function*() {
-    const i18n = yield* I18n;
-    const data = toRecord(formData);
-    const key = getStringOrEmpty("transportKey")(data);
-    const transport = key === "none"
-      ? Option.none()
-      : Array.findFirst(
-        step.person.transports,
-        (candidate) => candidate.key === key,
-      );
-
-    if (key !== "none" && Option.isNone(transport)) {
-      return makeFunnelFailedViewModel(
-        i18n,
-        step.shell,
-        i18n._({ id: "funnel.failed.invalidChoice" }),
-      );
-    }
-
-    return makeFunnelReviewViewModel(
-      i18n,
-      step.shell,
-      step.person,
-      step.film,
-      Option.getOrNull(transport),
-    );
-  });
-
 export const advanceFunnel = (
   previous: FunnelViewModel,
   formData: FormData,
 ) =>
   FunnelViewModel.match(previous, {
-    Search: (step) => searchStep(step, formData),
-    Choose: (step) => chooseStep(step, formData),
-    Film: (step) => filmStep(step, formData),
-    Transport: (step) => transportStep(step, formData),
+    Search: (step) =>
+      Effect.gen(function*() {
+        const i18n = yield* I18n;
+        const query = getStringOrEmpty("query")(toRecord(formData)).trim();
+
+        if (query === "") {
+          return makeFunnelSearchViewModel(
+            i18n,
+            step.shell,
+            query,
+            i18n._({ id: "funnel.search.required" }),
+          );
+        }
+
+        const client = yield* PeopleCatalog;
+        const results = yield* Effect.option(client.searchPeople(query));
+        return makeFunnelSearchResult(i18n, step, query, results);
+      }),
+    Choose: (step) =>
+      Effect.gen(function*() {
+        const i18n = yield* I18n;
+        const characterId = Schema.decodeOption(CharacterId)(
+          getStringOrEmpty("characterId")(toRecord(formData)),
+        );
+        const client = yield* PeopleCatalog;
+        const person: Option.Option<Person> = Option.isSome(characterId)
+          ? yield* Effect.option(client.getPerson(characterId.value))
+          : Option.none();
+        return makeFunnelChooseResult(i18n, step, characterId, person);
+      }),
+    Film: (step) =>
+      Effect.gen(function*() {
+        const i18n = yield* I18n;
+        const order = Schema.decodeOption(
+          Schema.NumberFromString.check(Schema.isInt()),
+        )(getStringOrEmpty("order")(toRecord(formData)));
+        return makeFunnelFilmResult(i18n, step, order);
+      }),
+    Transport: (step) =>
+      Effect.gen(function*() {
+        const i18n = yield* I18n;
+        const transportKey = getStringOrEmpty("transportKey")(
+          toRecord(formData),
+        );
+        return makeFunnelTransportResult(i18n, step, transportKey);
+      }),
     Review: (step) => Effect.succeed<FunnelViewModel>(step),
     Failed: (step) => Effect.succeed<FunnelViewModel>(step),
   });
