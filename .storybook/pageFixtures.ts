@@ -2,7 +2,6 @@ import { Array, Option } from "effect";
 import {
   makeAppShellViewModel,
   type AppShellViewModel,
-  type ExperienceTheme,
 } from "../src/components/AppShell";
 import {
   makeFunnelChooseViewModel,
@@ -16,10 +15,7 @@ import {
 } from "../src/components/FunnelView";
 import type { FilmListItemViewModel } from "../src/components/FilmListItem";
 import {
-  ghibliSplashImage,
   makeHomeViewModel,
-  starWarsSplashImage,
-  type HomeHeroImageViewModel,
   type HomeViewModel,
 } from "../src/components/HomeView";
 import {
@@ -122,7 +118,6 @@ const humanLuke: Person = {
 
 export type PageDataset = {
   readonly universe: Universe;
-  readonly image: HomeHeroImageViewModel;
   readonly shell: AppShellViewModel;
   readonly person: Person;
   readonly view: PersonViewModel;
@@ -136,10 +131,7 @@ export type PageDataset = {
 const datasetFor = (
   person: Person,
   universe: Universe,
-  theme: ExperienceTheme,
-  basePath: string,
   query: string,
-  image: HomeHeroImageViewModel,
 ): PageDataset => {
   const view = makePersonViewModel(i18n, person);
   const film = Option.getOrThrow(Array.head(view.films));
@@ -147,59 +139,24 @@ const datasetFor = (
 
   return {
     universe,
-    image,
-    shell: makeAppShellViewModel(i18n, theme),
+    shell: makeAppShellViewModel(i18n, universe),
     person,
     view,
     film,
     transport,
-    funnelHref: `${basePath}/funnel`,
-    homeHref: basePath,
+    funnelHref: `/${universe}/funnel`,
+    homeHref: `/${universe}`,
     query,
   };
 };
 
-export const starWars = datasetFor(
-  luke,
-  "star-wars",
-  "night",
-  "/star-wars",
-  "Luke",
-  starWarsSplashImage,
-);
-export const starWarsHuman = datasetFor(
-  humanLuke,
-  "star-wars",
-  "night",
-  "/star-wars",
-  "Luke",
-  starWarsSplashImage,
-);
-export const ghibli = datasetFor(
-  haku,
-  "ghibli",
-  "autumn",
-  "/ghibli",
-  "Haku",
-  ghibliSplashImage,
-);
-export const ghibliPilot = datasetFor(
-  porco,
-  "ghibli",
-  "autumn",
-  "/ghibli",
-  "Porco",
-  ghibliSplashImage,
-);
+export const starWars = datasetFor(luke, "star-wars", "Luke");
+export const starWarsHuman = datasetFor(humanLuke, "star-wars", "Luke");
+export const ghibli = datasetFor(haku, "ghibli", "Haku");
+export const ghibliPilot = datasetFor(porco, "ghibli", "Porco");
 
 export const homeSplash = (dataset: PageDataset): HomeViewModel =>
-  makeHomeViewModel(
-    i18n,
-    dataset.universe,
-    dataset.funnelHref,
-    dataset.shell,
-    dataset.image,
-  );
+  makeHomeViewModel(i18n, dataset.universe, dataset.shell);
 
 export const funnelSearch = (dataset: PageDataset): FunnelViewModel =>
   makeFunnelSearchViewModel(

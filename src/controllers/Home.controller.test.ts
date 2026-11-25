@@ -2,35 +2,20 @@ import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
 import {
-  HomeHeroImageViewModel,
+  ghibliSplashImage,
+  starWarsSplashImage,
 } from "../components/HomeView";
+import type { Universe } from "../domain/FilmUniverse.model";
 import { I18n, makeEn } from "../i18n/I18n.service";
 import { loadHome } from "./Home.controller";
 
-const image = HomeHeroImageViewModel.make({
-  url: "https://example.com/splash.jpg",
-  alt: "Splash image",
-  credit: "Image credit",
-  creditHref: "https://example.com/credit",
-});
-
-const run = (
-  universe: "star-wars" | "ghibli",
-  funnelHref: string,
-  theme: "night" | "autumn",
-) =>
-  loadHome(universe, funnelHref, theme, image).pipe(
-    Effect.provideService(I18n, makeEn()),
-  );
+const run = (universe: Universe) =>
+  loadHome(universe).pipe(Effect.provideService(I18n, makeEn()));
 
 describe("loadHome", () => {
   it.effect("builds the Star Wars splash", () =>
     Effect.gen(function*() {
-      const model = yield* run(
-        "star-wars",
-        "/star-wars/funnel",
-        "night",
-      );
+      const model = yield* run("star-wars");
 
       expect(model).toMatchObject({
         _tag: "HomeViewModel",
@@ -39,7 +24,7 @@ describe("loadHome", () => {
           kicker: "Star Wars",
           title: "Star Wars character dossier",
           funnelHref: "/star-wars/funnel",
-          image,
+          image: starWarsSplashImage,
         },
       });
     }),
@@ -47,7 +32,7 @@ describe("loadHome", () => {
 
   it.effect("builds the Ghibli splash", () =>
     Effect.gen(function*() {
-      const model = yield* run("ghibli", "/ghibli/funnel", "autumn");
+      const model = yield* run("ghibli");
 
       expect(model).toMatchObject({
         _tag: "HomeViewModel",
@@ -56,7 +41,7 @@ describe("loadHome", () => {
           kicker: "Ghibli",
           title: "Studio Ghibli character dossier",
           funnelHref: "/ghibli/funnel",
-          image,
+          image: ghibliSplashImage,
         },
       });
     }),

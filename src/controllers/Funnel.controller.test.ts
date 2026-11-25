@@ -19,7 +19,7 @@ import { layerStub } from "../services/SwapiPeopleCatalog.layer";
 import { advanceFunnel, startFunnel } from "./Funnel.controller";
 
 const i18n = makeEn();
-const shell = makeAppShellViewModel(i18n, "night");
+const shell = makeAppShellViewModel(i18n, "star-wars");
 
 const form = (values: Record<string, string>) => {
   const data = new FormData();
@@ -57,7 +57,7 @@ const failed = makeFunnelFailedViewModel(i18n, shell, "Nope");
 describe("startFunnel", () => {
   it.effect("starts on the search step", () =>
     Effect.gen(function*() {
-      const model = yield* startFunnel("night").pipe(
+      const model = yield* startFunnel("star-wars").pipe(
         Effect.provideService(I18n, i18n),
       );
 

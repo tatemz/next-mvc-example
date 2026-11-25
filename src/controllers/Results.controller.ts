@@ -1,14 +1,11 @@
 import { Array, Effect, Option, Schema } from "effect";
-import type {
-  AppShellViewModel,
-  ExperienceTheme,
-} from "../components/AppShell";
+import type { AppShellViewModel } from "../components/AppShell";
 import {
   makeResultsMissingViewModel,
   makeResultsReadyViewModel,
 } from "../components/ResultsView";
 import { makePersonViewModel } from "../components/PersonCard";
-import { CharacterId } from "../domain/FilmUniverse.model";
+import { CharacterId, type Universe } from "../domain/FilmUniverse.model";
 import { I18n } from "../i18n/I18n.service";
 import { decodeOption } from "../platform/ParsedSearchParams";
 import { PeopleCatalog } from "../services/PeopleCatalog";
@@ -70,14 +67,12 @@ export const loadResults = (
     );
   });
 
-export const loadResultsPage = (
-  basePath: string,
-  theme: ExperienceTheme,
-) =>
+export const loadResultsPage = (universe: Universe) =>
   Effect.gen(function*() {
     const i18n = yield* I18n;
-    const shell = yield* loadAppShell(theme);
+    const shell = yield* loadAppShell(universe);
     const params = yield* decodeOption(ResultsParams);
+    const basePath = `/${universe}`;
 
     if (Option.isNone(params)) {
       return makeResultsMissingViewModel(

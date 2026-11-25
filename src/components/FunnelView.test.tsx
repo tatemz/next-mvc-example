@@ -20,7 +20,7 @@ import { ConnectedFunnelView } from "./FunnelView.connected";
 import { UiEventProvider } from "../ui-events/UiEventContext";
 
 const i18n = makeEn();
-const shell = makeAppShellViewModel(i18n, "night");
+const shell = makeAppShellViewModel(i18n, "star-wars");
 const person = makePersonViewModel(i18n, luke);
 const film = person.films[0];
 const transport = person.transports[0];

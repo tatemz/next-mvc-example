@@ -4,7 +4,7 @@ import { loadResultsPage } from "../../controllers/Results.controller";
 import { makeNextPage } from "../../platform/NextPage";
 
 export const GhibliResultsPage = makeNextPage(
-  Effect.map(loadResultsPage("/ghibli", "autumn"), (model) => (
+  Effect.map(loadResultsPage("ghibli"), (model) => (
     <ConnectedResultsView model={model} universe="ghibli" />
   )),
 );

@@ -5,7 +5,7 @@ import { startFunnel } from "../../controllers/Funnel.controller";
 import { makeNextPage } from "../../platform/NextPage";
 
 export const GhibliFunnelPage = makeNextPage(
-  Effect.map(startFunnel("autumn"), (model) => (
+  Effect.map(startFunnel("ghibli"), (model) => (
     <ConnectedFunnelView
       model={model}
       submitAction={submitGhibliFunnel}

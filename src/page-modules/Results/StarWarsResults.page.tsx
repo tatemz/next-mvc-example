@@ -4,7 +4,7 @@ import { loadResultsPage } from "../../controllers/Results.controller";
 import { makeNextPage } from "../../platform/NextPage";
 
 export const StarWarsResultsPage = makeNextPage(
-  Effect.map(loadResultsPage("/star-wars", "night"), (model) => (
+  Effect.map(loadResultsPage("star-wars"), (model) => (
     <ConnectedResultsView model={model} universe="star-wars" />
   )),
 );

@@ -61,17 +61,17 @@ const copyFor = (i18n: I18n, universe: Universe) =>
 export const makeHomeViewModel = (
   i18n: I18n,
   universe: Universe,
-  funnelHref: string,
   shell: AppShellViewModel,
-  image: HomeHeroImageViewModel,
 ) =>
   HomeViewModel.make({
     shell,
     hero: HomeHeroViewModel.make({
       ...copyFor(i18n, universe),
       funnelLabel: i18n._({ id: "home.hero.funnel" }),
-      funnelHref,
-      image,
+      funnelHref: `/${universe}/funnel`,
+      image: universe === "star-wars"
+        ? starWarsSplashImage
+        : ghibliSplashImage,
     }),
   });
 

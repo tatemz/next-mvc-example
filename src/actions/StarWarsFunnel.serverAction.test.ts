@@ -21,7 +21,7 @@ describe("submitStarWarsFunnel server action", () => {
       const i18n = makeEn();
       const previous = makeFunnelSearchViewModel(
         i18n,
-        makeAppShellViewModel(i18n, "night"),
+        makeAppShellViewModel(i18n, "star-wars"),
         "",
         undefined,
       );

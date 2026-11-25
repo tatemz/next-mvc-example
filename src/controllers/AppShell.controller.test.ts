@@ -5,9 +5,9 @@ import { I18n, makeEn } from "../i18n/I18n.service";
 import { loadAppShell } from "./AppShell.controller";
 
 describe("loadAppShell", () => {
-  it.effect("builds the shell view model from i18n and a theme", () =>
+  it.effect("builds the shell view model from i18n and a universe", () =>
     Effect.gen(function*() {
-      const model = yield* loadAppShell("autumn").pipe(
+      const model = yield* loadAppShell("ghibli").pipe(
         Effect.provideService(I18n, makeEn()),
       );
 

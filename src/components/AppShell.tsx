@@ -1,5 +1,6 @@
 import { Array, Function, Schema } from "effect";
 import type { ReactNode } from "react";
+import type { Universe } from "../domain/FilmUniverse.model";
 import type { I18n } from "../i18n/I18n.service";
 
 export const ExperienceTheme = Schema.Literals(["night", "autumn"]);
@@ -23,10 +24,10 @@ export type AppShellViewModel = typeof AppShellViewModel.Type;
 
 export const makeAppShellViewModel = (
   i18n: I18n,
-  theme: ExperienceTheme,
+  universe: Universe,
 ) =>
   AppShellViewModel.make({
-    theme,
+    theme: universe === "star-wars" ? "night" : "autumn",
     brand: AppShellLinkViewModel.make({
       label: i18n._({ id: "shell.brand" }),
       href: "/",

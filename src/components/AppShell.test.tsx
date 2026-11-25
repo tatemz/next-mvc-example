@@ -8,7 +8,7 @@ const i18n = makeEn();
 
 describe("makeAppShellViewModel", () => {
   it("builds the theme, brand, and dataset links", () => {
-    expect(makeAppShellViewModel(i18n, "autumn")).toEqual({
+    expect(makeAppShellViewModel(i18n, "ghibli")).toEqual({
       _tag: "AppShellViewModel",
       theme: "autumn",
       brand: {
@@ -35,7 +35,7 @@ describe("makeAppShellViewModel", () => {
 describe("AppShell", () => {
   it("renders the shared frame around children", () => {
     const html = renderToStaticMarkup(
-      <AppShell {...makeAppShellViewModel(i18n, "night")}>
+      <AppShell {...makeAppShellViewModel(i18n, "star-wars")}>
         <p>child</p>
       </AppShell>,
     );

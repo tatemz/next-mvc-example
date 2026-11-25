@@ -12,7 +12,7 @@ import { layerStub } from "../services/SwapiPeopleCatalog.layer";
 import { loadResults, type ResultsParams } from "./Results.controller";
 
 const i18n = makeEn();
-const shell = makeAppShellViewModel(i18n, "night");
+const shell = makeAppShellViewModel(i18n, "star-wars");
 
 const run = (
   params: ResultsParams,
