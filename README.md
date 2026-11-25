@@ -55,6 +55,9 @@ by hand and handles server rendering and hydration itself. The tradeoff is
 leaving React and Next, which this project cannot do: it is here to show the
 discipline inside an existing Next codebase.
 
+The working rules distilled from this project are in
+[docs/engineering-guidelines.md](docs/engineering-guidelines.md).
+
 ## Features
 
 - Controllers are Effects; every model factory is a pure synchronous function
