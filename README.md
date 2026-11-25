@@ -1,16 +1,21 @@
 # next-mvc-example
 
-A small Next.js App Router example with Effect v4, styled with Tailwind 4 and
-daisyUI. One character-dossier experience is served from two film universes:
-Star Wars through SWAPI, and Studio Ghibli through the Ghibli API. The
-controllers, view models, and components are shared; only the runtime and server
-action injected at the route change.
+One character-dossier UI, served from two film universes: Star Wars through
+SWAPI and Studio Ghibli through the Ghibli API. Controllers, view models, and
+views are shared. Each page module supplies its own runtime, server action, and
+daisyUI theme.
 
-| Star Wars (`/star-wars`) | Studio Ghibli (`/ghibli`) |
+| Star Wars (`/star-wars`, night) | Studio Ghibli (`/ghibli`, autumn) |
 | --- | --- |
 | ![Star Wars dossier](docs/star-wars.jpg) | ![Ghibli dossier](docs/ghibli.jpg) |
 
-Run `pnpm install && pnpm dev`, then open `/star-wars` or `/ghibli`.
+```sh
+pnpm install
+cp .env.example .env.local
+pnpm dev
+```
+
+Open `/star-wars` or `/ghibli`.
 
 ## Routes
 
@@ -19,191 +24,128 @@ Run `pnpm install && pnpm dev`, then open `/star-wars` or `/ghibli`.
 | Star Wars | `/star-wars` | `/star-wars/funnel` | `/star-wars/results` |
 | Studio Ghibli | `/ghibli` | `/ghibli/funnel` | `/ghibli/results` |
 
-The root page's controller returns a `NextRedirect` to `/star-wars`; the page
-adapter turns that value into Next's redirect. The header switches between the
-two experiences; each home's CTA enters its own funnel.
+The root controller returns a `NextRedirect` to `/star-wars`. The AppShell
+header switches between the two experiences.
+
+## Page shape
+
+Each route file re-exports one page module. A page module is the only
+composition point: it passes a `ManagedRuntime` and a program to
+`makeNextPage`.
+
+```tsx
+export const StarWarsFunnelPage = makeNextPage(
+  swapiRuntime,
+  Effect.map(startFunnel("night"), (model) => (
+    <ConnectedFunnel model={model} submitAction={submitFunnel} />
+  )),
+);
+```
+
+- A page program returns a React tree or a `NextRedirect`.
+  `handleNextRedirect` is the only module that calls `next/navigation.redirect`.
+- `makeNextPage` provides the raw Next `searchParams` as the
+  `ParsedSearchParams` service. The page program decodes its own schema with
+  `ParsedSearchParams.decodeOption`; the adapter takes no params schema.
+- The root page uses the same adapter with a minimal `ManagedRuntime`.
+- Page view models carry their own `AppShellViewModel`. The views render the
+  shell (brand, links, and theme), so `app/layout.tsx` is only `<html>` and
+  `<body>`.
+- The AppShell sets `data-theme`: `night` for Star Wars, `autumn` for Ghibli.
+  The page views do not know which theme is active.
 
 ## What it shows
 
-- Every model is a `Schema.TaggedStruct` or `Schema.TaggedUnion`, and nested
-  models carry their own `_tag`.
+- Every model is a `Schema.TaggedStruct` or `Schema.TaggedUnion`; nested models
+  carry their own `_tag`.
 - `CharacterId` is a branded string built from `Schema.NumberFromString`, so
-  `Person.id` and `PeopleCatalog.getPerson` accept only a validated character
-  id.
-- Every user-visible string, including labels and button copy, is carried by the
-  view model rather than written in a view.
-- View models and their factories do not import domain models. The controllers
-  are the only place that map adapter records into view models.
-- `HomePageViewModel` is a `Schema.TaggedUnion` of `Loaded` and `Failed`.
+  `Person.id` and `PeopleCatalog.getPerson` accept only a validated id.
+- Every user-visible string is carried by the view model; views contain no copy.
 - `PeopleCatalog` is the port: `getPerson` and `searchPeople`, with
-  `PeopleCatalogError`. It has two implementations:
+  `PeopleCatalogError`. Two adapters implement it:
   - `SwapiPeopleCatalog` maps SWAPI people, films, planets, species, starships,
     and vehicles into the domain.
-  - `GhibliPeopleCatalog` maps Ghibli people, films, and species into the same
-    domain. The array index is the character id; missing measurements are
-    `unknown`; transports are empty.
-- `makeHomePage(runtime, searchAction)` is the dependency-injection seam. The
-  same `loadHomePage` controller and `ConnectedHomePage` render against any
-  `PeopleCatalog` runtime and matching server action. The `StarWarsHome.page.tsx`
-  and `GhibliHome.page.tsx` page modules inject `swapiRuntime` + `searchPerson`
-  or `ghibliRuntime` + `searchGhibliPerson`; the routes re-export those modules.
-- `FilmUniverse.model.ts` uses universe-neutral terms: `Person`, `Film` with an
-  `order`, `Origin`, `Species`, `Transport`. A film is a film in either
-  universe; its order is an episode number or a list position.
-- `Film.imageUrl` is optional. The Ghibli adapter fills it from the film
-  API's `image` field; SWAPI has no image field, so Star Wars leaves it empty.
-  The shared film list, funnel choices, review, and results render the poster
-  only when it exists.
-- `makeNextPage` is the Next boundary adapter. It provides the raw Next
-  `searchParams` as the `ParsedSearchParams` service and runs the page program.
-  A program yields the service, decodes its own schema with
-  `ParsedSearchParams.decodeOption`, and returns a React tree or a
-  `NextRedirect`; `handleNextRedirect` is the only module that calls Next's
-  `redirect`. An invalid query renders its `Missing` state, while the controller
-  receives already-typed params. Route files only re-export page modules.
-- `Root.controller.ts` returns
-  `NextRedirect.make({ url: "/star-wars", type: "replace" })`. Neither the route
-  nor the controller imports `next/navigation`; the platform adapter does.
-- `FunnelViewModel` is a `Schema.TaggedUnion` of `Search`, `Choose`, `Film`,
-  `Transport`, `Review`, and `Failed`. `Funnel.controller.ts` advances it with an
-  exhaustive Effect `Match` over the current step. Its controller also depends
-  only on `PeopleCatalog`.
-- `makeFunnelPage(runtime, submitAction)` and `makeResultsPage(runtime,
-  basePath)` are the same seam for the other two features. `/star-wars/funnel`
-  and `/ghibli/funnel` run the same funnel controller and view models with their
-  own runtime and action. The review's relative `results?` link stays inside the
-  dataset, and the results page's home/start-over links use the dataset base.
-- The results page module declares `ResultsParams`; the `makeNextPage` adapter
-  parses `/results?character=&film=&transport=`, and `loadResults` receives
-  typed params before rebuilding the dossier from the same catalog.
-- `searchPerson`, `searchGhibliPerson`, and `submitFunnel` are server actions.
-- `HomePage.connected.tsx` and `Funnel.connected.tsx` are the two client
-  components. Both use `useActionState`; the home page receives its action as a
-  prop.
-- `features/` drives the built app with Strider through effect-bdd. Scenarios run
-  in parallel, each on its own OS-assigned port. Debug mode records one paced
-  WebM per feature; a failed scenario also writes a full-page screenshot.
-
-Each component is one file, ordered model, optics (when needed), factory, dumb
-view, connected view; its tests sit beside it. HomePage and Funnel keep their
-connected views in their `.connected.tsx` modules, the two `"use client"`
-boundaries.
+  - `GhibliPeopleCatalog` maps Ghibli people, films, and species. The array index
+    is the character id; missing measurements are `unknown`; transports are empty.
+- `Film.imageUrl` is optional. The Ghibli adapter fills it from the film API's
+  `image` field; SWAPI has no image field. The film list, funnel choices, review,
+  and results render the poster only when it exists.
+- `FunnelViewModel` is a tagged union of `Search`, `Choose`, `Film`, `Transport`,
+  `Review`, and `Failed`. `Funnel.controller.ts` advances it with an exhaustive
+  Effect `Match`.
+- The results page requires `character`, `film`, and `transport`; a URL missing
+  one of them renders the `Missing` state. `transport=none` is an explicit
+  choice, not a default.
+- The review's `results?` link and the results links are relative to the
+  selected universe.
+- `searchPerson`, `searchGhibliPerson`, `submitFunnel`, and
+  `submitGhibliFunnel` are server actions. `HomePage.connected.tsx` and
+  `Funnel.connected.tsx` are the two `"use client"` boundaries.
 
 ## Layout
 
 ```text
-app/layout.tsx                               html/body wrapper; loads AppShell
-app/page.tsx                                 re-exports Root.page
-app/star-wars/page.tsx                       re-exports StarWarsHome.page
-app/star-wars/funnel/page.tsx                re-exports StarWarsFunnel.page
-app/star-wars/results/page.tsx               re-exports StarWarsResults.page
-app/ghibli/page.tsx                          re-exports GhibliHome.page
-app/ghibli/funnel/page.tsx                   re-exports GhibliFunnel.page
-app/ghibli/results/page.tsx                  re-exports GhibliResults.page
-src/page-modules/Root/Root.page.tsx               shell runtime + root controller -> redirect page
-src/page-modules/HomePage/HomePage.factory.tsx    runtime + action + funnel href -> home page
-src/page-modules/HomePage/StarWarsHome.page.tsx   SWAPI runtime + action
-src/page-modules/HomePage/GhibliHome.page.tsx     Ghibli runtime + action
-src/page-modules/Funnel/Funnel.factory.tsx        runtime + action -> funnel page
-src/page-modules/Funnel/StarWarsFunnel.page.tsx   SWAPI runtime + submitFunnel
-src/page-modules/Funnel/GhibliFunnel.page.tsx     Ghibli runtime + submitGhibliFunnel
-src/page-modules/Results/Results.factory.tsx      runtime + dataset base -> results page
-src/page-modules/Results/StarWarsResults.page.tsx SWAPI runtime + /star-wars
-src/page-modules/Results/GhibliResults.page.tsx   Ghibli runtime + /ghibli
-src/platform/NextPage.ts                     page program -> React tree or NextRedirect
-src/platform/NextRedirect.ts                 redirect model + the only Next redirect call
-src/platform/ParsedSearchParams.ts           raw query service + typed decode
-src/components/AppShell/                     AppShell.tsx
-src/components/HomePage/                     HomePage.tsx, HomePage.connected.tsx
-src/components/Funnel/                       Funnel.tsx, Funnel.connected.tsx
-src/components/Results/                      Results.tsx
-src/components/PersonCard/                   PersonCard.tsx
-src/components/FilmList/                     FilmList.tsx
-src/components/FilmListItem/                 FilmListItem.tsx
-src/components/SearchForm/                   SearchForm.tsx
-src/controllers/AppShell.controller.ts      I18n -> shell view model
-src/controllers/Root.controller.ts          returns the root NextRedirect
-src/controllers/HomePage.controller.ts       Config + PeopleCatalog -> home view model
-src/controllers/SearchPerson.controller.ts   form schema + catalog -> home view model
-src/controllers/Funnel.controller.ts         Match state machine for the funnel
-src/controllers/Results.controller.ts        typed params + catalog -> dossier
-src/actions/SearchPerson.serverAction.ts     SWAPI home "use server" boundary
-src/actions/GhibliSearchPerson.serverAction.ts  Ghibli home "use server" boundary
-src/actions/Funnel.serverAction.ts           SWAPI funnel "use server" boundary
-src/actions/GhibliFunnel.serverAction.ts     Ghibli funnel "use server" boundary
-src/domain/FilmUniverse.model.ts             CharacterId, Person, Film, Origin,
-                                             Species, Transport
-src/server/Runtime.ts                        shellRuntime, swapiRuntime, ghibliRuntime
-src/services/PeopleCatalog.ts                port and error
-src/services/SwapiApi.ts                     typed SWAPI endpoints
-src/services/SwapiPeopleCatalog.factory.ts   SWAPI records -> domain
-src/services/SwapiPeopleCatalog.layer.ts     SWAPI Config + HttpClient layer
-src/services/GhibliApi.ts                    typed Ghibli endpoints
-src/services/GhibliPeopleCatalog.factory.ts  Ghibli records -> domain
-src/services/GhibliPeopleCatalog.layer.ts    Ghibli Config + HttpClient layer
-features/CharacterLookup.feature             Star Wars home lookup scenarios
-features/Funnel.feature                      Star Wars dossier funnel scenarios
-features/GhibliFunnel.feature                Ghibli dossier funnel through the same page
-features/Datasets.feature                    the Ghibli home through the same page
-features/SharedSteps.ts                      shared browser steps
-features/support/ScenarioApp.ts              boots the built Next app per scenario
-                                             on an OS-assigned port
-features/support/ScenarioPage.ts             page, video, failure screenshot
-features/support/Video.ts                    ordered clips -> one WebM per feature
-features/support/Debug.ts                    E2E_DEBUG flag and interaction pause
+app/                         route re-exports; html/body layout
+src/page-modules/            one Next page per route via makeNextPage
+src/platform/                Next adapter, redirect model, parsed params
+src/controllers/             page programs, state machines, view models
+src/components/              flat view models and views (AppShell included)
+src/actions/                 "use server" boundaries
+src/domain/                  universe-neutral models
+src/services/                PeopleCatalog port and both adapters
+features/                    Gherkin plus inline step modules
 ```
 
-`src/pages` is reserved by Next's Pages Router, so page modules use the
-`src/page-modules` name. A page module is only the page wrapper;
-controllers, actions, domain, services, and the server runtime stay in their own
-layers.
+`src/pages` is reserved by the Next Pages Router, so page modules use the
+`src/page-modules` name.
 
 ## Commands
 
 ```sh
-pnpm install
 pnpm dev
 pnpm test
 pnpm test:coverage
 pnpm typecheck
 pnpm build
-pnpm start
 pnpm test:e2e
 pnpm test:e2e:debug
 ```
 
-Open `/star-wars` or `/ghibli` to compare the two datasets. The root's
-controller returns a redirect to `/star-wars`.
-
-## Requirements
-
-- Node.js 22.12+
-- pnpm 10
-- Chrome or Chromium for `pnpm test:e2e`, plus ffmpeg for `pnpm test:e2e:debug`
+`pnpm test:e2e` builds the app, then runs `test:e2e:run` with `--parallel=2`.
+`pnpm test:e2e:debug` reuses the same runner with `E2E_DEBUG=1 --parallel=1
+--verbose`, pausing after each browser interaction and recording one WebM per
+feature. The shared command owns the feature/steps globs, reporter, strict mode,
+and step timeout.
 
 ## Integration tests
 
-`pnpm test:e2e` builds the app, then runs the Gherkin scenarios with
-`effect-bdd`. Four features cover the Star Wars home and funnel and the Ghibli
-home and funnel through the same page modules. Scenarios run in parallel; each
-starts its own `next start -p 0`, so the OS assigns a free port, opens a Chromium
-page with Strider, and closes both when the scenario ends. It records nothing and
-pauses nowhere.
+Six features and 17 scenarios cover both universes:
 
-`pnpm test:e2e:debug` runs the same scenarios one at a time, pauses a second
-after each browser interaction, and records the whole feature into one
-`artifacts/<feature>.webm`. Debug mode needs ffmpeg; the default run does not.
+- Star Wars home: configured character, another character, invalid id, unknown id.
+- Ghibli home: configured character, unknown id.
+- Navigation: root redirect and theme, header switch and theme.
+- Star Wars funnel: review, open dossier, no search matches.
+- Star Wars results: complete dossier, missing transport, unknown transport,
+  explicit no transport.
+- Ghibli funnel: Haku dossier without transport, no search matches.
 
-Both need Chrome or Chromium:
+Each scenario starts its own `next start -p 0`, so the OS assigns a free port,
+and closes the server and browser when it ends. The steps are declared inline in
+each feature's `.steps.ts`, top to bottom. Scenarios use the live SWAPI and
+Ghibli APIs, so they need a network connection. A failure writes a full-page
+screenshot under `artifacts/`; debug mode also needs ffmpeg.
 
 ```sh
 CHROMIUM_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
   pnpm test:e2e
 ```
 
-The scenarios use the live SWAPI and Ghibli APIs, so they need a network
-connection. A failure writes `artifacts/<scenario>.png`. The folder is ignored
-by git.
+## Requirements
+
+- Node.js 22.12+
+- pnpm 10
+- Chrome or Chromium for the browser scenarios
+- ffmpeg for `pnpm test:e2e:debug`
 
 Copy `.env.example` to `.env.local` to choose the starting character or point
 either adapter at another host. The defaults are `CHARACTER_ID=1`,
