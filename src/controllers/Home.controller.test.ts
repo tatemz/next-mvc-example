@@ -4,7 +4,7 @@ import { describe, expect } from "vitest";
 import {
   ghibliSplashImage,
   starWarsSplashImage,
-} from "../components/HomeView";
+} from "../components/HomeHero";
 import type { Universe } from "../domain/FilmUniverse.model";
 import { I18n, makeEn } from "../i18n/I18n.service";
 import { tag as pathParamsTag } from "../platform/ParsedPathParams";

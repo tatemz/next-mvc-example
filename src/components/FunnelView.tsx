@@ -1,7 +1,6 @@
 import { Array, Option, Schema } from "effect";
-import type { ReactNode } from "react";
 import type { I18n } from "../i18n/I18n.service";
-import { FunnelCtas, type FunnelCta } from "../ui-events/UiEvent";
+import type { FunnelCta } from "../ui-events/UiEvent";
 import type {
   FunnelChooseForm,
   FunnelFilmForm,
@@ -15,6 +14,12 @@ import {
 } from "./AppShell";
 import type { Universe } from "../domain/FilmUniverse.model";
 import { FilmListItemViewModel } from "./FilmListItem";
+import { FunnelChooseStep } from "./FunnelChooseStep";
+import { FunnelFailedStep } from "./FunnelFailedStep";
+import { FunnelFilmStep } from "./FunnelFilmStep";
+import { FunnelReviewStep } from "./FunnelReviewStep";
+import { FunnelSearchStep } from "./FunnelSearchStep";
+import { FunnelTransportStep } from "./FunnelTransportStep";
 import {
   PersonCardInput,
   PersonViewModel,
@@ -410,293 +415,6 @@ export type FunnelViewProps = FunnelExtras & {
   readonly model: FunnelViewModel;
 };
 
-type StepShellProps = {
-  readonly step: {
-    readonly stepLabel: string;
-    readonly heading: string;
-    readonly subtitle: string;
-  };
-  readonly children: ReactNode;
-};
-
-const StepShell = ({ step, children }: StepShellProps) => (
-  <section className="card bg-base-100 shadow-xl">
-    <div className="card-body gap-4">
-      <span className="badge badge-secondary">{step.stepLabel}</span>
-      <h1 className="card-title text-3xl">{step.heading}</h1>
-      <p className="text-base-content/70">{step.subtitle}</p>
-      {children}
-    </div>
-  </section>
-);
-
-type StepProps<T, Cta extends FunnelCta = FunnelCta> = {
-  readonly step: T;
-  readonly dispatch: (formData: FormData) => void;
-  readonly isPending: boolean;
-  readonly onCtaClick: (cta: Cta) => void;
-};
-
-type SearchStepProps = StepProps<FunnelSearchViewModel, "search"> & {
-  readonly onQueryChange: (value: string) => void;
-};
-
-const SearchStep = ({
-  step,
-  dispatch,
-  isPending,
-  onCtaClick,
-  onQueryChange,
-}: SearchStepProps) => (
-  <StepShell step={step}>
-    <form
-      action={dispatch}
-      onSubmit={() => onCtaClick(FunnelCtas.Search)}
-      className="flex flex-col gap-3"
-    >
-      <label htmlFor="funnel-query" className="label-text">
-        {step.label}
-      </label>
-      <input
-        id="funnel-query"
-        name="query"
-        defaultValue={step.query}
-        onChange={(event) => onQueryChange(event.currentTarget.value)}
-        placeholder={step.placeholder}
-        className={`input input-bordered w-full${
-          step.error === undefined ? "" : " input-error"
-        }`}
-        aria-invalid={step.error !== undefined}
-        aria-describedby={
-          step.error === undefined ? undefined : "funnel-query-error"
-        }
-      />
-      {step.error === undefined ? null : (
-        <p id="funnel-query-error" role="alert" className="text-sm text-error">
-          {step.error}
-        </p>
-      )}
-      <button type="submit" className="btn btn-primary" disabled={isPending}>
-        {isPending ? step.pendingLabel : step.submitLabel}
-      </button>
-    </form>
-  </StepShell>
-);
-
-const ChooseStep = ({
-  step,
-  dispatch,
-  isPending,
-  onCtaClick,
-}: StepProps<FunnelChooseViewModel, typeof FunnelCtas.ChooseCharacter>) => (
-  <StepShell step={step}>
-    <form
-      action={dispatch}
-      onSubmit={() => onCtaClick(FunnelCtas.ChooseCharacter)}
-      className="flex flex-col gap-3"
-    >
-      <div className="flex flex-col gap-2">
-        {step.results.map((result) => (
-          <label
-            key={result.id}
-            className="flex cursor-pointer items-center gap-3 rounded-box bg-base-200 p-4"
-          >
-            <input
-              type="radio"
-              name="characterId"
-              value={result.id}
-              className="radio radio-primary"
-              required
-            />
-            <span className="font-semibold">{result.name}</span>
-          </label>
-        ))}
-      </div>
-      <button type="submit" className="btn btn-primary" disabled={isPending}>
-        {isPending ? step.pendingLabel : step.submitLabel}
-      </button>
-    </form>
-  </StepShell>
-);
-
-const FilmStep = ({
-  step,
-  dispatch,
-  isPending,
-  onCtaClick,
-}: StepProps<FunnelFilmViewModel, typeof FunnelCtas.NextTransport>) => (
-  <StepShell step={step}>
-    <form
-      action={dispatch}
-      onSubmit={() => onCtaClick(FunnelCtas.NextTransport)}
-      className="flex flex-col gap-3"
-    >
-      <div className="flex flex-col gap-2">
-        {step.person.films.map((film) => (
-          <label
-            key={film.order}
-            className="flex cursor-pointer items-center gap-3 rounded-box bg-base-200 p-4"
-          >
-            <input
-              type="radio"
-              name="order"
-              value={film.order}
-              className="radio radio-primary"
-              required
-            />
-            {film.imageUrl === undefined ? null : (
-              <img
-                src={film.imageUrl}
-                alt=""
-                className="h-16 w-12 rounded object-cover"
-                loading="lazy"
-              />
-            )}
-            <span className="font-semibold">{film.text}</span>
-          </label>
-        ))}
-      </div>
-      <button type="submit" className="btn btn-primary" disabled={isPending}>
-        {isPending ? step.pendingLabel : step.submitLabel}
-      </button>
-    </form>
-  </StepShell>
-);
-
-const TransportStep = ({
-  step,
-  dispatch,
-  isPending,
-  onCtaClick,
-}: StepProps<FunnelTransportViewModel, typeof FunnelCtas.ReviewDossier>) => (
-  <StepShell step={step}>
-    <form
-      action={dispatch}
-      onSubmit={() => onCtaClick(FunnelCtas.ReviewDossier)}
-      className="flex flex-col gap-3"
-    >
-      <div className="flex flex-col gap-2">
-        {step.person.transports.map((transport) => (
-          <label
-            key={transport.key}
-            className="flex cursor-pointer items-center gap-3 rounded-box bg-base-200 p-4"
-          >
-            <input
-              type="radio"
-              name="transportKey"
-              value={transport.key}
-              className="radio radio-primary"
-              required
-            />
-            <span className="font-semibold">{transport.name}</span>
-            <span className="badge badge-ghost">{transport.kind}</span>
-          </label>
-        ))}
-        <label className="flex cursor-pointer items-center gap-3 rounded-box bg-base-200 p-4">
-          <input
-            type="radio"
-            name="transportKey"
-            value="none"
-            defaultChecked={step.person.transports.length === 0}
-            className="radio radio-primary"
-            required
-          />
-          <span className="font-semibold">{step.noneLabel}</span>
-        </label>
-      </div>
-      <button type="submit" className="btn btn-primary" disabled={isPending}>
-        {isPending ? step.pendingLabel : step.submitLabel}
-      </button>
-    </form>
-  </StepShell>
-);
-
-const ReviewStep = ({
-  step,
-  onCtaClick,
-}: {
-  readonly step: FunnelReviewViewModel;
-  readonly onCtaClick: (
-    cta: typeof FunnelCtas.OpenDossier | typeof FunnelCtas.StartOver,
-  ) => void;
-}) => (
-  <StepShell step={step}>
-    <div className="rounded-box bg-base-200 p-4">
-      <h2 className="text-xl font-bold">{step.person.name}</h2>
-      <p className="text-base-content/70">
-        {step.person.origin.name} ·{" "}
-        {Option.match(Option.fromNullishOr(step.person.species), {
-          onNone: () => step.person.speciesUnknownLabel,
-          onSome: (species) => species.name,
-        })}
-      </p>
-    </div>
-    <dl className="grid gap-3 sm:grid-cols-2">
-      <div>
-        <dt className="text-xs uppercase tracking-wide opacity-60">
-          {step.filmLabel}
-        </dt>
-        {step.film.imageUrl === undefined ? null : (
-          <img
-            src={step.film.imageUrl}
-            alt=""
-            className="my-2 h-28 w-20 rounded object-cover"
-            loading="lazy"
-          />
-        )}
-        <dd className="text-lg">{step.film.text}</dd>
-      </div>
-      <div>
-        <dt className="text-xs uppercase tracking-wide opacity-60">
-          {step.transportLabel}
-        </dt>
-        <dd className="text-lg">
-          {step.transport === null
-            ? step.noneLabel
-            : `${step.transport.name} (${step.transport.kind})`}
-        </dd>
-      </div>
-    </dl>
-    <div className="flex flex-wrap gap-3">
-      <a
-        href={step.resultsHref}
-        onClick={() => onCtaClick(FunnelCtas.OpenDossier)}
-        className="btn btn-primary"
-      >
-        {step.openLabel}
-      </a>
-      <a
-        href={step.startOverHref}
-        onClick={() => onCtaClick(FunnelCtas.StartOver)}
-        className="btn btn-ghost"
-      >
-        {step.startOverLabel}
-      </a>
-    </div>
-  </StepShell>
-);
-
-const FailedStep = ({
-  step,
-  onCtaClick,
-}: {
-  readonly step: FunnelFailedViewModel;
-  readonly onCtaClick: (cta: typeof FunnelCtas.StartOver) => void;
-}) => (
-  <StepShell step={step}>
-    <div role="alert" className="alert alert-error">
-      {step.message}
-    </div>
-    <a
-      href={step.startOverHref}
-      onClick={() => onCtaClick(FunnelCtas.StartOver)}
-      className="btn btn-primary"
-    >
-      {step.startOverLabel}
-    </a>
-  </StepShell>
-);
-
 export const FunnelView = ({
   dispatch,
   isPending,
@@ -707,7 +425,7 @@ export const FunnelView = ({
   <AppShell {...model.shell}>
     {FunnelViewModel.match(model, {
       Search: (step) => (
-        <SearchStep
+        <FunnelSearchStep
           step={step}
           dispatch={dispatch}
           isPending={isPending}
@@ -716,7 +434,7 @@ export const FunnelView = ({
         />
       ),
       Choose: (step) => (
-        <ChooseStep
+        <FunnelChooseStep
           step={step}
           dispatch={dispatch}
           isPending={isPending}
@@ -724,7 +442,7 @@ export const FunnelView = ({
         />
       ),
       Film: (step) => (
-        <FilmStep
+        <FunnelFilmStep
           step={step}
           dispatch={dispatch}
           isPending={isPending}
@@ -732,7 +450,7 @@ export const FunnelView = ({
         />
       ),
       Transport: (step) => (
-        <TransportStep
+        <FunnelTransportStep
           step={step}
           dispatch={dispatch}
           isPending={isPending}
@@ -740,10 +458,10 @@ export const FunnelView = ({
         />
       ),
       Review: (step) => (
-        <ReviewStep step={step} onCtaClick={onCtaClick} />
+        <FunnelReviewStep step={step} onCtaClick={onCtaClick} />
       ),
       Failed: (step) => (
-        <FailedStep step={step} onCtaClick={onCtaClick} />
+        <FunnelFailedStep step={step} onCtaClick={onCtaClick} />
       ),
     })}
   </AppShell>
