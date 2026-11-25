@@ -10,7 +10,6 @@ export const StarWarsFunnelPage = Function.pipe(
     <ConnectedFunnelView
       model={model}
       submitAction={submitStarWarsFunnel}
-      universe="star-wars"
     />
   )),
   makeNextPage,

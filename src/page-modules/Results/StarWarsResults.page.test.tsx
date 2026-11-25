@@ -32,9 +32,9 @@ describe("Results page", () => {
       if (!isValidElement(element)) throw new Error("expected an element");
       expect(element.type).toBe(ConnectedResultsView);
       expect(element.props).toMatchObject({
-        universe: "star-wars",
         model: {
           _tag: "Ready",
+          shell: { universe: "star-wars" },
           person: { name: "Luke Skywalker" },
           transport: { key: "starship-12" },
           startOverHref: "/star-wars/funnel",
@@ -54,9 +54,9 @@ describe("Results page", () => {
       expect(isValidElement(element)).toBe(true);
       if (!isValidElement(element)) throw new Error("expected an element");
       expect(element.props).toMatchObject({
-        universe: "star-wars",
         model: {
           _tag: "Ready",
+          shell: { universe: "star-wars" },
           transport: null,
           startOverHref: "/star-wars/funnel",
           homeHref: "/star-wars",
@@ -71,9 +71,9 @@ describe("Results page", () => {
       expect(isValidElement(element)).toBe(true);
       if (!isValidElement(element)) throw new Error("expected an element");
       expect(element.props).toMatchObject({
-        universe: "star-wars",
         model: {
           _tag: "Missing",
+          shell: { universe: "star-wars" },
           startOverHref: "/star-wars/funnel",
         },
       });
@@ -86,9 +86,9 @@ describe("Results page", () => {
       expect(isValidElement(element)).toBe(true);
       if (!isValidElement(element)) throw new Error("expected an element");
       expect(element.props).toMatchObject({
-        universe: "star-wars",
         model: {
           _tag: "Missing",
+          shell: { universe: "star-wars" },
           startOverHref: "/star-wars/funnel",
         },
       });

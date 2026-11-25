@@ -3,6 +3,11 @@ import { Function, Schema, SchemaGetter } from "effect";
 export const Universe = Schema.Literals(["star-wars", "ghibli"]);
 export type Universe = typeof Universe.Type;
 
+export const Universes = {
+  StarWars: "star-wars",
+  Ghibli: "ghibli",
+} as const satisfies Record<string, Universe>;
+
 const CharacterNumber = Schema.NumberFromString.check(
   Schema.isInt(),
   Schema.isGreaterThan(0),

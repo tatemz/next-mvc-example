@@ -10,7 +10,6 @@ export const GhibliFunnelPage = Function.pipe(
     <ConnectedFunnelView
       model={model}
       submitAction={submitGhibliFunnel}
-      universe="ghibli"
     />
   )),
   makeNextPage,

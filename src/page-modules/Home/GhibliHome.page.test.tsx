@@ -25,14 +25,13 @@ describe("Ghibli home page", () => {
         throw new Error("expected an element");
       }
       expect(element.type).toBe(ConnectedHomeView);
-      expect(element.props.universe).toBe("ghibli");
       expect(element.props.model).toMatchObject({
         _tag: "HomeViewModel",
         hero: {
           title: "Studio Ghibli character dossier",
           funnelHref: "/ghibli/funnel",
         },
-        shell: { theme: "autumn" },
+        shell: { universe: "ghibli", theme: "autumn" },
       });
     }));
 });

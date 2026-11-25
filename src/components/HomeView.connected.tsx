@@ -7,19 +7,15 @@ import {
   PageLoaded,
 } from "../ui-events/UiEvent";
 import { useUiEventDispatch } from "../ui-events/UiEventContext";
-import type { Universe } from "../domain/FilmUniverse.model";
 import { HomeView, type HomeViewModel } from "./HomeView";
 
 export type ConnectedHomeViewProps = {
   readonly model: HomeViewModel;
-  readonly universe: Universe;
 };
 
-export const ConnectedHomeView = ({
-  model,
-  universe,
-}: ConnectedHomeViewProps) => {
+export const ConnectedHomeView = ({ model }: ConnectedHomeViewProps) => {
   const emit = useUiEventDispatch();
+  const universe = model.shell.universe;
 
   useEffect(() => {
     emit(

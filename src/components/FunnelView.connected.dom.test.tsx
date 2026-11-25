@@ -13,7 +13,6 @@ import {
   ghibli,
   starWars,
 } from "../../.storybook/pageFixtures";
-import type { Universe } from "../domain/FilmUniverse.model";
 import { type UiEvent } from "../ui-events/UiEvent";
 import { UiEventProvider } from "../ui-events/UiEventContext";
 import type { FunnelViewModel } from "./FunnelView";
@@ -23,18 +22,11 @@ afterEach(cleanup);
 
 const action = async (previous: FunnelViewModel) => previous;
 
-const renderFunnel = (
-  model: FunnelViewModel,
-  universe: Universe = "star-wars",
-) => {
+const renderFunnel = (model: FunnelViewModel) => {
   const events: UiEvent[] = [];
   render(
     <UiEventProvider handler={(event) => events.push(event)}>
-      <ConnectedFunnelView
-        model={model}
-        submitAction={action}
-        universe={universe}
-      />
+      <ConnectedFunnelView model={model} submitAction={action} />
     </UiEventProvider>,
   );
   return events;
@@ -201,7 +193,7 @@ describe("ConnectedFunnelView events", () => {
   });
 
   it("emits review and failed CTAs without a transport", () => {
-    const reviewEvents = renderFunnel(funnelReview(ghibli, null), "ghibli");
+    const reviewEvents = renderFunnel(funnelReview(ghibli, null));
     const open = screen.getByRole("link", { name: "Open dossier" });
     preventNavigation(open);
     fireEvent.click(open);

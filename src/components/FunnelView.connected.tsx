@@ -23,7 +23,6 @@ type FunnelAction = (
 export type ConnectedFunnelViewProps = {
   readonly model: FunnelViewModel;
   readonly submitAction: FunnelAction;
-  readonly universe: Universe;
 };
 
 const contextFor = (
@@ -120,8 +119,8 @@ const ctaEventFor = (
 export const ConnectedFunnelView = ({
   model,
   submitAction,
-  universe,
 }: ConnectedFunnelViewProps) => {
+  const universe = model.shell.universe;
   const emit = useUiEventDispatch();
   const [state, dispatch, isPending] = useActionState(submitAction, model);
 

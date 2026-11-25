@@ -17,7 +17,7 @@ const renderResults = (model: ReturnType<typeof resultsReady>) => {
   const events: UiEvent[] = [];
   render(
     <UiEventProvider handler={(event) => events.push(event)}>
-      <ConnectedResultsView model={model} universe="star-wars" />
+      <ConnectedResultsView model={model} />
     </UiEventProvider>,
   );
   return events;

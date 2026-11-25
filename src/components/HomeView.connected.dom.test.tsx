@@ -20,7 +20,7 @@ describe("ConnectedHomeView events", () => {
     const events: UiEvent[] = [];
     render(
       <UiEventProvider handler={(event) => events.push(event)}>
-        <ConnectedHomeView model={homeSplash(starWars)} universe="star-wars" />
+        <ConnectedHomeView model={homeSplash(starWars)} />
       </UiEventProvider>,
     );
     const link = screen.getByRole("link", { name: "Build a dossier" });

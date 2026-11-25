@@ -6,7 +6,7 @@ import { makeNextPage } from "../../platform/NextPage";
 export const StarWarsResultsPage = Function.pipe(
   loadResults("star-wars"),
   Effect.map((model) => (
-    <ConnectedResultsView model={model} universe="star-wars" />
+    <ConnectedResultsView model={model} />
   )),
   makeNextPage,
 );

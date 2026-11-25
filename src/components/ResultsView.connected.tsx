@@ -15,7 +15,6 @@ import { ResultsView, ResultsViewModel } from "./ResultsView";
 
 export type ConnectedResultsViewProps = {
   readonly model: ResultsViewModel;
-  readonly universe: Universe;
 };
 
 const contextFor = (
@@ -61,9 +60,9 @@ const ctaEventFor = (
 
 export const ConnectedResultsView = ({
   model,
-  universe,
 }: ConnectedResultsViewProps) => {
   const emit = useUiEventDispatch();
+  const universe = model.shell.universe;
 
   useEffect(() => {
     emit(

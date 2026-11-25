@@ -10,6 +10,7 @@ describe("makeAppShellViewModel", () => {
   it("builds the theme, brand, and dataset links", () => {
     expect(makeAppShellViewModel(i18n, "ghibli")).toEqual({
       _tag: "AppShellViewModel",
+      universe: "ghibli",
       theme: "autumn",
       brand: {
         _tag: "AppShellLinkViewModel",

@@ -13,19 +13,26 @@ const viewModelFiles = ["src/components", "src/page-modules"]
   .flatMap(filesUnder)
   .filter((path) => !/\.test\.tsx?$/.test(path));
 
-const universeTypeImport =
-  /import\s+type\s+\{[^}]*\bUniverse\b[^}]*\}\s+from\s+["'][^"']*\/domain\/FilmUniverse\.model["'];?\n?/g;
-const domainImport = /from\s+["'][^"']*\/domain\//;
-const withoutUniverseTypeImport = (source: string) =>
-  source.replace(universeTypeImport, "");
+const domainImport =
+  /import\s+(?:type\s+)?\{([^}]*)\}\s+from\s+["'][^"']*\/domain\//g;
+const allowedDomainImports = new Set(["Universe", "Universes"]);
+const importedDomainNames = (source: string): string[] =>
+  [...source.matchAll(domainImport)].flatMap((match) =>
+    match[1]
+      .split(",")
+      .map((name) =>
+        name.trim().replace(/^type\s+/, "").split(/\s+as\s+/)[0]
+      )
+      .filter((name) => name !== "")
+  );
 const viewModelImport = /from\s+["'][^"']*(components|page-modules)\//;
 
 describe("view-model layer", () => {
-  it("does not import domain models other than the Universe type", () => {
+  it("imports only the Universe domain values", () => {
     const importers = viewModelFiles.filter((path) =>
-      domainImport.test(
-        withoutUniverseTypeImport(readFileSync(path, "utf8")),
-      ),
+      importedDomainNames(readFileSync(path, "utf8")).some(
+        (name) => !allowedDomainImports.has(name),
+      )
     );
 
     expect(importers).toEqual([]);
@@ -33,7 +40,7 @@ describe("view-model layer", () => {
 
   it("keeps domain models independent of the view-model layer", () => {
     const importers = filesUnder("src/domain").filter((path) =>
-      viewModelImport.test(readFileSync(path, "utf8")),
+      viewModelImport.test(readFileSync(path, "utf8"))
     );
 
     expect(importers).toEqual([]);

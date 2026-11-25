@@ -224,7 +224,6 @@ describe("Funnel", () => {
         <ConnectedFunnelView
           model={makeFunnelSearchViewModel(i18n, "star-wars", "", undefined)}
           submitAction={async (previous) => previous}
-          universe="ghibli"
         />
       </UiEventProvider>,
     );

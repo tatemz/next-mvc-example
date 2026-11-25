@@ -6,7 +6,7 @@ import { makeNextPage } from "../../platform/NextPage";
 export const GhibliHomePage = Function.pipe(
   loadHome("ghibli"),
   Effect.map((model) => (
-    <ConnectedHomeView model={model} universe="ghibli" />
+    <ConnectedHomeView model={model} />
   )),
   makeNextPage,
 );

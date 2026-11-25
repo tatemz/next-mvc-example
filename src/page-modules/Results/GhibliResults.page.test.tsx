@@ -32,11 +32,10 @@ describe("Ghibli results page", () => {
       if (!isValidElement(element)) throw new Error("expected an element");
       expect(element.type).toBe(ConnectedResultsView);
       expect(element.props).toMatchObject({
-        universe: "ghibli",
         model: {
           _tag: "Ready",
+          shell: { universe: "ghibli", theme: "autumn" },
           person: { name: "Haku" },
-          shell: { theme: "autumn" },
           startOverHref: "/ghibli/funnel",
           homeHref: "/ghibli",
         },

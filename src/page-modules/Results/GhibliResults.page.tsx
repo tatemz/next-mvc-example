@@ -6,7 +6,7 @@ import { makeNextPage } from "../../platform/NextPage";
 export const GhibliResultsPage = Function.pipe(
   loadResults("ghibli"),
   Effect.map((model) => (
-    <ConnectedResultsView model={model} universe="ghibli" />
+    <ConnectedResultsView model={model} />
   )),
   makeNextPage,
 );

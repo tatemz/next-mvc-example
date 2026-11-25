@@ -25,14 +25,13 @@ describe("StarWars home page", () => {
         throw new Error("expected an element");
       }
       expect(element.type).toBe(ConnectedHomeView);
-      expect(element.props.universe).toBe("star-wars");
       expect(element.props.model).toMatchObject({
         _tag: "HomeViewModel",
         hero: {
           title: "Star Wars character dossier",
           funnelHref: "/star-wars/funnel",
         },
-        shell: { theme: "night" },
+        shell: { universe: "star-wars", theme: "night" },
       });
     }));
 });

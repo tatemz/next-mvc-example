@@ -5,7 +5,10 @@ import {
   muska,
 } from "../../src/domain/FilmUniverse.fixture";
 import type { Person } from "../../src/domain/FilmUniverse.model";
-import type { Universe } from "../../src/domain/FilmUniverse.model";
+import {
+  Universes,
+  type Universe,
+} from "../../src/domain/FilmUniverse.model";
 import { PeopleCatalog } from "../../src/services/PeopleCatalog";
 import {
   catalogOf,
@@ -47,6 +50,6 @@ const catalog = (
 export const catalogs = (
   mode: Ref.Ref<CatalogMode>,
 ): Record<Universe, PeopleCatalog> => ({
-  "star-wars": catalog(starWarsPeople, mode),
-  ghibli: catalog(ghibliPeople, mode),
+  [Universes.StarWars]: catalog(starWarsPeople, mode),
+  [Universes.Ghibli]: catalog(ghibliPeople, mode),
 });

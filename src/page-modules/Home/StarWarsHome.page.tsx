@@ -6,7 +6,7 @@ import { makeNextPage } from "../../platform/NextPage";
 export const StarWarsHomePage = Function.pipe(
   loadHome("star-wars"),
   Effect.map((model) => (
-    <ConnectedHomeView model={model} universe="star-wars" />
+    <ConnectedHomeView model={model} />
   )),
   makeNextPage,
 );
