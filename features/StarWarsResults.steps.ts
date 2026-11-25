@@ -92,7 +92,7 @@ const theThemeIs = (expected: string) =>
 const environment = (scenario: string, index: number) =>
   Layer.merge(
     scenarioApp({ CHARACTER_ID: "1" }),
-    scenarioPage({ feature: "results", index, scenario }),
+    scenarioPage({ feature: "star-wars-results", index, scenario }),
   );
 
 const completeDossier = Bdd.scenario("Opening a complete dossier").pipe(

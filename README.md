@@ -2,8 +2,8 @@
 
 One character-dossier UI, served from two film universes: Star Wars through
 SWAPI and Studio Ghibli through the Ghibli API. Controllers, view models, and
-views are shared. Each page module supplies its own runtime, server action, and
-daisyUI theme.
+views are shared. Each experience page module supplies its own runtime, server
+action, and daisyUI theme.
 
 | Star Wars (`/star-wars`, night) | Studio Ghibli (`/ghibli`, autumn) |
 | --- | --- |
@@ -76,8 +76,8 @@ export const StarWarsFunnelPage = makeNextPage(
 - The results page requires `character`, `film`, and `transport`; a URL missing
   one of them renders the `Missing` state. `transport=none` is an explicit
   choice, not a default.
-- The review's `results?` link and the results links are relative to the
-  selected universe.
+- The review link is relative (`results?...`); the results page's links use the
+  selected universe's base path.
 - `searchPerson`, `searchGhibliPerson`, `submitFunnel`, and
   `submitGhibliFunnel` are server actions. `HomePage.connected.tsx` and
   `Funnel.connected.tsx` are the two `"use client"` boundaries.

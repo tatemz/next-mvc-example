@@ -121,7 +121,7 @@ const theThemeIs = (expected: string) =>
 const environment = (scenario: string, index: number) =>
   Layer.merge(
     scenarioApp({ CHARACTER_ID: "1" }),
-    scenarioPage({ feature: "funnel", index, scenario }),
+    scenarioPage({ feature: "star-wars-funnel", index, scenario }),
   );
 
 const reviewDossier = Bdd.scenario("Reviewing the dossier").pipe(

@@ -121,7 +121,7 @@ const theThemeIs = (expected: string) =>
 const environment = (scenario: string, index: number) =>
   Layer.merge(
     scenarioApp({ CHARACTER_ID: "1" }),
-    scenarioPage({ feature: "character-lookup", index, scenario }),
+    scenarioPage({ feature: "star-wars-home", index, scenario }),
   );
 
 const configuredCharacter = Bdd.scenario("The configured character loads").pipe(
@@ -162,7 +162,7 @@ const unknownCharacter = Bdd.scenario("Reporting an unknown character").pipe(
   Bdd.provide(environment("unknown-character", 3)),
 );
 
-export const characterLookup = Bdd.feature(
+export const starWarsHome = Bdd.feature(
   "Looking up a Star Wars character",
 ).pipe(
   configuredCharacter,
