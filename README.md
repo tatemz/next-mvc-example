@@ -32,12 +32,12 @@ This repo is a small, production-shaped answer for an existing Next app. It
 keeps Next and React, makes the implicit boundaries visible, and wires Effect
 services with a relatively scalable hack:
 
-- the server entry builds the Effect services once and hands each universe's
-  route its catalog;
+- the server entry builds the Effect services once and provides a catalog
+  registry; a page-composition stage selects the universe's catalog and i18n;
 - the request's Effect `Context` crosses Next's render boundary through
   `AsyncLocalStorage`, because Next's own async machinery does not preserve
   it;
-- controllers are Effects. They `yield*` their ports, load and parse, then
+- controllers receive their services as a value. They load and parse, then
   hand domain objects to a pure model factory;
 - model factories are synchronous and hold the rendering and business logic;
 - views render a view model and nothing else.
@@ -144,59 +144,60 @@ or hands a `NextRedirect` to Next.
 
 ```tsx
 export const FunnelPage = Function.pipe(
-  startFunnel,
-  Effect.map((model) => (
-    <ConnectedFunnelView model={model} submitAction={submitFunnel} />
-  )),
+  withUniverseServices((services) => Effect.succeed(startFunnel(services))),
+  Effect.map((model) =>
+    model._tag === "NotFoundViewModel"
+      ? <NotFoundView model={model} />
+      : <ConnectedFunnelView model={model} submitAction={submitFunnel} />
+  ),
   makeNextPage,
 );
 ```
 
-- `makeNextPage` provides `ParsedSearchParams` and `ParsedPathParams`.
-  Controllers decode their own schemas. `currentUniverse` reads
-  `params.universe` and returns an Option; an unknown universe becomes a
-  `NotFoundViewModel` that the page renders.
+- `makeNextPage` provides `ParsedSearchParams` and the raw
+  `ParsedPathParams`. `withUniverseServices` decodes `params.universe` with
+  the `Universe` schema, selects the catalog from `Catalogs` and the request
+  `I18n`, then calls the controller with a `UniverseServices` value. An
+  unknown universe becomes a `NotFoundViewModel` that the page renders.
 - Subviews with their own view models live in their own files: `HomeHero`,
   the `Funnel*Step` components, and `ResultsReadyView`/`ResultsMissingView`.
-- The request context carries `I18n` and one `PeopleCatalog`. `boot/app.ts`
-  mounts `/star-wars` with the SWAPI catalog and `/ghibli` with the Ghibli
-  one, so a controller never chooses its adapter.
+- The request context carries `I18n` and the `Catalogs` registry.
+  `boot/app.ts` mounts one Next catch-all, so service selection happens in
+  page composition rather than in the HTTP route.
 - The root page uses `makeNextPage` with a redirect program.
 - Every page view model carries its `AppShellViewModel`, so
   `app/layout.tsx` is only `<html>` and `<body>`. The shell owns the
   `data-theme` value: `night` for Star Wars, `autumn` for Ghibli.
 - Each home page is a splash with a credited image and one funnel CTA.
 - `server.ts` is the process entrypoint. `boot/live.ts` builds the live
-  catalogs, `boot/app.ts` mounts `/api/ui-events` and the Next catch-alls,
+  catalogs, `boot/app.ts` mounts `/api/ui-events` and one Next catch-all,
   `boot/next.ts` bridges the render context, and `boot/serve.ts` owns the
   socket.
 
 ### Controllers and model factories
 
-A controller is an Effect. It loads and parses, then passes domain values to
-one top-level model factory. The factory is pure and synchronous, and it owns
-the page decision and every derived view model. Types are elided here for
-width:
+A controller receives its services as a value. It loads and parses, then
+passes domain values to one top-level model factory. The factory is pure and
+synchronous, and it owns the page decision and every derived view model.
+Types are elided here for width:
 
 ```ts
-export const loadResults = (universe, params, shell) =>
+export const loadResults = ({ i18n, universe, catalog }: UniverseServices) =>
   Effect.gen(function*() {
-    const i18n = yield* I18n;
-    const client = yield* PeopleCatalog;
-    const person = yield* Effect.option(client.getPerson(params.character));
-    return makeResultsViewModel(
-      i18n,
-      shell,
-      universe,
-      person,
-      params.film,
-      params.transport,
+    const params = yield* decodeOption(ResultsParams);
+    if (Option.isNone(params)) {
+      return makeResultsMissingViewModel(i18n, universe);
+    }
+    const person = yield* Effect.option(
+      catalog.getPerson(params.value.character),
     );
+    return makeResultsViewModel(i18n, universe, person, params.value);
   });
 ```
 
-`makeResultsViewModel` is the only place that decides between `Ready` and
-`Missing` and builds the person, film, and transport view models. The funnel
+`loadResults` decides between `Ready` and `Missing`; page composition owns
+`NotFound`. `makeResultsViewModel` builds the person, film, and transport
+view models. The funnel
 keeps its in-progress state in `FunnelViewModel` because the server action
 serializes that state between steps. Its controller parses the form and loads
 the catalog; pure step-result factories decide the next state. The transport
