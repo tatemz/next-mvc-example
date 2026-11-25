@@ -1,15 +1,12 @@
-import { Context, Effect, Layer, Ref } from "effect";
+import { Context, Effect, Ref } from "effect";
 import {
   haku,
   luke,
   muska,
 } from "../../src/domain/FilmUniverse.fixture";
 import type { Person } from "../../src/domain/FilmUniverse.model";
-import {
-  GhibliCatalog,
-  PeopleCatalog,
-  StarWarsCatalog,
-} from "../../src/services/PeopleCatalog";
+import type { Universe } from "../../src/domain/FilmUniverse.model";
+import { PeopleCatalog } from "../../src/services/PeopleCatalog";
 import {
   catalogOf,
   unavailableCatalog,
@@ -47,8 +44,9 @@ const catalog = (
   };
 };
 
-export const catalogs = (mode: Ref.Ref<CatalogMode>) =>
-  Layer.mergeAll(
-    Layer.succeed(StarWarsCatalog, catalog(starWarsPeople, mode)),
-    Layer.succeed(GhibliCatalog, catalog(ghibliPeople, mode)),
-  );
+export const catalogs = (
+  mode: Ref.Ref<CatalogMode>,
+): Record<Universe, PeopleCatalog> => ({
+  "star-wars": catalog(starWarsPeople, mode),
+  ghibli: catalog(ghibliPeople, mode),
+});

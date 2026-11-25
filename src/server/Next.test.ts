@@ -14,14 +14,10 @@ import {
   personNamed,
 } from "../domain/FilmUniverse.fixture";
 import { catalogOf } from "../services/PeopleCatalog.fixture";
-import {
-  GhibliCatalog,
-  PeopleCatalog,
-  StarWarsCatalog,
-} from "../services/PeopleCatalog";
+import { PeopleCatalog } from "../services/PeopleCatalog";
 import type { RenderServices } from "./RenderContext";
 import { Next } from "./Next";
-import { UiEventLogger, noopUiEventLogger } from "./UiEventLogger";
+import { noopUiEventLogger } from "./UiEventLogger";
 
 const catalogServing = (name: string) =>
   catalogOf([personNamed(makeCharacterId("1"), name)]);
@@ -46,14 +42,14 @@ const fakeNext = Layer.succeed(
   }),
 );
 
-const appWithFakes = appWith(
-  Layer.mergeAll(
-    fakeNext,
-    Layer.succeed(StarWarsCatalog, catalogServing("Luke")),
-    Layer.succeed(GhibliCatalog, catalogServing("Haku")),
-    Layer.succeed(UiEventLogger, noopUiEventLogger),
-  ),
-);
+const appWithFakes = appWith({
+  next: fakeNext,
+  catalogs: {
+    "star-wars": catalogServing("Luke"),
+    ghibli: catalogServing("Haku"),
+  },
+  uiEventLogger: noopUiEventLogger,
+});
 
 const body = (url: string) =>
   HttpClient.get(url).pipe(

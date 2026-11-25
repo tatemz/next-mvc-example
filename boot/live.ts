@@ -1,11 +1,7 @@
-import { Effect, Layer } from "effect";
-import { FetchHttpClient } from "effect/http";
+import { Context, Effect, Layer } from "effect";
+import type { Universe } from "../src/domain/FilmUniverse.model";
 import { layer as GhibliCatalogLayer } from "../src/services/GhibliPeopleCatalog.layer";
-import {
-  GhibliCatalog,
-  PeopleCatalog,
-  StarWarsCatalog,
-} from "../src/services/PeopleCatalog";
+import { PeopleCatalog } from "../src/services/PeopleCatalog";
 import { layer as SwapiCatalogLayer } from "../src/services/SwapiPeopleCatalog.layer";
 import {
   UiEventLogger,
@@ -14,25 +10,24 @@ import {
 import { appWith } from "./app";
 import { nextLayer } from "./next";
 
-const catalogs = Layer.mergeAll(
-  Layer.effect(
-    StarWarsCatalog,
-    Effect.map(PeopleCatalog, (catalog) => catalog),
-  ).pipe(Layer.provide(SwapiCatalogLayer)),
-  Layer.effect(
-    GhibliCatalog,
-    Effect.map(PeopleCatalog, (catalog) => catalog),
-  ).pipe(Layer.provide(GhibliCatalogLayer)),
-).pipe(Layer.provide(FetchHttpClient.layer));
-
-export const liveApp = (dir: string) =>
-  appWith(
-    Layer.mergeAll(
-      nextLayer(dir),
-      catalogs,
-      Layer.succeed(
-        UiEventLogger,
-        makeUiEventLogger(process.env.UI_EVENT_LOGGER),
-      ),
-    ),
+const catalogValue = <E, R>(layer: Layer.Layer<PeopleCatalog, E, R>) =>
+  Layer.build(layer).pipe(
+    Effect.map((context) => Context.get(context, PeopleCatalog)),
   );
+
+export const liveCatalogs = Effect.gen(function*() {
+  return {
+    "star-wars": yield* catalogValue(SwapiCatalogLayer),
+    ghibli: yield* catalogValue(GhibliCatalogLayer),
+  };
+});
+
+export const liveApp = (
+  dir: string,
+  catalogs: Record<Universe, PeopleCatalog>,
+) =>
+  appWith({
+    next: nextLayer(dir),
+    catalogs,
+    uiEventLogger: makeUiEventLogger(process.env.UI_EVENT_LOGGER),
+  });

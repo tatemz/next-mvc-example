@@ -3,10 +3,7 @@ import { resolve } from "node:path";
 import { appWith } from "../../boot/app";
 import { nextLayer } from "../../boot/next";
 import { serve } from "../../boot/serve";
-import {
-  UiEventLogger,
-  noopUiEventLogger,
-} from "../../src/server/UiEventLogger";
+import { noopUiEventLogger } from "../../src/server/UiEventLogger";
 import {
   CatalogControl,
   type CatalogMode,
@@ -21,13 +18,11 @@ export class ScenarioApp extends Context.Service<
 const repoRoot = resolve(import.meta.dirname, "../..");
 
 const appWithStubs = (mode: Ref.Ref<CatalogMode>) =>
-  appWith(
-    Layer.mergeAll(
-      nextLayer(repoRoot),
-      catalogs(mode),
-      Layer.succeed(UiEventLogger, noopUiEventLogger),
-    ),
-  );
+  appWith({
+    next: nextLayer(repoRoot),
+    catalogs: catalogs(mode),
+    uiEventLogger: noopUiEventLogger,
+  });
 
 export const scenarioApp = Layer.unwrap(
   Effect.gen(function*() {
