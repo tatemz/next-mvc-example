@@ -1,108 +1,61 @@
 # next-mvc-example
 
+A character-dossier app built twice, for Star Wars (SWAPI) and Studio Ghibli
+(the Ghibli API), from shared controllers, model factories, and views. It runs
+on the Next.js App Router behind an Effect HTTP server, and it is a reference
+for keeping a production Next app's dependencies explicit and testable.
+
+## Contents
+
+- [Why this project exists](#why-this-project-exists)
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Getting started](#getting-started)
+- [Routes](#routes)
+- [Architecture](#architecture)
+- [Project structure](#project-structure)
+- [Scripts](#scripts)
+- [Testing](#testing)
+- [Configuration](#configuration)
+- [Checks and CI](#checks-and-ci)
+
 ## Why this project exists
 
-This is a reference for maintaining a production Next.js App Router
-application with Effect. Next leaves the application architecture to you;
-this repo shows one that stays explicit:
+Next.js is productive, but much of its behavior is implicit: file-system
+routing, server/client boundaries, caching, and module imports with side
+effects. That magic is convenient until it hides where data comes from and
+what a render touches. Next also has no dependency-injection seam of its own,
+so pages and server actions import their clients directly and a test has to
+mock modules.
 
-- a controller is an Effect. It loads and parses data, then hands domain
-  objects to one top-level model factory;
-- model factories are pure and synchronous. They hold the rendering and
-  business logic that turns domain values into a view model;
-- views render a view model and nothing else;
-- the request's Effect context is bridged into Next's render, so the same
-  controllers run in production and in the browser suite with stubbed
-  catalogs.
+This repo is a small, production-shaped answer for an existing Next app. It
+keeps Next and React, makes the implicit boundaries visible, and wires Effect
+services with a relatively scalable hack:
 
-The demo exists because those boundaries are easy to lose as a Next app grows:
-module-level clients, ambient configuration, and route handlers that mix
-loading, decisions, and markup. Keeping them explicit is what makes the pages
-testable without a network and the adapters replaceable.
+- the server entry builds the Effect services once and hands each universe's
+  route its catalog;
+- the request's Effect `Context` crosses Next's render boundary through
+  `AsyncLocalStorage`, because Next's own async machinery does not preserve
+  it;
+- controllers are Effects. They `yield*` their ports, load and parse, then
+  hand domain objects to a pure model factory;
+- model factories are synchronous and hold the rendering and business logic;
+- views render a view model and nothing else.
 
-A new application that can choose its stack should look at
+The bridge is the only ambient state. Every other dependency arrives through
+the request context or a function argument, which is what lets the browser
+suite run the same pages with stub catalogs and no network.
+
+A new app that can choose its stack should evaluate
 [Foldkit](https://foldkit.dev), a TypeScript framework built on Effect that
-makes this architecture the framework's own. One `Model`, explicit `Message`
+makes this architecture the framework's own: one `Model`, explicit `Message`
 values, a pure `update` that returns the next model and its `Command`s, and a
 runtime that executes them. Foldkit enforces the separation this demo builds
-by hand, and it handles server rendering and hydration itself. The tradeoff is
+by hand and handles server rendering and hydration itself. The tradeoff is
 leaving React and Next, which this project cannot do: it is here to show the
 discipline inside an existing Next codebase.
 
-## What it is
-
-One character-dossier UI, served from two film universes: Star Wars through
-SWAPI and Studio Ghibli through the Ghibli API. Controllers, view models, and
-views are shared. Each experience's routes carry its catalog and daisyUI
-theme; the funnel modules also supply their server actions.
-
-| Star Wars (`/star-wars`, night) | Studio Ghibli (`/ghibli`, autumn) |
-| --- | --- |
-| ![Star Wars dossier](docs/star-wars.jpg) | ![Ghibli dossier](docs/ghibli.jpg) |
-
-```sh
-pnpm install
-cp .env.example .env.local
-pnpm dev
-```
-
-Open `/star-wars` or `/ghibli`. `pnpm dev` builds the Next app, then serves it
-through the Effect HTTP server in `server.ts`.
-
-## Routes
-
-| Experience | Home | Funnel | Results |
-| --- | --- | --- | --- |
-| Star Wars | `/star-wars` | `/star-wars/funnel` | `/star-wars/results` |
-| Studio Ghibli | `/ghibli` | `/ghibli/funnel` | `/ghibli/results` |
-
-The root controller returns a `NextRedirect` to `/star-wars`. The AppShell
-header switches between the two experiences.
-
-## Page shape
-
-Each route file re-exports one page module. A page module names its program;
-`makeNextPage` runs it with the request's Effect context.
-
-```tsx
-export const StarWarsFunnelPage = makeNextPage(
-  Effect.map(startFunnel("night"), (model) => (
-    <ConnectedFunnelView
-      model={model}
-      submitAction={submitStarWarsFunnel}
-      universe="star-wars"
-    />
-  )),
-);
-```
-
-- A page program returns a React tree or a `NextRedirect`.
-  `handleNextRedirect` is the only module that calls `next/navigation.redirect`.
-- `makeNextPage` provides the raw Next `searchParams` as the
-  `ParsedSearchParams` service, then runs the program with the request context
-  bridged from `boot/next.ts`. The program decodes its own schema with
-  `ParsedSearchParams.decodeOption`; the adapter takes no params schema.
-- The program is a controller Effect. It decodes and loads, then hands domain
-  values to one pure model factory, which decides the page state and builds
-  the view model.
-- The request context carries `I18n` and one `PeopleCatalog`: the
-  `/star-wars` routes provide the SWAPI adapter, the `/ghibli` routes the
-  Ghibli one. A page never chooses its adapter.
-- The root page uses `makeRedirectNextPage`, which needs no context.
-- Page view models carry their own `AppShellViewModel`. The views render the
-  shell (brand, links, and theme), so `app/layout.tsx` is only `<html>` and
-  `<body>`.
-- The AppShell sets `data-theme`: `night` for Star Wars, `autumn` for Ghibli.
-  The page views do not know which theme is active.
-- Each home page is a splash: a universe image with a visible credit and one
-  CTA into that universe's funnel. It loads no character data.
-- `server.ts` is the process entrypoint. `boot/live.ts` provides the live
-  catalogs, `boot/app.ts` mounts the Effect `HttpApi` endpoint at
-  `/api/ui-events` plus a Next catch-all per universe, and `boot/serve.ts`
-  owns the socket. Run `next build` before `pnpm start`; `pnpm dev` does the
-  build first.
-
-## What it shows
+## Features
 
 - Controllers are Effects; every model factory is a pure synchronous function
   over domain values and i18n.
@@ -110,19 +63,21 @@ export const StarWarsFunnelPage = makeNextPage(
   carry their own `_tag`.
 - `CharacterId` is a branded string built from `Schema.NumberFromString`, so
   `Person.id` and `PeopleCatalog.getPerson` accept only a validated id.
-- Every user-visible string is carried by the view model; views contain no copy.
+- Every user-visible string is carried by the view model; views contain no
+  copy.
 - `PeopleCatalog` is the port: `getPerson` and `searchPeople`, with
   `PeopleCatalogError`. Two adapters implement it:
-  - `SwapiPeopleCatalog` maps SWAPI people, films, planets, species, starships,
-    and vehicles into the domain.
-  - `GhibliPeopleCatalog` maps Ghibli people, films, and species. The array index
-    is the character id; missing measurements are `unknown`; transports are empty.
+  - `SwapiPeopleCatalog` maps SWAPI people, films, planets, species,
+    starships, and vehicles into the domain.
+  - `GhibliPeopleCatalog` maps Ghibli people, films, and species. The array
+    index is the character id; missing measurements are `unknown`; transports
+    are empty.
 - `Film.imageUrl` is optional. The Ghibli adapter fills it from the film API's
-  `image` field; SWAPI has no image field. The film list, funnel choices, review,
-  and results render the poster only when it exists.
-- `FunnelViewModel` is a tagged union of `Search`, `Choose`, `Film`, `Transport`,
-  `Review`, and `Failed`. `Funnel.controller.ts` advances it with an exhaustive
-  Effect `Match`.
+  `image` field; SWAPI has no image field. The film list, funnel choices,
+  review, and results render the poster only when it exists.
+- `FunnelViewModel` is a tagged union of `Search`, `Choose`, `Film`,
+  `Transport`, `Review`, and `Failed`. `Funnel.controller.ts` advances it with
+  an exhaustive Effect `Match`.
 - The results page requires `character`, `film`, and `transport`; a URL missing
   one of them renders the `Missing` state. `transport=none` is an explicit
   choice, not a default.
@@ -132,7 +87,112 @@ export const StarWarsFunnelPage = makeNextPage(
   `HomeView.connected.tsx`, `FunnelView.connected.tsx`, and
   `ResultsView.connected.tsx` are the client event boundaries.
 
-## UI events
+## Screenshots
+
+| Star Wars (`/star-wars`, night) | Studio Ghibli (`/ghibli`, autumn) |
+| --- | --- |
+| ![Star Wars dossier](docs/star-wars.jpg) | ![Ghibli dossier](docs/ghibli.jpg) |
+
+## Getting started
+
+### Requirements
+
+- Node.js 22.12+
+- pnpm 10
+- Chrome or Chromium for the browser scenarios
+- ffmpeg for `pnpm test:e2e:debug`
+
+### Install and run
+
+```sh
+pnpm install
+cp .env.example .env.local
+pnpm dev
+```
+
+`pnpm dev` builds the Next app and then serves it through the Effect HTTP
+server in `server.ts`. Open `/star-wars` or `/ghibli`. `pnpm build` creates the
+production build and `pnpm start` serves an existing one.
+
+## Routes
+
+| Experience | Home | Funnel | Results |
+| --- | --- | --- | --- |
+| Star Wars | `/star-wars` | `/star-wars/funnel` | `/star-wars/results` |
+| Studio Ghibli | `/ghibli` | `/ghibli/funnel` | `/ghibli/results` |
+
+The root page redirects to `/star-wars`. The AppShell header switches between
+the two experiences.
+
+## Architecture
+
+### Page modules and the request context
+
+Each route file re-exports one page module, and a page module names its
+program. `makeNextPage` supplies the parsed search params, runs the program
+with the request's Effect context, and renders the result or hands a
+`NextRedirect` to Next.
+
+```tsx
+export const StarWarsFunnelPage = makeNextPage(
+  Effect.map(startFunnel("star-wars"), (model) => (
+    <ConnectedFunnelView
+      model={model}
+      submitAction={submitStarWarsFunnel}
+      universe="star-wars"
+    />
+  )),
+);
+```
+
+- `makeNextPage` provides the raw Next `searchParams` as
+  `ParsedSearchParams`; the controller decodes its own schema with
+  `ParsedSearchParams.decodeOption`.
+- The request context carries `I18n` and one `PeopleCatalog`. `boot/app.ts`
+  mounts `/star-wars` with the SWAPI catalog and `/ghibli` with the Ghibli
+  one, so a page never chooses its adapter.
+- The root page uses `makeRedirectNextPage` and needs no context.
+- Every page view model carries its `AppShellViewModel`, so
+  `app/layout.tsx` is only `<html>` and `<body>`. The shell owns the
+  `data-theme` value: `night` for Star Wars, `autumn` for Ghibli.
+- Each home page is a splash with a credited image and one funnel CTA.
+- `server.ts` is the process entrypoint. `boot/live.ts` builds the live
+  catalogs, `boot/app.ts` mounts `/api/ui-events` and the Next catch-alls,
+  `boot/next.ts` bridges the render context, and `boot/serve.ts` owns the
+  socket.
+
+### Controllers and model factories
+
+A controller is an Effect. It loads and parses, then passes domain values to
+one top-level model factory. The factory is pure and synchronous, and it owns
+the page decision and every derived view model. Types are elided here for
+width:
+
+```ts
+export const loadResults = (universe, params, shell) =>
+  Effect.gen(function*() {
+    const i18n = yield* I18n;
+    const client = yield* PeopleCatalog;
+    const person = yield* Effect.option(client.getPerson(params.character));
+    return makeResultsViewModel(
+      i18n,
+      shell,
+      universe,
+      person,
+      params.film,
+      params.transport,
+    );
+  });
+```
+
+`makeResultsViewModel` is the only place that decides between `Ready` and
+`Missing` and builds the person, film, and transport view models. The funnel
+keeps its in-progress state in `FunnelViewModel` because the server action
+serializes that state between steps. Its search and choose controllers load
+and pass domain values; the film, transport, and review factories build from
+the previous step's model, which is the data the action actually receives.
+
+### UI events
 
 UI events are typed, JSON-shaped domain facts emitted from the connected page
 components:
@@ -154,42 +214,27 @@ no event payload uses an optional field.
 
 `CtaClicked` is a closed union with one variant per page state: the home CTA,
 each funnel stage's CTA, and each results outcome's CTA. A search click cannot
-carry a review CTA. `makeUiEventHandler` transforms an event
-into a flat `UiEventPayload` with `event`, `page`, `universe`, `occurredAt`,
-and `properties`, then sends it to every injected `UiEventSink`. The sink
-keeps the flat property names (`characterId`, `filmOrder`, `transportKey`,
-`query`, and so on).
+carry a review CTA. `makeUiEventHandler` transforms an event into a flat
+`UiEventPayload` with `event`, `page`, `universe`, `occurredAt`, and
+`properties`, then sends it to every injected `UiEventSink`. The sink keeps the
+flat property names (`characterId`, `filmOrder`, `transportKey`, `query`, and
+so on).
 
 `AppUiEventProvider` mounts the handler once at the root. The default list has
-two sinks: `ConsoleUiEventSink.ts` logs the payload, and
-`BeaconUiEventSink.ts` posts it with `navigator.sendBeacon` to
-`/api/ui-events`. A failing sink is logged and does not stop the others, so a
-new destination is one entry in the list. Connected `HomeView` supplies
-page-load and CTA events, `FunnelView` supplies input, validation, and CTA
-events, and `ResultsView` supplies page-load and CTA events.
+two sinks: `ConsoleUiEventSink.ts` logs the payload, and `BeaconUiEventSink.ts`
+posts it with `navigator.sendBeacon` to `/api/ui-events`. A failing sink is
+logged and does not stop the others, so a new destination is one entry in the
+list. Connected `HomeView` supplies page-load and CTA events, `FunnelView`
+supplies input, validation, and CTA events, and `ResultsView` supplies
+page-load and CTA events.
 
 `src/api/UiEventApi.ts` defines `POST /api/ui-events`; `src/api/UiEventApi.layer.ts`
 logs each payload through `UiEventLogger`. `server.ts` serves that API and the
-Next catch-all from one Effect HTTP server, so the endpoint is not a Next route.
-The default layer uses the Effect logger; `UI_EVENT_LOGGER=noop` swaps in a noop
-layer, and the integration harness sets it so event traffic does not fill the
-test output.
+Next catch-all from one Effect HTTP server, so the endpoint is not a Next
+route. `UI_EVENT_LOGGER=console` is the default; `noop` drops the logs, and the
+browser suite uses it so event traffic does not fill the test output.
 
-## Storybook
-
-```sh
-pnpm storybook
-```
-
-The stories in `src/components/*.stories.tsx` render the three top-level page
-views, split by universe. Every tagged view-model variant is represented, including pending,
-validation-error, known-species, film-poster, transport/no-transport, and both
-`night` and `autumn` shells. `.storybook/pageFixtures.ts` builds the models from
-the app fixtures and view-model factories.
-
-`pnpm build-storybook` writes a static site to `storybook-static/`.
-
-## Layout
+## Project structure
 
 ```text
 .oxlintrc.json               Effect Oxlint preset and boundary overrides
@@ -200,7 +245,7 @@ app/                         route re-exports; html/body layout
 src/api/                     UiEventApi definition and handler layer
 src/page-modules/            one Next page per route via makeNextPage
 src/platform/                Next adapter, redirect model, parsed params
-src/controllers/             page programs, state machines, view models
+src/controllers/             page programs and the funnel state machine
 src/components/              flat view models and views (AppShell included)
 src/ui-events/               event model, payload, handler, sinks, and React provider
 src/server/                  Next service, render context, and UI event logger
@@ -215,34 +260,46 @@ features/                    Gherkin, shared steps, and the stubbed scenario app
 `src/pages` is reserved by the Next Pages Router, so page modules use the
 `src/page-modules` name.
 
-## Commands
+## Scripts
+
+| Command | What it does |
+| --- | --- |
+| `pnpm dev` | Build Next, then serve through `tsx server.ts` |
+| `pnpm start` | Serve an existing build through `tsx server.ts` |
+| `pnpm build` | Create the production Next build |
+| `pnpm test` | Run the Vitest suite |
+| `pnpm test:coverage` | Run Vitest with the 100% coverage thresholds |
+| `pnpm test:e2e` | Build, then run the 26 browser scenarios |
+| `pnpm test:e2e:debug` | Run the browser scenarios slowly and record WebM |
+| `pnpm typecheck` | Run the Effect-patched TypeScript compiler |
+| `pnpm lint` | Run type-aware Oxlint with the Effect preset |
+| `pnpm check` | Run `typecheck` and `lint` |
+| `pnpm storybook` | Start Storybook on port 6006 |
+| `pnpm build-storybook` | Build the static Storybook site |
+
+`pnpm test:e2e` runs the shared command with `--parallel=2`.
+`pnpm test:e2e:debug` reuses it with `E2E_DEBUG=1 --parallel=1 --verbose`,
+pausing after each interaction and recording one WebM per feature. The shared
+command owns the feature/steps globs, reporters, strict mode, and step timeout.
+Each run writes `reports/junit.xml` and `reports/report.html`.
+
+## Testing
+
+### Unit tests and coverage
 
 ```sh
-pnpm dev
-pnpm start
 pnpm test
 pnpm test:coverage
-pnpm typecheck
-pnpm build
-pnpm check
-pnpm lint
-pnpm lint:fix
-pnpm test:e2e
-pnpm test:e2e:debug
-pnpm storybook
-pnpm build-storybook
 ```
 
-`pnpm test:e2e` builds the app, then runs `test:e2e:run` with `--parallel=2`.
-`pnpm test:e2e:debug` reuses the same runner with `E2E_DEBUG=1 --parallel=1
---verbose`, pausing after each browser interaction and recording one WebM per
-feature. The shared command owns the feature/steps globs, reporters, strict
-mode, and step timeout. Each run writes `reports/junit.xml` and
-`reports/report.html`.
+Vitest covers schemas, controllers, model factories, views, server actions,
+and event handling. `test:coverage` enforces 100% statements, branches,
+functions, and lines over `app/` and `src/`.
 
-## Integration tests
+### Browser suite
 
-Four features and 26 scenarios cover both universes:
+`pnpm test:e2e` builds the app and runs 26 Gherkin scenarios with Effect BDD
+and Chromium. Four features cover both universes:
 
 - Home: the universe splash and its funnel CTA.
 - Funnel: review and open a dossier, the no-match search, and an unavailable
@@ -252,25 +309,50 @@ Four features and 26 scenarios cover both universes:
 - Navigation: the app root and the header switch.
 
 Each feature is a Scenario Outline with a `universe` column, so adding an API
-is a row in the examples tables. The Ghibli rows cover the same home, funnel,
-results, and navigation states as Star Wars, including the Ghibli vehicle
-transport.
+is a row in the examples tables. Each scenario boots `boot/app.ts` in-process
+on an OS-assigned port, provides the stub catalogs from
+`features/support/ScenarioApp.ts`, and closes the app and browser when it
+ends. The stubs serve domain fixtures, so the suite needs no network;
+`Given the catalogue is unavailable` switches them to the failure path. Shared
+steps live in `features/support/Steps.ts`, and each feature's `.steps.ts`
+composes the scenarios.
 
-Each scenario boots `boot/app.ts` in-process on an OS-assigned port through
-`boot/serve.ts`, providing the stub catalogs from
-`features/support/ScenarioApp.ts`, and closes the app and the browser when the
-scenario ends. The stubs serve the domain fixtures, so the suite needs no
-network; `Given the catalogue is unavailable` switches them to their failure
-path. Shared steps are declared in `features/support/Steps.ts`, and each
-feature's `.steps.ts` composes the scenarios. A failure writes a full-page
-screenshot under `artifacts/`; debug mode also needs ffmpeg.
+A failure writes a full-page screenshot under `artifacts/`; debug mode records
+videos and needs ffmpeg.
 
 ```sh
 CHROMIUM_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
   pnpm test:e2e
 ```
 
-## Checks
+### Storybook
+
+```sh
+pnpm storybook
+pnpm build-storybook
+```
+
+The stories render the three page views for both universes, with every tagged
+view-model variant represented, including pending, validation-error,
+known-species, film-poster, transport/no-transport, and both shells.
+`.storybook/pageFixtures.ts` builds the models from the domain fixtures and
+factories. `pnpm build-storybook` writes the static site to `storybook-static/`.
+
+## Configuration
+
+Copy `.env.example` to `.env.local` for local development.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `STAR_WARS_API_URL` | `https://swapi.dev/api` | SWAPI base URL for the live adapter |
+| `GHIBLI_API_URL` | `https://ghibliapi.vercel.app` | Ghibli API base URL for the live adapter |
+| `PORT` | `3000` | Effect HTTP server port |
+| `UI_EVENT_LOGGER` | `console` | `console` logs UI events; `noop` drops them |
+| `CHROMIUM_PATH` | none | Chrome or Chromium executable for the browser suite |
+
+The browser suite ignores both API URLs; it provides stub catalogs.
+
+## Checks and CI
 
 ```sh
 pnpm check
@@ -280,20 +362,20 @@ pnpm lint:fix
 ```
 
 `typecheck` runs the Effect-patched TypeScript-Go compiler. `lint` runs
-type-aware Oxlint with the recommended Effect preset. `check` runs both, and
-the `prepare` script patches TypeScript and Oxlint after install. The
-`unstable-api-usage` warning is disabled only at the experimental Effect
-HTTP/API/server and test/e2e boundaries.
+type-aware Oxlint with the recommended Effect preset. The `prepare` script
+patches TypeScript and Oxlint after install. The `unstable-api-usage` warning
+is disabled only at the experimental Effect HTTP/API/server and test/e2e
+boundaries in `.oxlintrc.json`.
 
-## Requirements
+`.github/workflows/ci.yml` runs four jobs on pushes to `main` and pull
+requests:
 
-- Node.js 22.12+
-- pnpm 10
-- Chrome or Chromium for the browser scenarios
-- ffmpeg for `pnpm test:e2e:debug`
+- lint and typecheck;
+- tests with coverage;
+- production build;
+- browser suite, with Chrome from the runner image.
 
-Copy `.env.example` to `.env.local` to point either adapter at another host.
-The example values are `STAR_WARS_API_URL=https://swapi.dev/api` and
-`GHIBLI_API_URL=https://ghibliapi.vercel.app`. The browser suite ignores both;
-it provides stub catalogs. `server.ts` reads `PORT` (default `3000`);
-`UI_EVENT_LOGGER=console` is the default and `noop` drops UI event logs.
+It uses the Node version in the workflow, pnpm from `packageManager`, and
+`pnpm install --frozen-lockfile`. The coverage job uploads its report on
+failure, and the browser job always uploads `reports/` plus `artifacts/` on
+failure.
