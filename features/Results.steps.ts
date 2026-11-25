@@ -4,6 +4,7 @@ import {
   givenTheAppIsRunning,
   openResults,
   see,
+  theCatalogueIs,
   theThemeIs,
   theUniverseIs,
 } from "./support/Steps";
@@ -34,7 +35,21 @@ const invalidDossier = Bdd.scenario(
   Bdd.provide(environment("results", "invalid")),
 );
 
+const unavailable = Bdd.scenario(
+  "Reporting an unavailable catalogue",
+).pipe(
+  givenTheAppIsRunning,
+  theUniverseIs,
+  theCatalogueIs,
+  openResults,
+  see,
+  see,
+  theThemeIs,
+  Bdd.provide(environment("results", "unavailable")),
+);
+
 export const results = Bdd.feature("Opening a dossier").pipe(
   completeDossier,
   invalidDossier,
+  unavailable,
 );

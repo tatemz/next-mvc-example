@@ -1,32 +1,23 @@
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { isValidElement } from "react";
-import { describe, expect, vi } from "vitest";
-
-vi.mock("../../server/Runtime", async () => {
-  const { Effect, Layer, ManagedRuntime } = await import("effect");
-  const { layer: i18nLayer } = await import("../../i18n/I18n.service");
-  const { layerStub } = await import("../../services/SwapiPeopleCatalog.layer");
-  const { luke } = await import("../../domain/FilmUniverse.fixture");
-
-  const runtime = ManagedRuntime.make(
-    Layer.mergeAll(
-      i18nLayer,
-      layerStub(() => Effect.succeed(luke)),
-    ),
-  );
-
-  return { ghibliRuntime: runtime };
-});
-
+import { describe, expect } from "vitest";
 import { ConnectedFunnelView } from "../../components/FunnelView.connected";
+import { unusedCatalog } from "../../services/PeopleCatalog.fixture";
+import { runInRenderContext } from "../../server/RenderContext";
+import { renderContext } from "../../server/RenderContext.fixture";
 import { GhibliFunnelPage } from "./GhibliFunnel.page";
 
+const context = renderContext(unusedCatalog);
+
 describe("Ghibli funnel page", () => {
-  it.effect("loads the initial funnel through the Ghibli runtime", () =>
+  it.effect("loads the initial funnel for the Ghibli universe", () =>
     Effect.gen(function*() {
       const element = yield* Effect.promise(() =>
-        GhibliFunnelPage({ searchParams: Promise.resolve({}) }),
+        runInRenderContext(
+          context,
+          () => GhibliFunnelPage({ searchParams: Promise.resolve({}) }),
+        )
       );
 
       expect(isValidElement(element)).toBe(true);
@@ -41,6 +32,5 @@ describe("Ghibli funnel page", () => {
         shell: { theme: "autumn" },
       });
       expect(typeof element.props.submitAction).toBe("function");
-    }),
-  );
+    }));
 });

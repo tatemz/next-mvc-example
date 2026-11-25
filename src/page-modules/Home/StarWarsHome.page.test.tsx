@@ -1,25 +1,23 @@
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { isValidElement } from "react";
-import { describe, expect, vi } from "vitest";
-
-vi.mock("../../server/Runtime", async () => {
-  const { ManagedRuntime } = await import("effect");
-  const { layer: i18nLayer } = await import("../../i18n/I18n.service");
-
-  return {
-    shellRuntime: ManagedRuntime.make(i18nLayer),
-  };
-});
-
+import { describe, expect } from "vitest";
 import { ConnectedHomeView } from "../../components/HomeView.connected";
+import { unusedCatalog } from "../../services/PeopleCatalog.fixture";
+import { runInRenderContext } from "../../server/RenderContext";
+import { renderContext } from "../../server/RenderContext.fixture";
 import { StarWarsHomePage } from "./StarWarsHome.page";
+
+const context = renderContext(unusedCatalog);
 
 describe("StarWars home page", () => {
   it.effect("loads the Star Wars splash", () =>
     Effect.gen(function*() {
       const element = yield* Effect.promise(() =>
-        StarWarsHomePage({ searchParams: Promise.resolve({}) }),
+        runInRenderContext(
+          context,
+          () => StarWarsHomePage({ searchParams: Promise.resolve({}) }),
+        )
       );
 
       expect(isValidElement(element)).toBe(true);
@@ -36,6 +34,5 @@ describe("StarWars home page", () => {
         },
         shell: { theme: "night" },
       });
-    }),
-  );
+    }));
 });

@@ -9,6 +9,7 @@ import {
   openFunnel,
   searchFor,
   see,
+  theCatalogueIs,
   theThemeIs,
   theUniverseIs,
 } from "./support/Steps";
@@ -54,8 +55,23 @@ const noMatches = Bdd.scenario("No characters match").pipe(
   Bdd.provide(environment("funnel", "no-matches")),
 );
 
+const unavailable = Bdd.scenario(
+  "Reporting an unavailable catalogue",
+).pipe(
+  givenTheAppIsRunning,
+  theUniverseIs,
+  theCatalogueIs,
+  openFunnel,
+  searchFor,
+  see,
+  see,
+  theThemeIs,
+  Bdd.provide(environment("funnel", "unavailable")),
+);
+
 export const funnel = Bdd.feature("Building a dossier").pipe(
   reviewDossier,
   openDossierScenario,
   noMatches,
+  unavailable,
 );

@@ -1,119 +1,96 @@
-import { NodeServices } from "@effect/platform-node";
-import {
-  Context,
-  Deferred,
-  Effect,
-  Layer,
-  Option,
-  Schedule,
-  Schema,
-  Stream,
-} from "effect";
-import { ChildProcess } from "effect/process";
+import { NodeHttpServer } from "@effect/platform-node";
+import { Context, Effect, Layer, Ref } from "effect";
 import { resolve } from "node:path";
+import { app } from "../../boot/app";
+import { nextLayer } from "../../boot/next";
+import { serve } from "../../boot/serve";
+import {
+  haku,
+  luke,
+  muska,
+} from "../../src/domain/FilmUniverse.fixture";
+import type { Person } from "../../src/domain/FilmUniverse.model";
+import {
+  GhibliCatalog,
+  PeopleCatalog,
+  StarWarsCatalog,
+} from "../../src/services/PeopleCatalog";
+import {
+  catalogOf,
+  unavailableCatalog,
+} from "../../src/services/PeopleCatalog.fixture";
+import {
+  UiEventLogger,
+  noopUiEventLogger,
+} from "../../src/server/UiEventLogger";
 
 export class ScenarioApp extends Context.Service<
   ScenarioApp,
   { readonly url: string }
 >()("next-mvc-example/test/ScenarioApp") {}
 
-class ScenarioAppError extends Schema.TaggedError<
-  ScenarioAppError,
-  { readonly brand: unique symbol }
->()("ScenarioAppError", {
-  message: Schema.String,
-  cause: Schema.optional(Schema.Unknown),
-}) {}
+export type CatalogMode = "working" | "unavailable";
+
+export class CatalogControl extends Context.Service<
+  CatalogControl,
+  { readonly set: (mode: CatalogMode) => Effect.Effect<void> }
+>()("next-mvc-example/test/CatalogControl") {}
 
 const repoRoot = resolve(import.meta.dirname, "../..");
-const serverEntry = resolve(repoRoot, "server.ts");
 
-const ansi = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
-const localLine = /^\s*(?:-\s*)?Local:\s+https?:\/\/\S+:(\d+)\s*$/;
+const starWarsPeople: ReadonlyArray<Person> = [luke];
+const ghibliPeople: ReadonlyArray<Person> = [haku, muska];
 
-export const parseServerPort = (line: string): Option.Option<number> => {
-  const match = localLine.exec(line.replace(ansi, ""));
-  return match === null ? Option.none() : Option.some(Number(match[1]));
+const catalog = (
+  people: ReadonlyArray<Person>,
+  mode: Ref.Ref<CatalogMode>,
+): PeopleCatalog => {
+  const working = catalogOf(people);
+
+  return {
+    getPerson: (id) =>
+      Effect.flatMap(Ref.get(mode), (current) =>
+        current === "unavailable"
+          ? unavailableCatalog.getPerson(id)
+          : working.getPerson(id)
+      ),
+    searchPeople: (query) =>
+      Effect.flatMap(Ref.get(mode), (current) =>
+        current === "unavailable"
+          ? unavailableCatalog.searchPeople(query)
+          : working.searchPeople(query)
+      ),
+  };
 };
 
-const liveApiEnvironment = {
-  STAR_WARS_API_URL: "https://swapi.dev/api",
-  GHIBLI_API_URL: "https://ghibliapi.vercel.app",
-  UI_EVENT_LOGGER: "noop",
-} as const;
-
-const waitUntilReady = (url: string) =>
-  Effect.gen(function*() {
-    const response = yield* Effect.tryPromise({
-      try: () => fetch(url),
-      catch: (cause) =>
-        new ScenarioAppError({
-          message: `The app did not answer at ${url}: ${String(cause)}`,
-          cause,
-        }),
-    });
-    if (!response.ok) {
-      return yield* new ScenarioAppError({
-        message: `The app answered ${response.status} at ${url}`,
-      });
-    }
-  }).pipe(
-    Effect.retry({ schedule: Schedule.spaced("250 millis"), times: 120 }),
-    Effect.timeout("30 seconds"),
+const appWithStubs = (mode: Ref.Ref<CatalogMode>) =>
+  app.pipe(
+    Layer.provide(
+      Layer.mergeAll(
+        nextLayer(repoRoot),
+        NodeHttpServer.layerHttpServices,
+        Layer.succeed(StarWarsCatalog, catalog(starWarsPeople, mode)),
+        Layer.succeed(GhibliCatalog, catalog(ghibliPeople, mode)),
+        Layer.succeed(UiEventLogger, noopUiEventLogger),
+      ),
+    ),
   );
 
-const startServer = (env: Record<string, string>) =>
+export const scenarioApp = Layer.unwrap(
   Effect.gen(function*() {
-    const child = yield* ChildProcess.make(
-      process.execPath,
-      ["--import", "tsx", serverEntry],
-      {
-        cwd: repoRoot,
-        env: { ...env, PORT: "0", NODE_OPTIONS: undefined },
-        extendEnv: true,
-        stdout: "pipe",
-        stderr: "inherit",
-      },
+    const mode = yield* Ref.make<CatalogMode>("working");
+    const app = Layer.effect(
+      ScenarioApp,
+      Effect.gen(function*() {
+        const url = yield* serve(0)(appWithStubs(mode));
+        return ScenarioApp.of({ url });
+      }),
     );
-    yield* Effect.addFinalizer(() =>
-      child
-        .kill({ killSignal: "SIGTERM", forceKillAfter: "5 seconds" })
-        .pipe(Effect.ignore),
+    return Layer.merge(
+      app,
+      Layer.succeed(CatalogControl, {
+        set: (next) => Ref.set(mode, next),
+      }),
     );
-    const found = yield* Deferred.make<number>();
-    yield* child.stdout.pipe(
-      Stream.decodeText(),
-      Stream.splitLines,
-      Stream.runForEach((line) =>
-        Effect.gen(function*() {
-          yield* Effect.sync(() => process.stdout.write(`${line}\n`));
-          const port = parseServerPort(line);
-          if (Option.isSome(port)) {
-            yield* Deferred.succeed(found, port.value);
-          }
-        }),
-      ),
-      Effect.forkScoped,
-    );
-    const port = yield* Deferred.await(found).pipe(
-      Effect.timeout("30 seconds"),
-      Effect.mapError(
-        () =>
-          new ScenarioAppError({
-            message: "the server did not report its port within 30 seconds",
-          }),
-      ),
-    );
-    const url = `http://127.0.0.1:${port}`;
-    yield* waitUntilReady(url);
-    return url;
-  });
-
-export const scenarioApp = (env: Record<string, string>) =>
-  Layer.effect(
-    ScenarioApp,
-    Effect.gen(function*() {
-      const url = yield* startServer({ ...liveApiEnvironment, ...env });
-      return ScenarioApp.of({ url });
-    }),
-  ).pipe(Layer.provide(NodeServices.layer));
+  }),
+);

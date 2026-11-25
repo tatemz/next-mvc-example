@@ -46,3 +46,54 @@ export const personNamed = (id: CharacterId, name: string): Person => ({
   id,
   name,
 });
+
+export const haku: Person = {
+  _tag: "Person",
+  id: makeCharacterId("1"),
+  name: "Haku",
+  height: "170",
+  mass: "60",
+  birthYear: "unknown",
+  gender: "male",
+  origin: {
+    _tag: "Origin",
+    name: "Spirit World",
+    climate: "misty",
+    terrain: "marsh",
+  },
+  species: {
+    _tag: "Species",
+    name: "River Spirit",
+    classification: "deity",
+    language: "Japanese",
+  },
+  films: [{ _tag: "Film", title: "Spirited Away", order: 1 }],
+  transports: [],
+};
+
+export const muska: Person = {
+  _tag: "Person",
+  id: makeCharacterId("42"),
+  name: "Colonel Muska",
+  height: "180",
+  mass: "70",
+  birthYear: "unknown",
+  gender: "male",
+  origin: {
+    _tag: "Origin",
+    name: "Laputa",
+    climate: "windy",
+    terrain: "mountain",
+  },
+  species: null,
+  films: [{ _tag: "Film", title: "Castle in the Sky", order: 1 }],
+  transports: [
+    {
+      _tag: "Transport",
+      key: "4e09b023-f650-4747-9ab9-eacf14540cfb",
+      kind: "Vehicle",
+      name: "Air Destroyer Goliath",
+      model: "Goliath",
+    },
+  ],
+};

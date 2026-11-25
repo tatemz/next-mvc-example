@@ -1,12 +1,15 @@
 "use server";
 
+import { Effect } from "effect";
 import type { FunnelViewModel } from "../components/FunnelView";
 import { advanceFunnel } from "../controllers/Funnel.controller";
-import { swapiRuntime } from "../server/Runtime";
+import { currentRenderContext } from "../server/RenderContext";
 
 export async function submitStarWarsFunnel(
   previous: FunnelViewModel,
   formData: FormData,
 ) {
-  return swapiRuntime.runPromise(advanceFunnel(previous, formData));
+  return Effect.runPromiseWith(currentRenderContext())(
+    advanceFunnel(previous, formData),
+  );
 }

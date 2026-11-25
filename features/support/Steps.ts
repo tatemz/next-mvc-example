@@ -3,7 +3,12 @@ import { Effect, Layer, Schema } from "effect";
 import { Bdd } from "effect-bdd";
 import { Universe } from "../../src/domain/FilmUniverse.model";
 import { interactionPause } from "./Debug";
-import { ScenarioApp, scenarioApp } from "./ScenarioApp";
+import {
+  type CatalogMode,
+  CatalogControl,
+  ScenarioApp,
+  scenarioApp,
+} from "./ScenarioApp";
 import { ScenarioPage, scenarioPage } from "./ScenarioPage";
 
 export type Session = {
@@ -21,6 +26,10 @@ const transportName = Bdd.capture("transportName", Schema.String);
 const characterId = Bdd.capture("characterId", Schema.String);
 const filmOrder = Bdd.capture("filmOrder", Schema.String);
 const transportKey = Bdd.capture("transportKey", Schema.String);
+const catalogMode = Bdd.capture(
+  "catalogMode",
+  Schema.Literals(["working", "unavailable"]),
+);
 
 export const givenTheAppIsRunning = Bdd.given`the app is running`(
   Effect.fn("givenTheAppIsRunning")(function*() {
@@ -34,6 +43,18 @@ export const theUniverseIs = Bdd.given`the universe is ${universe}`(
     page: Page.Page,
   ) => Effect.succeed({ page, universe }),
 );
+
+export const theCatalogueIs =
+  Bdd.given`the catalogue is ${catalogMode}`(
+    Effect.fn("theCatalogueIs")(function*(
+      { catalogMode }: { readonly catalogMode: CatalogMode },
+      session: Session,
+    ) {
+      const control = yield* CatalogControl;
+      yield* control.set(catalogMode);
+      return session;
+    }),
+  );
 
 export const see = Bdd.then`I see "${text}"`(
   Effect.fn("see")(function*(
@@ -222,6 +243,6 @@ export const openResults =
 
 export const environment = (feature: string, scenario: string) =>
   Layer.merge(
-    scenarioApp({}),
+    scenarioApp,
     scenarioPage({ feature, index: 0, scenario }),
   );

@@ -51,3 +51,18 @@ Feature: Building a dossier
       | universe  | theme  | query           |
       | star-wars | night  | NoSuchCharacter |
       | ghibli    | autumn | NoSuchCharacter |
+
+  Scenario Outline: Reporting an unavailable catalogue
+    Given the app is running
+    And the universe is <universe>
+    And the catalogue is unavailable
+    When I open the funnel
+    And I search for "<query>"
+    Then I see "The dossier could not be built"
+    And I see "The character API could not answer."
+    And the page uses the "<theme>" theme
+
+    Examples:
+      | universe  | theme  | query |
+      | star-wars | night  | Luke  |
+      | ghibli    | autumn | Haku  |

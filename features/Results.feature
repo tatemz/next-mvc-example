@@ -31,3 +31,17 @@ Feature: Opening a dossier
       | star-wars | night  | 1           | 4         | starship-99  |
       | ghibli    | autumn | 1           | 1         | missing      |
       | ghibli    | autumn | 1           | 1         | unknown      |
+
+  Scenario Outline: Reporting an unavailable catalogue
+    Given the app is running
+    And the universe is <universe>
+    And the catalogue is unavailable
+    When I open the results for character "<characterId>", film "<filmOrder>", transport "none"
+    Then I see "Dossier not found"
+    And I see "Build a dossier"
+    And the page uses the "<theme>" theme
+
+    Examples:
+      | universe  | theme  | characterId | filmOrder |
+      | star-wars | night  | 1           | 4         |
+      | ghibli    | autumn | 1           | 1         |

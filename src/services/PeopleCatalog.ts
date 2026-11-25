@@ -27,3 +27,13 @@ export interface PeopleCatalog {
 export const PeopleCatalog = Context.Service<PeopleCatalog>(
   "next-mvc-example/PeopleCatalog",
 );
+
+export class StarWarsCatalog extends Context.Service<
+  StarWarsCatalog,
+  PeopleCatalog
+>()("next-mvc-example/StarWarsCatalog") {}
+
+export class GhibliCatalog extends Context.Service<
+  GhibliCatalog,
+  PeopleCatalog
+>()("next-mvc-example/GhibliCatalog") {}

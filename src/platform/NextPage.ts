@@ -1,5 +1,9 @@
-import { Effect, type ManagedRuntime } from "effect";
+import { Effect } from "effect";
 import type { ReactElement } from "react";
+import {
+  type RenderServices,
+  currentRenderContext,
+} from "../server/RenderContext";
 import {
   type NextRedirect,
   handleNextRedirect,
@@ -15,18 +19,33 @@ export type NextPageProps = {
   readonly searchParams: Promise<ParsedSearchParams>;
 };
 
-export const makeNextPage = <R, E>(
-  runtime: ManagedRuntime.ManagedRuntime<R, E>,
+const finish = (result: ReactElement | NextRedirect): ReactElement =>
+  isNextRedirect(result) ? handleNextRedirect(result) : result;
+
+export const makeNextPage = <E>(
   load: Effect.Effect<
     ReactElement | NextRedirect,
-    never,
-    R | ParsedSearchParams
+    E,
+    ParsedSearchParams | RenderServices
   >,
 ) =>
-  async function NextPage({ searchParams }: NextPageProps) {
+  async ({ searchParams }: NextPageProps) => {
     const params = fromInput(await searchParams);
-    const result = await runtime.runPromise(
-      load.pipe(Effect.provideService(parsedSearchParamsTag, params)),
+    return finish(
+      await Effect.runPromiseWith(currentRenderContext())(
+        load.pipe(Effect.provideService(parsedSearchParamsTag, params)),
+      ),
     );
-    return isNextRedirect(result) ? handleNextRedirect(result) : result;
+  };
+
+export const makeRedirectNextPage = <E>(
+  load: Effect.Effect<NextRedirect, E, ParsedSearchParams>,
+) =>
+  async ({ searchParams }: NextPageProps) => {
+    const params = fromInput(await searchParams);
+    return finish(
+      await Effect.runPromise(
+        load.pipe(Effect.provideService(parsedSearchParamsTag, params)),
+      ),
+    );
   };

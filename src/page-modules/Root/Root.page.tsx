@@ -1,7 +1,4 @@
-import { Layer, ManagedRuntime } from "effect";
 import { loadRootPage } from "../../controllers/Root.controller";
-import { makeNextPage } from "../../platform/NextPage";
+import { makeRedirectNextPage } from "../../platform/NextPage";
 
-const runtime = ManagedRuntime.make(Layer.empty);
-
-export const RootPage = makeNextPage(runtime, loadRootPage);
+export const RootPage = makeRedirectNextPage(loadRootPage);

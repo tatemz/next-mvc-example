@@ -2,8 +2,8 @@
 
 One character-dossier UI, served from two film universes: Star Wars through
 SWAPI and Studio Ghibli through the Ghibli API. Controllers, view models, and
-views are shared. Each experience page module supplies its own runtime and
-daisyUI theme; the funnel modules also supply their server actions.
+views are shared. Each experience's routes carry its catalog and daisyUI
+theme; the funnel modules also supply their server actions.
 
 | Star Wars (`/star-wars`, night) | Studio Ghibli (`/ghibli`, autumn) |
 | --- | --- |
@@ -30,15 +30,17 @@ header switches between the two experiences.
 
 ## Page shape
 
-Each route file re-exports one page module. A page module is the only
-composition point: it passes a `ManagedRuntime` and a program to
-`makeNextPage`.
+Each route file re-exports one page module. A page module names its program;
+`makeNextPage` runs it with the request's Effect context.
 
 ```tsx
 export const StarWarsFunnelPage = makeNextPage(
-  swapiRuntime,
   Effect.map(startFunnel("night"), (model) => (
-    <ConnectedFunnelView model={model} submitAction={submitStarWarsFunnel} />
+    <ConnectedFunnelView
+      model={model}
+      submitAction={submitStarWarsFunnel}
+      universe="star-wars"
+    />
   )),
 );
 ```
@@ -46,9 +48,13 @@ export const StarWarsFunnelPage = makeNextPage(
 - A page program returns a React tree or a `NextRedirect`.
   `handleNextRedirect` is the only module that calls `next/navigation.redirect`.
 - `makeNextPage` provides the raw Next `searchParams` as the
-  `ParsedSearchParams` service. The page program decodes its own schema with
+  `ParsedSearchParams` service, then runs the program with the request context
+  bridged from `boot/next.ts`. The program decodes its own schema with
   `ParsedSearchParams.decodeOption`; the adapter takes no params schema.
-- The root page uses the same adapter with a minimal `ManagedRuntime`.
+- The request context carries `I18n` and one `PeopleCatalog`: the
+  `/star-wars` routes provide the SWAPI adapter, the `/ghibli` routes the
+  Ghibli one. A page never chooses its adapter.
+- The root page uses `makeRedirectNextPage`, which needs no context.
 - Page view models carry their own `AppShellViewModel`. The views render the
   shell (brand, links, and theme), so `app/layout.tsx` is only `<html>` and
   `<body>`.
@@ -56,10 +62,11 @@ export const StarWarsFunnelPage = makeNextPage(
   The page views do not know which theme is active.
 - Each home page is a splash: a universe image with a visible credit and one
   CTA into that universe's funnel. It loads no character data.
-- `server.ts` is the process entrypoint. It serves the Effect `HttpApi` endpoint
-  at `/api/ui-events`, and an `HttpRouter` catch-all hands every other request
-  to the built Next app. Run `next build` before `pnpm start`; `pnpm dev` does
-  the build first.
+- `server.ts` is the process entrypoint. `boot/live.ts` provides the live
+  catalogs, `boot/app.ts` mounts the Effect `HttpApi` endpoint at
+  `/api/ui-events` plus a Next catch-all per universe, and `boot/serve.ts`
+  owns the socket. Run `next build` before `pnpm start`; `pnpm dev` does the
+  build first.
 
 ## What it shows
 
@@ -151,7 +158,8 @@ the app fixtures and view-model factories.
 ```text
 .oxlintrc.json               Effect Oxlint preset and boundary overrides
 .storybook/                  Storybook config and page fixtures
-server.ts                    Effect HTTP server: UI event API + Next catch-all
+server.ts                    process entrypoint: the live app on the configured port
+boot/                        app composition, live wiring, socket, and Next bridge
 app/                         route re-exports; html/body layout
 src/api/                     UiEventApi definition and handler layer
 src/page-modules/            one Next page per route via makeNextPage
@@ -159,11 +167,11 @@ src/platform/                Next adapter, redirect model, parsed params
 src/controllers/             page programs, state machines, view models
 src/components/              flat view models and views (AppShell included)
 src/ui-events/               event model, payload, handler, sinks, and React provider
-src/server/                  Effect runtimes and the UI event logger service
+src/server/                  Next service, render context, and UI event logger
 src/actions/                 "use server" boundaries
 src/domain/                  universe-neutral models
 src/services/                PeopleCatalog port and both adapters
-features/                    Gherkin plus inline step modules
+features/                    Gherkin, shared steps, and the stubbed scenario app
 ```
 
 `src/pages` is reserved by the Next Pages Router, so page modules use the
@@ -196,12 +204,13 @@ mode, and step timeout. Each run writes `reports/junit.xml` and
 
 ## Integration tests
 
-Four features and 22 scenarios cover both universes:
+Four features and 26 scenarios cover both universes:
 
 - Home: the universe splash and its funnel CTA.
-- Funnel: review and open a dossier, plus the no-match search.
-- Results: complete, missing transport, unknown transport, and explicit no
-  transport.
+- Funnel: review and open a dossier, the no-match search, and an unavailable
+  catalogue.
+- Results: complete, missing transport, unknown transport, explicit no
+  transport, and an unavailable catalogue.
 - Navigation: the app root and the header switch.
 
 Each feature is a Scenario Outline with a `universe` column, so adding an API
@@ -209,13 +218,14 @@ is a row in the examples tables. The Ghibli rows cover the same home, funnel,
 results, and navigation states as Star Wars, including the Ghibli vehicle
 transport.
 
-Each scenario starts its own `tsx server.ts` on an OS-assigned port, so the
-Effect API and the Next catch-all share one server, and closes it and the
-browser when the scenario ends. Shared steps are declared in
-`features/support/Steps.ts`, and each feature's `.steps.ts` composes the
-scenarios. Scenarios use the live SWAPI and Ghibli APIs, so they need a network
-connection. A failure writes a full-page screenshot under `artifacts/`; debug
-mode also needs ffmpeg.
+Each scenario boots `boot/app.ts` in-process on an OS-assigned port through
+`boot/serve.ts`, providing the stub catalogs from
+`features/support/ScenarioApp.ts`, and closes the app and the browser when the
+scenario ends. The stubs serve the domain fixtures, so the suite needs no
+network; `Given the catalogue is unavailable` switches them to their failure
+path. Shared steps are declared in `features/support/Steps.ts`, and each
+feature's `.steps.ts` composes the scenarios. A failure writes a full-page
+screenshot under `artifacts/`; debug mode also needs ffmpeg.
 
 ```sh
 CHROMIUM_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \

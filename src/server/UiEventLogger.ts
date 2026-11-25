@@ -1,26 +1,26 @@
-import { Context, Effect, Layer } from "effect";
+import { Context, Effect } from "effect";
+
+export type UiEventLoggerService = {
+  readonly log: (payload: unknown) => Effect.Effect<void>;
+};
 
 export class UiEventLogger extends Context.Service<
   UiEventLogger,
-  {
-    readonly log: (payload: unknown) => Effect.Effect<void>;
-  }
+  UiEventLoggerService
 >()("next-mvc-example/UiEventLogger") {}
 
-export const consoleLayer = Layer.succeed(UiEventLogger, {
+export const consoleUiEventLogger: UiEventLoggerService = {
   log: (payload) =>
     Effect.logInfo("ui event").pipe(
       Effect.annotateLogs({ uiEvent: payload }),
     ),
-});
+};
 
-export const noopLayer = Layer.succeed(UiEventLogger, {
+export const noopUiEventLogger: UiEventLoggerService = {
   log: () => Effect.void,
-});
+};
 
-export const makeUiEventLoggerLayer = (mode: string | undefined) =>
-  mode === "noop" ? noopLayer : consoleLayer;
-
-export const layer = makeUiEventLoggerLayer(
-  process.env.UI_EVENT_LOGGER,
-);
+export const makeUiEventLogger = (
+  mode: string | undefined,
+): UiEventLoggerService =>
+  mode === "noop" ? noopUiEventLogger : consoleUiEventLogger;
