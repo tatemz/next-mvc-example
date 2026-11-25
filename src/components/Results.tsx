@@ -144,10 +144,9 @@ const MissingResults = ({
 
 export const Results = (model: ResultsViewModel) => (
   <AppShell {...model.shell}>
-    {Match.value(model).pipe(
-      Match.tag("Ready", (ready) => <ReadyResults model={ready} />),
-      Match.tag("Missing", (missing) => <MissingResults model={missing} />),
-      Match.exhaustive,
-    )}
+    {Match.valueTags(model, {
+      Ready: (ready) => <ReadyResults model={ready} />,
+      Missing: (missing) => <MissingResults model={missing} />,
+    })}
   </AppShell>
 );

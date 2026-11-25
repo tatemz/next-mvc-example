@@ -463,22 +463,21 @@ export const Funnel = ({
   ...model
 }: FunnelProps) => (
   <AppShell {...model.shell}>
-    {Match.value(model).pipe(
-      Match.tag("Search", (step) => (
+    {Match.valueTags(model, {
+      Search: (step) => (
         <SearchStep step={step} dispatch={dispatch} isPending={isPending} />
-      )),
-      Match.tag("Choose", (step) => (
+      ),
+      Choose: (step) => (
         <ChooseStep step={step} dispatch={dispatch} isPending={isPending} />
-      )),
-      Match.tag("Film", (step) => (
+      ),
+      Film: (step) => (
         <FilmStep step={step} dispatch={dispatch} isPending={isPending} />
-      )),
-      Match.tag("Transport", (step) => (
+      ),
+      Transport: (step) => (
         <TransportStep step={step} dispatch={dispatch} isPending={isPending} />
-      )),
-      Match.tag("Review", (step) => <ReviewStep step={step} />),
-      Match.tag("Failed", (step) => <FailedStep step={step} />),
-      Match.exhaustive,
-    )}
+      ),
+      Review: (step) => <ReviewStep step={step} />,
+      Failed: (step) => <FailedStep step={step} />,
+    })}
   </AppShell>
 );

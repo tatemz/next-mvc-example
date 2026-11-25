@@ -188,12 +188,11 @@ export const advanceFunnel = (
   previous: FunnelViewModel,
   formData: FormData,
 ) =>
-  Match.value(previous).pipe(
-    Match.tag("Search", (step) => searchStep(step, formData)),
-    Match.tag("Choose", (step) => chooseStep(step, formData)),
-    Match.tag("Film", (step) => filmStep(step, formData)),
-    Match.tag("Transport", (step) => transportStep(step, formData)),
-    Match.tag("Review", (step) => Effect.succeed<FunnelViewModel>(step)),
-    Match.tag("Failed", (step) => Effect.succeed<FunnelViewModel>(step)),
-    Match.exhaustive,
-  );
+  Match.valueTags(previous, {
+    Search: (step) => searchStep(step, formData),
+    Choose: (step) => chooseStep(step, formData),
+    Film: (step) => filmStep(step, formData),
+    Transport: (step) => transportStep(step, formData),
+    Review: (step) => Effect.succeed<FunnelViewModel>(step),
+    Failed: (step) => Effect.succeed<FunnelViewModel>(step),
+  });
