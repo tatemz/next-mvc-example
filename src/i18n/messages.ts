@@ -16,13 +16,13 @@ const shellMessages = {
 } as const;
 
 const homePageMessages = {
-  "homePage.starWars.title": "Star Wars character dossier",
-  "homePage.starWars.subtitle":
+  "home.starWars.title": "Star Wars character dossier",
+  "home.starWars.subtitle":
     "Build a dossier from the Star Wars universe.",
-  "homePage.ghibli.title": "Studio Ghibli character dossier",
-  "homePage.ghibli.subtitle":
+  "home.ghibli.title": "Studio Ghibli character dossier",
+  "home.ghibli.subtitle":
     "Build a dossier from the Studio Ghibli universe.",
-  "homePage.hero.funnel": "Build a dossier",
+  "home.hero.funnel": "Build a dossier",
 } as const;
 
 const funnelMessages = {

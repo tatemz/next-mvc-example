@@ -3,9 +3,9 @@ import { Effect } from "effect";
 import { describe, expect } from "vitest";
 import {
   HomeHeroImageViewModel,
-} from "../components/HomePage";
+} from "../components/HomeView";
 import { I18n, makeEn } from "../i18n/I18n.service";
-import { loadHomePage } from "./HomePage.controller";
+import { loadHome } from "./Home.controller";
 
 const image = HomeHeroImageViewModel.make({
   url: "https://example.com/splash.jpg",
@@ -19,11 +19,11 @@ const run = (
   funnelHref: string,
   theme: "night" | "autumn",
 ) =>
-  loadHomePage(universe, funnelHref, theme, image).pipe(
+  loadHome(universe, funnelHref, theme, image).pipe(
     Effect.provideService(I18n, makeEn()),
   );
 
-describe("loadHomePage", () => {
+describe("loadHome", () => {
   it.effect("builds the Star Wars splash", () =>
     Effect.gen(function*() {
       const model = yield* run(
@@ -33,7 +33,7 @@ describe("loadHomePage", () => {
       );
 
       expect(model).toMatchObject({
-        _tag: "HomePageViewModel",
+        _tag: "HomeViewModel",
         shell: { theme: "night" },
         hero: {
           kicker: "Star Wars",
@@ -50,7 +50,7 @@ describe("loadHomePage", () => {
       const model = yield* run("ghibli", "/ghibli/funnel", "autumn");
 
       expect(model).toMatchObject({
-        _tag: "HomePageViewModel",
+        _tag: "HomeViewModel",
         shell: { theme: "autumn" },
         hero: {
           kicker: "Ghibli",

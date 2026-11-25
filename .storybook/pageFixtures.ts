@@ -17,11 +17,11 @@ import {
 import type { FilmListItemViewModel } from "../src/components/FilmListItem";
 import {
   ghibliSplashImage,
-  makeHomePageViewModel,
+  makeHomeViewModel,
   starWarsSplashImage,
   type HomeHeroImageViewModel,
-  type HomePageViewModel,
-} from "../src/components/HomePage";
+  type HomeViewModel,
+} from "../src/components/HomeView";
 import {
   makePersonViewModel,
   type PersonViewModel,
@@ -31,7 +31,7 @@ import {
   makeResultsMissingViewModel,
   makeResultsReadyViewModel,
   type ResultsViewModel,
-} from "../src/components/Results";
+} from "../src/components/ResultsView";
 import { luke, makeCharacterId } from "../src/domain/FilmUniverse.fixture";
 import type { Person, Universe } from "../src/domain/FilmUniverse.model";
 import { makeEn } from "../src/i18n/I18n.service";
@@ -192,8 +192,8 @@ export const ghibliPilot = datasetFor(
   ghibliSplashImage,
 );
 
-export const homeSplash = (dataset: PageDataset): HomePageViewModel =>
-  makeHomePageViewModel(
+export const homeSplash = (dataset: PageDataset): HomeViewModel =>
+  makeHomeViewModel(
     i18n,
     dataset.universe,
     dataset.funnelHref,

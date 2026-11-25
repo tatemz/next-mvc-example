@@ -40,7 +40,7 @@ describe("I18n.service", () => {
         const i18n = yield* I18nService;
 
         expect(i18n._({ id: "person.heightLabel" })).toBe("Height");
-        expect(i18n._({ id: "homePage.starWars.title" })).toBe(
+        expect(i18n._({ id: "home.starWars.title" })).toBe(
           "Star Wars character dossier",
         );
       }),

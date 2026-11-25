@@ -1,6 +1,6 @@
 import { it } from "@effect/vitest";
 import { describe, expect } from "vitest";
-import { GhibliHomePage } from "../../src/page-modules/HomePage/GhibliHome.page";
+import { GhibliHomePage } from "../../src/page-modules/Home/GhibliHome.page";
 import HomeRoute from "./page";
 
 describe("Ghibli home route", () => {

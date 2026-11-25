@@ -2,7 +2,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { UI_EVENT_ROUTE, beaconUiEventSink } from "./BeaconUiEventSink";
-import type { UiEventPayload } from "./UiEventHandler";
+import type { UiEventPayload } from "./UiEventPayload";
 
 const payload: UiEventPayload = {
   event: "page_loaded",

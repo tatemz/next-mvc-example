@@ -6,10 +6,10 @@ import { makeEn } from "../i18n/I18n.service";
 import { makePersonViewModel } from "./PersonCard";
 import { makeAppShellViewModel } from "./AppShell";
 import {
-  Results,
+  ResultsView,
   makeResultsMissingViewModel,
   makeResultsReadyViewModel,
-} from "./Results";
+} from "./ResultsView";
 
 const i18n = makeEn();
 const shell = makeAppShellViewModel(i18n, "night");
@@ -19,7 +19,7 @@ const transport = person.transports[0];
 const startOverHref = "/star-wars/funnel";
 const homeHref = "/star-wars";
 
-describe("Results", () => {
+describe("ResultsView", () => {
   it("renders a complete dossier", () => {
     const model = makeResultsReadyViewModel(
       i18n,
@@ -30,7 +30,7 @@ describe("Results", () => {
       startOverHref,
       homeHref,
     );
-    const html = renderToStaticMarkup(<Results model={model} onCtaClick={() => {}} />);
+    const html = renderToStaticMarkup(<ResultsView model={model} onCtaClick={() => {}} />);
 
     expect(html).toContain("Your dossier");
     expect(html).toContain("Luke Skywalker");
@@ -46,7 +46,7 @@ describe("Results", () => {
       imageUrl: "https://example.com/poster.jpg",
     };
     const html = renderToStaticMarkup(
-      <Results
+      <ResultsView
         model={makeResultsReadyViewModel(
           i18n,
           shell,
@@ -73,14 +73,14 @@ describe("Results", () => {
       startOverHref,
       homeHref,
     );
-    const html = renderToStaticMarkup(<Results model={model} onCtaClick={() => {}} />);
+    const html = renderToStaticMarkup(<ResultsView model={model} onCtaClick={() => {}} />);
 
     expect(html).toContain("No transport selected");
   });
 
   it("renders a missing dossier", () => {
     const model = makeResultsMissingViewModel(i18n, shell, startOverHref);
-    const html = renderToStaticMarkup(<Results model={model} onCtaClick={() => {}} />);
+    const html = renderToStaticMarkup(<ResultsView model={model} onCtaClick={() => {}} />);
 
     expect(html).toContain("Dossier not found");
     expect(html).toContain('role="alert"');

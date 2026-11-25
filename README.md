@@ -86,8 +86,8 @@ export const StarWarsFunnelPage = makeNextPage(
 - The review link is relative (`results?...`); the results page's links use the
   selected universe's base path.
 - `submitStarWarsFunnel` and `submitGhibliFunnel` are the server actions.
-  `HomePage.connected.tsx`, `FunnelView.connected.tsx`, and
-  `Results.connected.tsx` are the client event boundaries.
+  `HomeView.connected.tsx`, `FunnelView.connected.tsx`, and
+  `ResultsView.connected.tsx` are the client event boundaries.
 
 ## UI events
 
@@ -121,9 +121,9 @@ keeps the flat property names (`characterId`, `filmOrder`, `transportKey`,
 two sinks: `ConsoleUiEventSink.ts` logs the payload, and
 `BeaconUiEventSink.ts` posts it with `navigator.sendBeacon` to
 `/api/ui-events`. A failing sink is logged and does not stop the others, so a
-new destination is one entry in the list. Connected `HomePage` supplies
-page-load and CTA events, `Funnel` supplies input, validation, and CTA events,
-and `Results` supplies page-load and CTA events.
+new destination is one entry in the list. Connected `HomeView` supplies
+page-load and CTA events, `FunnelView` supplies input, validation, and CTA
+events, and `ResultsView` supplies page-load and CTA events.
 
 `src/api/UiEventApi.ts` defines `POST /api/ui-events`; `src/api/UiEventApi.layer.ts`
 logs each payload through `UiEventLogger`. `server.ts` serves that API and the
@@ -158,7 +158,8 @@ src/page-modules/            one Next page per route via makeNextPage
 src/platform/                Next adapter, redirect model, parsed params
 src/controllers/             page programs, state machines, view models
 src/components/              flat view models and views (AppShell included)
-src/ui-events/               event model, handler, sinks, and React provider
+src/ui-events/               event model, payload, handler, sinks, and React provider
+src/server/                  Effect runtimes and the UI event logger service
 src/actions/                 "use server" boundaries
 src/domain/                  universe-neutral models
 src/services/                PeopleCatalog port and both adapters
@@ -194,16 +195,18 @@ and step timeout.
 
 ## Integration tests
 
-Six features and 16 scenarios cover both universes:
+Four features and 22 scenarios cover both universes:
 
-- Star Wars splash: the branded introduction and the funnel CTA.
-- Ghibli splash: the branded introduction and the funnel CTA.
-- Navigation: root and header splash themes.
-- Star Wars funnel: review, open dossier, no search matches.
-- Star Wars results: complete dossier, missing transport, unknown transport,
-  explicit no transport.
-- Ghibli funnel: Haku dossier without transport, a Colonel Muska vehicle dossier,
-  no search matches.
+- Home: the universe splash and its funnel CTA.
+- Funnel: review and open a dossier, plus the no-match search.
+- Results: complete, missing transport, unknown transport, and explicit no
+  transport.
+- Navigation: the app root and the header switch.
+
+Each feature is a Scenario Outline with a `universe` column, so adding an API
+is a row in the examples tables. The Ghibli rows cover the same home, funnel,
+results, and navigation states as Star Wars, including the Ghibli vehicle
+transport.
 
 Each scenario starts its own `tsx server.ts` on an OS-assigned port, so the
 Effect API and the Next catch-all share one server, and closes it and the

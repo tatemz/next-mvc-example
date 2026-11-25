@@ -76,7 +76,7 @@ export const makeResultsMissingViewModel = (
     startOverHref,
   });
 
-export type ResultsProps = {
+export type ResultsViewProps = {
   readonly model: ResultsViewModel;
   readonly onCtaClick: (cta: ResultsCta) => void;
 };
@@ -165,7 +165,7 @@ const MissingResults = ({
   </div>
 );
 
-export const Results = ({ model, onCtaClick }: ResultsProps) => (
+export const ResultsView = ({ model, onCtaClick }: ResultsViewProps) => (
   <AppShell {...model.shell}>
     {ResultsViewModel.match(model, {
       Ready: (ready) => (

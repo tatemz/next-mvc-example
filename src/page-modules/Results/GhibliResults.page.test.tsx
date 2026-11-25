@@ -23,7 +23,7 @@ vi.mock("../../server/Runtime", async () => {
   return { ghibliRuntime: runtime };
 });
 
-import { ConnectedResults } from "../../components/Results.connected";
+import { ConnectedResultsView } from "../../components/ResultsView.connected";
 import { GhibliResultsPage } from "./GhibliResults.page";
 
 describe("Ghibli results page", () => {
@@ -41,7 +41,7 @@ describe("Ghibli results page", () => {
 
       expect(isValidElement(element)).toBe(true);
       if (!isValidElement(element)) throw new Error("expected an element");
-      expect(element.type).toBe(ConnectedResults);
+      expect(element.type).toBe(ConnectedResultsView);
       expect(element.props).toMatchObject({
         universe: "ghibli",
         model: {

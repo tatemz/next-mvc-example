@@ -11,9 +11,9 @@ import {
 } from "../ui-events/UiEvent";
 import { useUiEventDispatch } from "../ui-events/UiEventContext";
 import type { Universe } from "../domain/FilmUniverse.model";
-import { Results, ResultsViewModel } from "./Results";
+import { ResultsView, ResultsViewModel } from "./ResultsView";
 
-export type ConnectedResultsProps = {
+export type ConnectedResultsViewProps = {
   readonly model: ResultsViewModel;
   readonly universe: Universe;
 };
@@ -59,10 +59,10 @@ const ctaEventFor = (
       }),
   });
 
-export const ConnectedResults = ({
+export const ConnectedResultsView = ({
   model,
   universe,
-}: ConnectedResultsProps) => {
+}: ConnectedResultsViewProps) => {
   const emit = useUiEventDispatch();
 
   useEffect(() => {
@@ -76,5 +76,5 @@ export const ConnectedResults = ({
   const onCtaClick = (cta: ResultsCta) =>
     emit(ctaEventFor(model, universe, cta));
 
-  return <Results model={model} onCtaClick={onCtaClick} />;
+  return <ResultsView model={model} onCtaClick={onCtaClick} />;
 };

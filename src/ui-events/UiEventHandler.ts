@@ -1,30 +1,15 @@
-import { Schema } from "effect";
-import { Universe } from "../domain/FilmUniverse.model";
+import type { Universe } from "../domain/FilmUniverse.model";
 import {
-  Page,
   PageContext,
   TransportChoice,
   UiEvent,
   type CtaClicked,
+  type Page,
 } from "./UiEvent";
-
-export type UiEventProperty = string | number | boolean;
-
-export const UiEventPayload = Schema.Struct({
-  event: Schema.String,
-  page: Page,
-  universe: Universe,
-  occurredAt: Schema.String,
-  properties: Schema.Record(
-    Schema.String,
-    Schema.Union([
-      Schema.String,
-      Schema.Finite,
-      Schema.Boolean,
-    ]),
-  ),
-});
-export type UiEventPayload = typeof UiEventPayload.Type;
+import type {
+  UiEventPayload,
+  UiEventProperty,
+} from "./UiEventPayload";
 
 export type UiEventSink = (payload: UiEventPayload) => void;
 export type UiEventHandler = (event: UiEvent) => void;

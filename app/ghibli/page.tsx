@@ -1,4 +1,4 @@
-import { GhibliHomePage } from "../../src/page-modules/HomePage/GhibliHome.page";
+import { GhibliHomePage } from "../../src/page-modules/Home/GhibliHome.page";
 
 export const dynamic = "force-dynamic";
 

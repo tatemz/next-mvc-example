@@ -6,7 +6,7 @@ import type {
 import {
   makeResultsMissingViewModel,
   makeResultsReadyViewModel,
-} from "../components/Results";
+} from "../components/ResultsView";
 import { makePersonViewModel } from "../components/PersonCard";
 import { CharacterId } from "../domain/FilmUniverse.model";
 import { I18n } from "../i18n/I18n.service";

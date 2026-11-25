@@ -1,4 +1,4 @@
-import { StarWarsHomePage } from "../../src/page-modules/HomePage/StarWarsHome.page";
+import { StarWarsHomePage } from "../../src/page-modules/Home/StarWarsHome.page";
 
 export const dynamic = "force-dynamic";
 

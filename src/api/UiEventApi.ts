@@ -3,7 +3,7 @@ import {
   HttpApiEndpoint,
   HttpApiGroup,
 } from "effect/http-api";
-import { UiEventPayload } from "../ui-events/UiEventHandler";
+import { UiEventPayload } from "../ui-events/UiEventPayload";
 
 export const UiEventApi = HttpApi.make("UiEventApi").add(
   HttpApiGroup.make("UiEvents").add(

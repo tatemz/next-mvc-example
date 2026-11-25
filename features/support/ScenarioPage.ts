@@ -1,7 +1,7 @@
 import { NodeServices } from "@effect/platform-node";
 import { Browser, type Page } from "@usestrider/browser";
 import { Chromium } from "@usestrider/browser/chromium";
-import { Config, Context, Effect, Exit, FileSystem, Layer } from "effect";
+import { Config, Context, Effect, FileSystem, Layer, Match, Ref } from "effect";
 import { debugMode } from "./Debug";
 import { recordVideo, type ScenarioRecording } from "./Video";
 
@@ -13,7 +13,7 @@ const ChromiumLive = Chromium.layerConfig({
   executablePath: Config.String("CHROMIUM_PATH"),
 });
 
-let nextRecordingIndex = 0;
+const recordingIndex = Ref.makeUnsafe(0);
 
 export const scenarioPage = (recording: ScenarioRecording) =>
   Layer.effect(
@@ -21,7 +21,10 @@ export const scenarioPage = (recording: ScenarioRecording) =>
     Effect.gen(function*() {
       const fs = yield* FileSystem.FileSystem;
       yield* fs.makeDirectory("artifacts", { recursive: true });
-      const index = yield* Effect.sync(() => nextRecordingIndex++);
+      const index = yield* Ref.updateAndGet(
+        recordingIndex,
+        (current) => current + 1,
+      );
       const page = yield* Browser.newPage({
         emulation: { viewport: { width: 1280, height: 720 } },
       });
@@ -29,8 +32,9 @@ export const scenarioPage = (recording: ScenarioRecording) =>
         yield* recordVideo(page, { ...recording, index });
       }
       yield* Effect.addFinalizer((exit) =>
-        Exit.isFailure(exit)
-          ? page.screenshot({ area: "fullPage" }).pipe(
+        Match.valueTags(exit, {
+          Failure: () =>
+            page.screenshot({ area: "fullPage" }).pipe(
               Effect.flatMap((png) =>
                 fs.writeFile(
                   `artifacts/${String(index).padStart(2, "0")}-${recording.scenario}.png`,
@@ -38,8 +42,9 @@ export const scenarioPage = (recording: ScenarioRecording) =>
                 ),
               ),
               Effect.ignore,
-            )
-          : Effect.void,
+            ),
+          Success: () => Effect.void,
+        }),
       );
       return page;
     }),

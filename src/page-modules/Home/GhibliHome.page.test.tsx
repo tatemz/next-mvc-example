@@ -12,7 +12,7 @@ vi.mock("../../server/Runtime", async () => {
   };
 });
 
-import { ConnectedHomePage } from "../../components/HomePage.connected";
+import { ConnectedHomeView } from "../../components/HomeView.connected";
 import { GhibliHomePage } from "./GhibliHome.page";
 
 describe("Ghibli home page", () => {
@@ -26,10 +26,10 @@ describe("Ghibli home page", () => {
       if (!isValidElement<{ model: unknown; universe: unknown }>(element)) {
         throw new Error("expected an element");
       }
-      expect(element.type).toBe(ConnectedHomePage);
+      expect(element.type).toBe(ConnectedHomeView);
       expect(element.props.universe).toBe("ghibli");
       expect(element.props.model).toMatchObject({
-        _tag: "HomePageViewModel",
+        _tag: "HomeViewModel",
         hero: {
           title: "Studio Ghibli character dossier",
           funnelHref: "/ghibli/funnel",

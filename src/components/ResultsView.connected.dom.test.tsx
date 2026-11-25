@@ -9,7 +9,7 @@ import {
 } from "../../.storybook/pageFixtures";
 import { type UiEvent } from "../ui-events/UiEvent";
 import { UiEventProvider } from "../ui-events/UiEventContext";
-import { ConnectedResults } from "./Results.connected";
+import { ConnectedResultsView } from "./ResultsView.connected";
 
 afterEach(cleanup);
 
@@ -17,7 +17,7 @@ const renderResults = (model: ReturnType<typeof resultsReady>) => {
   const events: UiEvent[] = [];
   render(
     <UiEventProvider handler={(event) => events.push(event)}>
-      <ConnectedResults model={model} universe="star-wars" />
+      <ConnectedResultsView model={model} universe="star-wars" />
     </UiEventProvider>,
   );
   return events;
@@ -26,7 +26,7 @@ const renderResults = (model: ReturnType<typeof resultsReady>) => {
 const preventNavigation = (element: HTMLElement) =>
   element.addEventListener("click", (event) => event.preventDefault());
 
-describe("ConnectedResults events", () => {
+describe("ConnectedResultsView events", () => {
   it("emits page load and result CTAs", async () => {
     const events = renderResults(
       resultsReady(starWars, starWars.transport),

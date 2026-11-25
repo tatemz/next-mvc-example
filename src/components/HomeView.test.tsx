@@ -2,14 +2,14 @@ import { it } from "@effect/vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect } from "vitest";
 import { ghibli, homeSplash, starWars } from "../../.storybook/pageFixtures";
-import { HomePage } from "./HomePage";
+import { HomeView } from "./HomeView";
 
 const render = (dataset: typeof starWars) =>
   renderToStaticMarkup(
-    <HomePage model={homeSplash(dataset)} onCtaClick={() => {}} />,
+    <HomeView model={homeSplash(dataset)} onCtaClick={() => {}} />,
   );
 
-describe("HomePage", () => {
+describe("HomeView", () => {
   it("renders the Star Wars splash and funnel CTA", () => {
     const html = render(starWars);
 

@@ -19,7 +19,7 @@ vi.mock("../../server/Runtime", async () => {
   return { swapiRuntime: runtime };
 });
 
-import { ConnectedResults } from "../../components/Results.connected";
+import { ConnectedResultsView } from "../../components/ResultsView.connected";
 import { StarWarsResultsPage } from "./StarWarsResults.page";
 
 describe("Results page", () => {
@@ -37,7 +37,7 @@ describe("Results page", () => {
 
       expect(isValidElement(element)).toBe(true);
       if (!isValidElement(element)) throw new Error("expected an element");
-      expect(element.type).toBe(ConnectedResults);
+      expect(element.type).toBe(ConnectedResultsView);
       expect(element.props).toMatchObject({
         universe: "star-wars",
         model: {

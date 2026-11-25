@@ -1,15 +1,15 @@
-Feature: Moving between the two experiences
+Feature: Moving between the universes
 
-  Scenario: The root opens the Star Wars experience
+  Scenario Outline: The header opens the universe
     Given the app is running
+    And the universe is <universe>
     When I open the app root
-    Then I see "Star Wars character dossier"
+    And I choose the universe from the header
+    Then I see "<title>"
     And I see "Build a dossier"
-    And the page uses the "night" theme
+    And the page uses the "<theme>" theme
 
-  Scenario: The header switches to Ghibli
-    Given the Star Wars home is open
-    When I choose the "Ghibli" universe
-    Then I see "Studio Ghibli character dossier"
-    And I see "Build a dossier"
-    And the page uses the "autumn" theme
+    Examples:
+      | universe  | title                          | theme  |
+      | star-wars | Star Wars character dossier    | night  |
+      | ghibli    | Studio Ghibli character dossier | autumn |

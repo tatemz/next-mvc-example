@@ -8,17 +8,17 @@ import {
 } from "../ui-events/UiEvent";
 import { useUiEventDispatch } from "../ui-events/UiEventContext";
 import type { Universe } from "../domain/FilmUniverse.model";
-import { HomePage, type HomePageViewModel } from "./HomePage";
+import { HomeView, type HomeViewModel } from "./HomeView";
 
-export type ConnectedHomePageProps = {
-  readonly model: HomePageViewModel;
+export type ConnectedHomeViewProps = {
+  readonly model: HomeViewModel;
   readonly universe: Universe;
 };
 
-export const ConnectedHomePage = ({
+export const ConnectedHomeView = ({
   model,
   universe,
-}: ConnectedHomePageProps) => {
+}: ConnectedHomeViewProps) => {
   const emit = useUiEventDispatch();
 
   useEffect(() => {
@@ -41,5 +41,5 @@ export const ConnectedHomePage = ({
       }),
     );
 
-  return <HomePage model={model} onCtaClick={onCtaClick} />;
+  return <HomeView model={model} onCtaClick={onCtaClick} />;
 };

@@ -39,44 +39,44 @@ const HomeHeroViewModel = Schema.TaggedStruct("HomeHeroViewModel", {
 });
 type HomeHeroViewModel = typeof HomeHeroViewModel.Type;
 
-export const HomePageViewModel = Schema.TaggedStruct("HomePageViewModel", {
+export const HomeViewModel = Schema.TaggedStruct("HomeViewModel", {
   shell: AppShellViewModel,
   hero: HomeHeroViewModel,
 });
-export type HomePageViewModel = typeof HomePageViewModel.Type;
+export type HomeViewModel = typeof HomeViewModel.Type;
 
 const copyFor = (i18n: I18n, universe: Universe) =>
   universe === "star-wars"
     ? {
         kicker: i18n._({ id: "shell.starWars" }),
-        title: i18n._({ id: "homePage.starWars.title" }),
-        subtitle: i18n._({ id: "homePage.starWars.subtitle" }),
+        title: i18n._({ id: "home.starWars.title" }),
+        subtitle: i18n._({ id: "home.starWars.subtitle" }),
       }
     : {
         kicker: i18n._({ id: "shell.ghibli" }),
-        title: i18n._({ id: "homePage.ghibli.title" }),
-        subtitle: i18n._({ id: "homePage.ghibli.subtitle" }),
+        title: i18n._({ id: "home.ghibli.title" }),
+        subtitle: i18n._({ id: "home.ghibli.subtitle" }),
       };
 
-export const makeHomePageViewModel = (
+export const makeHomeViewModel = (
   i18n: I18n,
   universe: Universe,
   funnelHref: string,
   shell: AppShellViewModel,
   image: HomeHeroImageViewModel,
 ) =>
-  HomePageViewModel.make({
+  HomeViewModel.make({
     shell,
     hero: HomeHeroViewModel.make({
       ...copyFor(i18n, universe),
-      funnelLabel: i18n._({ id: "homePage.hero.funnel" }),
+      funnelLabel: i18n._({ id: "home.hero.funnel" }),
       funnelHref,
       image,
     }),
   });
 
-export type HomePageProps = {
-  readonly model: HomePageViewModel;
+export type HomeViewProps = {
+  readonly model: HomeViewModel;
   readonly onCtaClick: () => void;
 };
 
@@ -124,7 +124,7 @@ const HomeHero = ({
   </section>
 );
 
-export const HomePage = ({ model, onCtaClick }: HomePageProps) => (
+export const HomeView = ({ model, onCtaClick }: HomeViewProps) => (
   <AppShell {...model.shell}>
     <HomeHero hero={model.hero} onCtaClick={onCtaClick} />
   </AppShell>

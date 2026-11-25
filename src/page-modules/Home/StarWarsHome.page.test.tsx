@@ -12,7 +12,7 @@ vi.mock("../../server/Runtime", async () => {
   };
 });
 
-import { ConnectedHomePage } from "../../components/HomePage.connected";
+import { ConnectedHomeView } from "../../components/HomeView.connected";
 import { StarWarsHomePage } from "./StarWarsHome.page";
 
 describe("StarWars home page", () => {
@@ -26,10 +26,10 @@ describe("StarWars home page", () => {
       if (!isValidElement<{ model: unknown; universe: unknown }>(element)) {
         throw new Error("expected an element");
       }
-      expect(element.type).toBe(ConnectedHomePage);
+      expect(element.type).toBe(ConnectedHomeView);
       expect(element.props.universe).toBe("star-wars");
       expect(element.props.model).toMatchObject({
-        _tag: "HomePageViewModel",
+        _tag: "HomeViewModel",
         hero: {
           title: "Star Wars character dossier",
           funnelHref: "/star-wars/funnel",

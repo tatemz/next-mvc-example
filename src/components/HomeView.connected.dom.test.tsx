@@ -11,16 +11,16 @@ import {
 import { homeSplash, starWars } from "../../.storybook/pageFixtures";
 import { type UiEvent } from "../ui-events/UiEvent";
 import { UiEventProvider } from "../ui-events/UiEventContext";
-import { ConnectedHomePage } from "./HomePage.connected";
+import { ConnectedHomeView } from "./HomeView.connected";
 
 afterEach(cleanup);
 
-describe("ConnectedHomePage events", () => {
+describe("ConnectedHomeView events", () => {
   it("emits page load and build-dossier CTA events", async () => {
     const events: UiEvent[] = [];
     render(
       <UiEventProvider handler={(event) => events.push(event)}>
-        <ConnectedHomePage model={homeSplash(starWars)} universe="star-wars" />
+        <ConnectedHomeView model={homeSplash(starWars)} universe="star-wars" />
       </UiEventProvider>,
     );
     const link = screen.getByRole("link", { name: "Build a dossier" });
