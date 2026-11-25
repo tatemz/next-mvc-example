@@ -3,13 +3,13 @@ import {
   loadResults,
   type ResultsSearchParams,
 } from "../../controllers/Results.controller";
-import { runtime } from "../../server/Runtime";
+import { swapiRuntime } from "../../server/Runtime";
 
 export async function ResultsPage({
   searchParams,
 }: {
   readonly searchParams: ResultsSearchParams;
 }) {
-  const model = await runtime.runPromise(loadResults(searchParams));
+  const model = await swapiRuntime.runPromise(loadResults(searchParams));
   return <Results {...model} />;
 }

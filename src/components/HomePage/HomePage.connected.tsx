@@ -1,12 +1,22 @@
 "use client";
 
 import { useActionState } from "react";
-import { searchPerson } from "../../actions/SearchPerson.serverAction";
 import { HomePage, type HomePageViewModel } from "./HomePage";
 
-export type ConnectedHomePageProps = HomePageViewModel;
+export type HomePageAction = (
+  previous: HomePageViewModel,
+  formData: FormData,
+) => Promise<HomePageViewModel>;
 
-export const ConnectedHomePage = (model: ConnectedHomePageProps) => {
-  const [state, dispatch, isPending] = useActionState(searchPerson, model);
+export type ConnectedHomePageProps = {
+  readonly model: HomePageViewModel;
+  readonly searchAction: HomePageAction;
+};
+
+export const ConnectedHomePage = ({
+  model,
+  searchAction,
+}: ConnectedHomePageProps) => {
+  const [state, dispatch, isPending] = useActionState(searchAction, model);
   return <HomePage {...state} dispatch={dispatch} isPending={isPending} />;
 };

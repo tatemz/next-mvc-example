@@ -4,8 +4,8 @@ import { describe, expect } from "vitest";
 import { presentLoadedHomePage } from "./HomePage.controller";
 import { searchPerson } from "./SearchPerson.controller";
 import { I18n, makeEn } from "../i18n/I18n.service";
-import { layerStub } from "../services/StarWarsClient.layer";
-import { luke, personNamed } from "../domain/StarWars.fixture";
+import { layerStub } from "../services/SwapiPeopleCatalog.layer";
+import { luke, personNamed } from "../domain/FilmUniverse.fixture";
 
 const form = (characterId: string) => {
   const data = new FormData();

@@ -15,12 +15,13 @@ const feature = "character-lookup";
 
 const environment = (scenario: string, index: number) =>
   Layer.merge(
-    scenarioApp({ STAR_WARS_CHARACTER_ID: "1" }),
+    scenarioApp({ CHARACTER_ID: "1" }),
     scenarioPage({ feature, index, scenario }),
   );
 
 const configuredCharacter = Bdd.scenario("The configured character loads").pipe(
   givenTheAppIsOpen,
+  whenILoadTheCharacter,
   thenISee,
   thenISee,
   thenISeeFilms,

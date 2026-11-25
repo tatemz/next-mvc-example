@@ -49,17 +49,23 @@ export const thenISee = Bdd.then`I see "${text}"`(
   }),
 );
 
+const thenISeeFilmCount = Effect.fn("thenISeeFilmCount")(function*(
+  { filmCount }: { readonly filmCount: number },
+  page: Page.Page,
+) {
+  const actual = yield* page.getByRole("listitem").count;
+  if (actual !== filmCount) {
+    return yield* Effect.fail(`expected ${filmCount} films, got ${actual}`);
+  }
+  return page;
+});
+
 export const thenISeeFilms = Bdd.then`I see ${filmCount} films`(
-  Effect.fn("thenISeeFilms")(function*(
-    { filmCount }: { readonly filmCount: number },
-    page: Page.Page,
-  ) {
-    const actual = yield* page.getByRole("listitem").count;
-    if (actual !== filmCount) {
-      return yield* Effect.fail(`expected ${filmCount} films, got ${actual}`);
-    }
-    return page;
-  }),
+  thenISeeFilmCount,
+);
+
+export const thenISeeFilm = Bdd.then`I see ${filmCount} film`(
+  thenISeeFilmCount,
 );
 
 export const thenTheCharacterIdFieldContains =

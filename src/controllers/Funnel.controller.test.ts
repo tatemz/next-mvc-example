@@ -11,10 +11,10 @@ import {
   makeFunnelTransportViewModel,
 } from "../components/Funnel/Funnel";
 import { makePersonViewModel } from "../components/PersonCard/PersonCard";
-import { luke, makeCharacterId } from "../domain/StarWars.fixture";
+import { luke, makeCharacterId } from "../domain/FilmUniverse.fixture";
 import { I18n, makeEn } from "../i18n/I18n.service";
-import { StarWarsClient, StarWarsError } from "../services/StarWarsClient";
-import { layerStub } from "../services/StarWarsClient.layer";
+import { PeopleCatalog, PeopleCatalogError } from "../services/PeopleCatalog";
+import { layerStub } from "../services/SwapiPeopleCatalog.layer";
 import { advanceFunnel, startFunnel } from "./Funnel.controller";
 
 const i18n = makeEn();
@@ -30,8 +30,8 @@ const form = (values: Record<string, string>) => {
 const run = (
   previous: Parameters<typeof advanceFunnel>[0],
   data: FormData,
-  searchPeople: StarWarsClient["searchPeople"] = () => Effect.succeed([]),
-  getPerson: StarWarsClient["getPerson"] = () => Effect.succeed(luke),
+  searchPeople: PeopleCatalog["searchPeople"] = () => Effect.succeed([]),
+  getPerson: PeopleCatalog["getPerson"] = () => Effect.succeed(luke),
 ) =>
   advanceFunnel(previous, data).pipe(
     Effect.provide(layerStub(getPerson, searchPeople)),
@@ -85,12 +85,12 @@ describe("advanceFunnel", () => {
       const model = yield* run(
         search,
         form({ query: "Luke" }),
-        () => Effect.fail(new StarWarsError({ message: "down" })),
+        () => Effect.fail(new PeopleCatalogError({ message: "down" })),
       );
 
       expect(model).toMatchObject({
         _tag: "Failed",
-        message: "The Star Wars API could not answer.",
+        message: "The character API could not answer.",
       });
     }),
   );
@@ -157,12 +157,12 @@ describe("advanceFunnel", () => {
         choose,
         form({ characterId: "1" }),
         undefined,
-        () => Effect.fail(new StarWarsError({ message: "down" })),
+        () => Effect.fail(new PeopleCatalogError({ message: "down" })),
       );
 
       expect(model).toMatchObject({
         _tag: "Failed",
-        message: "The Star Wars API could not answer.",
+        message: "The character API could not answer.",
       });
     }),
   );
@@ -180,7 +180,7 @@ describe("advanceFunnel", () => {
 
   it.effect("rejects a film outside the person", () =>
     Effect.gen(function*() {
-      const model = yield* run(filmStep, form({ episodeId: "99" }));
+      const model = yield* run(filmStep, form({ order: "99" }));
 
       expect(model).toMatchObject({
         _tag: "Failed",
@@ -191,11 +191,11 @@ describe("advanceFunnel", () => {
 
   it.effect("moves from the film to the transports", () =>
     Effect.gen(function*() {
-      const model = yield* run(filmStep, form({ episodeId: "4" }));
+      const model = yield* run(filmStep, form({ order: "4" }));
 
       expect(model).toMatchObject({
         _tag: "Transport",
-        film: { episodeId: 4 },
+        film: { order: 4 },
       });
     }),
   );

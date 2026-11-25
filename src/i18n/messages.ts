@@ -16,23 +16,21 @@ const personCardMessages = {
   "person.massLabel": "Mass",
   "person.birthYearLabel": "Born",
   "person.genderLabel": "Gender",
-  "person.homeworldLabel": "Homeworld",
+  "person.originLabel": "Origin",
   "person.speciesLabel": "Species",
   "person.unknownMeasurement": "Unknown",
   "person.unknownSpecies": "Unknown species",
 } as const;
 
 const filmListMessages = {
-  "film.episodeLabel": "Episode",
-  "film.listItem": "{title} ({episodeLabel} {episodeId, number})",
   "film.count": "{count, plural, one {# film} other {# films}}",
 } as const;
 
 const homePageMessages = {
   "homePage.loadError": "The character could not be loaded.",
-  "homePage.hero.title": "Star Wars API explorer",
+  "homePage.hero.title": "One dossier, two universes",
   "homePage.hero.subtitle":
-    "Look up a character by id, or build a dossier through the SWAPI graph.",
+    "The same controller and views, served from Star Wars or Studio Ghibli.",
   "homePage.hero.funnel": "Build a dossier",
 } as const;
 
@@ -44,7 +42,7 @@ const funnelMessages = {
   "funnel.step.review": "Review",
   "funnel.step.failed": "Something went wrong",
   "funnel.search.heading": "Find a character",
-  "funnel.search.subtitle": "Search the Star Wars API by name.",
+  "funnel.search.subtitle": "Search the character API by name.",
   "funnel.search.label": "Character name",
   "funnel.search.placeholder": "Luke",
   "funnel.search.submit": "Search",
@@ -69,14 +67,14 @@ const funnelMessages = {
   "funnel.review.open": "Open dossier",
   "funnel.review.startOver": "Start over",
   "funnel.failed.heading": "The dossier could not be built",
-  "funnel.failed.message": "The Star Wars API could not answer.",
+  "funnel.failed.message": "The character API could not answer.",
   "funnel.failed.invalidChoice": "That choice is no longer available.",
   "funnel.failed.startOver": "Start over",
   "funnel.pending": "Loading...",
 } as const;
 
 const resultsMessages = {
-  "results.ready.heading": "Character dossier",
+  "results.ready.heading": "Your dossier",
   "results.ready.subtitle":
     "The choices from your funnel, loaded fresh from SWAPI.",
   "results.ready.filmLabel": "Film",

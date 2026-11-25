@@ -33,7 +33,7 @@ export const FilmList = (model: FilmListProps) => (
         {Function.pipe(
           model.films,
           Array.map((film) => (
-            <FilmListItem key={film.episodeId} {...film} />
+            <FilmListItem key={film.order} {...film} />
           )),
         )}
       </ul>

@@ -1,14 +1,24 @@
 import { Function, Layer, ManagedRuntime } from "effect";
 import { FetchHttpClient } from "effect/http";
 import { layer as I18nLayer } from "../i18n/I18n.service";
-import * as StarWarsClientLayer from "../services/StarWarsClient.layer";
+import * as GhibliPeopleCatalogLayer from "../services/GhibliPeopleCatalog.layer";
+import * as SwapiPeopleCatalogLayer from "../services/SwapiPeopleCatalog.layer";
 
-const AppLayer = Layer.mergeAll(
+const SwapiAppLayer = Layer.mergeAll(
   I18nLayer,
   Function.pipe(
-    StarWarsClientLayer.layer,
+    SwapiPeopleCatalogLayer.layer,
     Layer.provide(FetchHttpClient.layer),
   ),
 );
 
-export const runtime = ManagedRuntime.make(AppLayer);
+const GhibliAppLayer = Layer.mergeAll(
+  I18nLayer,
+  Function.pipe(
+    GhibliPeopleCatalogLayer.layer,
+    Layer.provide(FetchHttpClient.layer),
+  ),
+);
+
+export const swapiRuntime = ManagedRuntime.make(SwapiAppLayer);
+export const ghibliRuntime = ManagedRuntime.make(GhibliAppLayer);

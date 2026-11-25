@@ -5,9 +5,9 @@ import { describe, expect, vi } from "vitest";
 vi.mock("../server/Runtime", async () => {
   const { Effect, Layer, ManagedRuntime } = await import("effect");
   const { layer: i18nLayer } = await import("../i18n/I18n.service");
-  const { layerStub } = await import("../services/StarWarsClient.layer");
+  const { layerStub } = await import("../services/SwapiPeopleCatalog.layer");
   const { luke, makeCharacterId } = await import(
-    "../domain/StarWars.fixture"
+    "../domain/FilmUniverse.fixture"
   );
 
   const runtime = ManagedRuntime.make(
@@ -27,7 +27,7 @@ vi.mock("../server/Runtime", async () => {
     ),
   );
 
-  return { runtime };
+  return { swapiRuntime: runtime };
 });
 
 import { makeFunnelSearchViewModel } from "../components/Funnel/Funnel";

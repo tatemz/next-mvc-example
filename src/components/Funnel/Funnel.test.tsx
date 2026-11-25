@@ -1,7 +1,7 @@
 import { it } from "@effect/vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect } from "vitest";
-import { luke } from "../../domain/StarWars.fixture";
+import { luke } from "../../domain/FilmUniverse.fixture";
 import { makeEn } from "../../i18n/I18n.service";
 import { makePersonViewModel } from "../PersonCard/PersonCard";
 import {
@@ -78,7 +78,7 @@ describe("Funnel", () => {
     const html = render(makeFunnelFilmViewModel(i18n, person));
 
     expect(html).toContain("Choose a film");
-    expect(html).toContain("A New Hope (Episode 4)");
+    expect(html).toContain("A New Hope");
     expect(html).toContain("Next: transport");
 
     const pending = render(makeFunnelFilmViewModel(i18n, person), true);
@@ -132,7 +132,7 @@ describe("Funnel", () => {
     const html = render(model);
     expect(html).toContain("Ready for the dossier");
     expect(html).toContain("Luke Skywalker");
-    expect(html).toContain("A New Hope (Episode 4)");
+    expect(html).toContain("A New Hope");
     expect(html).toContain("X-wing (Starship)");
     expect(html).toContain("Open dossier");
     expect(html).toContain("Start over");

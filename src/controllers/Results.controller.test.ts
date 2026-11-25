@@ -1,20 +1,20 @@
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
-import { luke } from "../domain/StarWars.fixture";
+import { luke } from "../domain/FilmUniverse.fixture";
 import { I18n, makeEn } from "../i18n/I18n.service";
 import {
-  StarWarsError,
-  type StarWarsClient,
-} from "../services/StarWarsClient";
-import { layerStub } from "../services/StarWarsClient.layer";
+  PeopleCatalogError,
+  type PeopleCatalog,
+} from "../services/PeopleCatalog";
+import { layerStub } from "../services/SwapiPeopleCatalog.layer";
 import { loadResults } from "./Results.controller";
 
 const i18n = makeEn();
 
 const run = (
   params: Parameters<typeof loadResults>[0],
-  getPerson: StarWarsClient["getPerson"] = () => Effect.succeed(luke),
+  getPerson: PeopleCatalog["getPerson"] = () => Effect.succeed(luke),
 ) =>
   loadResults(params).pipe(
     Effect.provide(layerStub(getPerson)),
@@ -33,7 +33,7 @@ describe("loadResults", () => {
       expect(model).toMatchObject({
         _tag: "Ready",
         person: { name: "Luke Skywalker" },
-        film: { episodeId: 4 },
+        film: { order: 4 },
         transport: { key: "starship-12", name: "X-wing" },
       });
     }),
@@ -65,7 +65,7 @@ describe("loadResults", () => {
     Effect.gen(function*() {
       const model = yield* run(
         { character: "1", film: "4" },
-        () => Effect.fail(new StarWarsError({ message: "down" })),
+        () => Effect.fail(new PeopleCatalogError({ message: "down" })),
       );
 
       expect(model).toMatchObject({ _tag: "Missing" });

@@ -5,8 +5,8 @@ import { describe, expect, vi } from "vitest";
 vi.mock("../../server/Runtime", async () => {
   const { Effect, Layer, ManagedRuntime } = await import("effect");
   const { layer: i18nLayer } = await import("../../i18n/I18n.service");
-  const { layerStub } = await import("../../services/StarWarsClient.layer");
-  const { luke } = await import("../../domain/StarWars.fixture");
+  const { layerStub } = await import("../../services/SwapiPeopleCatalog.layer");
+  const { luke } = await import("../../domain/FilmUniverse.fixture");
 
   const runtime = ManagedRuntime.make(
     Layer.mergeAll(
@@ -15,7 +15,7 @@ vi.mock("../../server/Runtime", async () => {
     ),
   );
 
-  return { runtime };
+  return { swapiRuntime: runtime };
 });
 
 import { FunnelPage } from "./Funnel.page";

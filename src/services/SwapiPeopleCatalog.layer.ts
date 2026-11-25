@@ -1,8 +1,8 @@
 import { Config, Effect, Function, Layer, String as Str } from "effect";
 import { HttpApiClient } from "effect/http-api";
 import { SwapiApi } from "./SwapiApi";
-import { StarWarsClient } from "./StarWarsClient";
-import { make, makeStub } from "./StarWarsClient.factory";
+import { PeopleCatalog } from "./PeopleCatalog";
+import { make, makeStub } from "./SwapiPeopleCatalog.factory";
 
 const apiUrl = Function.pipe(
   Config.String("STAR_WARS_API_URL"),
@@ -10,7 +10,7 @@ const apiUrl = Function.pipe(
 );
 
 export const layer = Layer.effect(
-  StarWarsClient,
+  PeopleCatalog,
   Effect.gen(function*() {
     const configuredBaseUrl = yield* apiUrl;
     const baseUrl = Function.pipe(
@@ -23,6 +23,6 @@ export const layer = Layer.effect(
 );
 
 export const layerStub = (
-  getPerson: StarWarsClient["getPerson"],
-  searchPeople?: StarWarsClient["searchPeople"],
-) => Layer.succeed(StarWarsClient, makeStub(getPerson, searchPeople));
+  getPerson: PeopleCatalog["getPerson"],
+  searchPeople?: PeopleCatalog["searchPeople"],
+) => Layer.succeed(PeopleCatalog, makeStub(getPerson, searchPeople));

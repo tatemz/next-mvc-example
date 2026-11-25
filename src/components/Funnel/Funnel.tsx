@@ -164,7 +164,7 @@ export const makeFunnelReviewViewModel = (
 ) => {
   const params = new URLSearchParams({
     character: person.id,
-    film: String(film.episodeId),
+    film: String(film.order),
     transport: transport?.key ?? "none",
   });
 
@@ -306,13 +306,13 @@ const FilmStep = ({
       <div className="flex flex-col gap-2">
         {step.person.films.map((film) => (
           <label
-            key={film.episodeId}
+            key={film.order}
             className="flex cursor-pointer items-center gap-3 rounded-box bg-base-200 p-4"
           >
             <input
               type="radio"
-              name="episodeId"
-              value={film.episodeId}
+              name="order"
+              value={film.order}
               className="radio radio-primary"
               required
             />
@@ -375,7 +375,7 @@ const ReviewStep = ({ step }: { readonly step: FunnelReviewViewModel }) => (
     <div className="rounded-box bg-base-200 p-4">
       <h2 className="text-xl font-bold">{step.person.name}</h2>
       <p className="text-base-content/70">
-        {step.person.homeworld.name} ·{" "}
+        {step.person.origin.name} ·{" "}
         {step.person.species?.name ?? step.person.speciesUnknownLabel}
       </p>
     </div>

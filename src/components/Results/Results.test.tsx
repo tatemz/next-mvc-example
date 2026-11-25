@@ -1,7 +1,7 @@
 import { it } from "@effect/vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect } from "vitest";
-import { luke } from "../../domain/StarWars.fixture";
+import { luke } from "../../domain/FilmUniverse.fixture";
 import { makeEn } from "../../i18n/I18n.service";
 import { makePersonViewModel } from "../PersonCard/PersonCard";
 import {
@@ -25,9 +25,9 @@ describe("Results", () => {
     );
     const html = renderToStaticMarkup(<Results {...model} />);
 
-    expect(html).toContain("Character dossier");
+    expect(html).toContain("Your dossier");
     expect(html).toContain("Luke Skywalker");
-    expect(html).toContain("A New Hope (Episode 4)");
+    expect(html).toContain("A New Hope");
     expect(html).toContain("X-wing (Starship)");
     expect(html).toContain("Build another dossier");
     expect(html).toContain("Back home");

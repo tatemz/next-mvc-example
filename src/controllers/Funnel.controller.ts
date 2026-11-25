@@ -10,10 +10,10 @@ import {
   makeFunnelTransportViewModel,
 } from "../components/Funnel/Funnel";
 import { makePersonViewModel } from "../components/PersonCard/PersonCard";
-import { CharacterId } from "../domain/StarWars.model";
+import { CharacterId } from "../domain/FilmUniverse.model";
 import { getString, toRecord } from "../forms/FormData";
 import { I18n } from "../i18n/I18n.service";
-import { StarWarsClient } from "../services/StarWarsClient";
+import { PeopleCatalog } from "../services/PeopleCatalog";
 
 export const startFunnel = Effect.gen(function*() {
   const i18n = yield* I18n;
@@ -37,7 +37,7 @@ const searchStep = (
       );
     }
 
-    const client = yield* StarWarsClient;
+    const client = yield* PeopleCatalog;
     const results = yield* client.searchPeople(query).pipe(
       Effect.match({
         onFailure: () => undefined,
@@ -92,7 +92,7 @@ const chooseStep = (
       );
     }
 
-    const client = yield* StarWarsClient;
+    const client = yield* PeopleCatalog;
     const person = yield* client.getPerson(characterId.value).pipe(
       Effect.match({
         onFailure: () => undefined,
@@ -117,9 +117,9 @@ const filmStep = (
   Effect.gen(function*() {
     const i18n = yield* I18n;
     const data = toRecord(formData);
-    const episodeId = Number(getString(data, "episodeId"));
+    const order = Number(getString(data, "order"));
     const film = step.person.films.find(
-      (candidate) => candidate.episodeId === episodeId,
+      (candidate) => candidate.order === order,
     );
 
     if (film === undefined) {

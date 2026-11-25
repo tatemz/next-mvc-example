@@ -4,8 +4,9 @@ Feature: Looking up a Star Wars character
     Given the app is open
 
   Scenario: The configured character loads
+    When I load the character
     Then I see "Luke Skywalker"
-    And I see "A New Hope (Episode 4)"
+    And I see "A New Hope"
     And I see 4 films
 
   Scenario: Loading another character

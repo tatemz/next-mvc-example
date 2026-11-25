@@ -1,5 +1,5 @@
 import { Schema, type SchemaIssue } from "effect";
-import { CharacterId } from "../domain/StarWars.model";
+import { CharacterId } from "../domain/FilmUniverse.model";
 import {
   FormValidationError,
   validateFormData,

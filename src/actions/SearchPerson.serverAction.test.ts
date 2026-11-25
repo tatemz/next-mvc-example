@@ -3,13 +3,13 @@ import { Effect } from "effect";
 import { describe, expect, vi } from "vitest";
 import { presentLoadedHomePage } from "../controllers/HomePage.controller";
 import { makeEn } from "../i18n/I18n.service";
-import { luke } from "../domain/StarWars.fixture";
+import { luke } from "../domain/FilmUniverse.fixture";
 
 vi.mock("../server/Runtime", async () => {
   const { Effect, Layer, ManagedRuntime } = await import("effect");
   const { layer: i18nLayer } = await import("../i18n/I18n.service");
-  const { layerStub } = await import("../services/StarWarsClient.layer");
-  const { personNamed } = await import("../domain/StarWars.fixture");
+  const { layerStub } = await import("../services/SwapiPeopleCatalog.layer");
+  const { personNamed } = await import("../domain/FilmUniverse.fixture");
 
   const runtime = ManagedRuntime.make(
     Layer.mergeAll(
@@ -18,7 +18,7 @@ vi.mock("../server/Runtime", async () => {
     ),
   );
 
-  return { runtime };
+  return { swapiRuntime: runtime };
 });
 
 import { searchPerson } from "./SearchPerson.serverAction";

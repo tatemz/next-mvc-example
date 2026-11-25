@@ -1,8 +1,8 @@
 import { ConnectedFunnel } from "../../components/Funnel/Funnel.connected";
 import { startFunnel } from "../../controllers/Funnel.controller";
-import { runtime } from "../../server/Runtime";
+import { swapiRuntime } from "../../server/Runtime";
 
 export async function FunnelPage() {
-  const model = await runtime.runPromise(startFunnel);
+  const model = await swapiRuntime.runPromise(startFunnel);
   return <ConnectedFunnel {...model} />;
 }

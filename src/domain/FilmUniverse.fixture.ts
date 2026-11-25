@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { CharacterId, type Person } from "./StarWars.model";
+import { CharacterId, type Person } from "./FilmUniverse.model";
 
 export const makeCharacterId = (value: string): CharacterId =>
   Schema.decodeSync(CharacterId)(value);
@@ -12,16 +12,16 @@ export const luke: Person = {
   mass: "77",
   birthYear: "19BBY",
   gender: "male",
-  homeworld: {
-    _tag: "Planet",
+  origin: {
+    _tag: "Origin",
     name: "Tatooine",
     climate: "arid",
     terrain: "desert",
   },
   species: null,
   films: [
-    { _tag: "Film", title: "A New Hope", episodeId: 4 },
-    { _tag: "Film", title: "The Empire Strikes Back", episodeId: 5 },
+    { _tag: "Film", title: "A New Hope", order: 4 },
+    { _tag: "Film", title: "The Empire Strikes Back", order: 5 },
   ],
   transports: [
     {

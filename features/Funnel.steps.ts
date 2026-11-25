@@ -86,13 +86,11 @@ export const whenIOpenTheDossier = Bdd.when`I open the dossier`(
 
 const environment = (scenario: string, index: number) =>
   Layer.merge(
-    scenarioApp({ STAR_WARS_CHARACTER_ID: "1" }),
+    scenarioApp({ CHARACTER_ID: "1" }),
     scenarioPage({ feature: "funnel", index, scenario }),
   );
 
-const buildDossier = Bdd.scenario(
-  "Building a dossier for Luke Skywalker",
-).pipe(
+const reviewDossier = Bdd.scenario("Reviewing the dossier").pipe(
   givenTheFunnelIsOpen,
   whenISearchTheFunnel,
   whenIChooseTheCharacter,
@@ -100,13 +98,22 @@ const buildDossier = Bdd.scenario(
   whenIChooseTheTransport,
   thenISee,
   thenISee,
+  Bdd.provide(environment("review-dossier", 0)),
+);
+
+const openDossier = Bdd.scenario("Opening the dossier").pipe(
+  givenTheFunnelIsOpen,
+  whenISearchTheFunnel,
+  whenIChooseTheCharacter,
+  whenIChooseTheFilm,
+  whenIChooseTheTransport,
   whenIOpenTheDossier,
   thenISee,
   thenISee,
   thenISee,
-  Bdd.provide(environment("luke-dossier", 0)),
+  Bdd.provide(environment("open-dossier", 1)),
 );
 
 export const buildingADossier = Bdd.feature(
   "Building a character dossier",
-).pipe(buildDossier);
+).pipe(reviewDossier, openDossier);

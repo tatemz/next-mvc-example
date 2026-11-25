@@ -6,12 +6,12 @@ import {
   makeFilmListItemViewModel,
 } from "../FilmListItem/FilmListItem";
 
-export const PlanetViewModel = Schema.TaggedStruct("PlanetViewModel", {
+export const OriginViewModel = Schema.TaggedStruct("OriginViewModel", {
   name: Schema.NonEmptyString,
   climate: Schema.String,
   terrain: Schema.String,
 });
-export type PlanetViewModel = typeof PlanetViewModel.Type;
+export type OriginViewModel = typeof OriginViewModel.Type;
 
 export const SpeciesViewModel = Schema.TaggedStruct("SpeciesViewModel", {
   name: Schema.NonEmptyString,
@@ -42,17 +42,17 @@ export const PersonViewModel = Schema.TaggedStruct("PersonViewModel", {
   massLabel: Schema.NonEmptyString,
   birthYearLabel: Schema.NonEmptyString,
   genderLabel: Schema.NonEmptyString,
-  homeworldLabel: Schema.NonEmptyString,
+  originLabel: Schema.NonEmptyString,
   speciesLabel: Schema.NonEmptyString,
   speciesUnknownLabel: Schema.NonEmptyString,
-  homeworld: PlanetViewModel,
+  origin: OriginViewModel,
   species: Schema.NullOr(SpeciesViewModel),
   films: Schema.NonEmptyArray(FilmListItemViewModel),
   transports: Schema.Array(TransportViewModel),
 });
 export type PersonViewModel = typeof PersonViewModel.Type;
 
-const PlanetInput = Schema.Struct({
+const OriginInput = Schema.Struct({
   name: Schema.NonEmptyString,
   climate: Schema.String,
   terrain: Schema.String,
@@ -78,7 +78,7 @@ export const PersonCardInput = Schema.Struct({
   mass: Schema.String,
   birthYear: Schema.String,
   gender: Schema.String,
-  homeworld: PlanetInput,
+  origin: OriginInput,
   species: Schema.NullOr(SpeciesInput),
   films: Schema.NonEmptyArray(FilmListItemInput),
   transports: Schema.Array(TransportInput),
@@ -104,19 +104,19 @@ export const makePersonViewModel = (
     name: person.name,
     height: displayMeasurement(i18n, person.height),
     mass: displayMeasurement(i18n, person.mass),
-    birthYear: person.birthYear,
+    birthYear: displayMeasurement(i18n, person.birthYear),
     gender: person.gender,
     heightLabel: i18n._({ id: "person.heightLabel" }),
     massLabel: i18n._({ id: "person.massLabel" }),
     birthYearLabel: i18n._({ id: "person.birthYearLabel" }),
     genderLabel: i18n._({ id: "person.genderLabel" }),
-    homeworldLabel: i18n._({ id: "person.homeworldLabel" }),
+    originLabel: i18n._({ id: "person.originLabel" }),
     speciesLabel: i18n._({ id: "person.speciesLabel" }),
     speciesUnknownLabel: i18n._({ id: "person.unknownSpecies" }),
-    homeworld: PlanetViewModel.make({
-      name: person.homeworld.name,
-      climate: person.homeworld.climate,
-      terrain: person.homeworld.terrain,
+    origin: OriginViewModel.make({
+      name: person.origin.name,
+      climate: person.origin.climate,
+      terrain: person.origin.terrain,
     }),
     species:
       person.species === null
@@ -128,7 +128,7 @@ export const makePersonViewModel = (
           }),
     films: Function.pipe(
       person.films,
-      Array.map((film) => makeFilmListItemViewModel(i18n, film)),
+      Array.map(makeFilmListItemViewModel),
     ),
     transports: person.transports.map((transport) =>
       TransportViewModel.make({
@@ -140,36 +140,37 @@ export const makePersonViewModel = (
     ),
   });
 
+const Stat = ({
+  label,
+  value,
+}: {
+  readonly label: string;
+  readonly value: string;
+}) => (
+  <div className="rounded-box bg-base-200 p-3">
+    <div className="text-xs uppercase tracking-wide opacity-60">{label}</div>
+    <div className="text-lg font-semibold capitalize">{value}</div>
+  </div>
+);
+
 export type PersonCardProps = PersonViewModel;
 
 export const PersonCard = (model: PersonCardProps) => (
   <article className="card bg-base-100 shadow-xl">
     <div className="card-body gap-4">
       <h1 className="card-title text-3xl">{model.name}</h1>
-      <div className="stats stats-vertical bg-base-200 sm:stats-horizontal">
-        <div className="stat">
-          <div className="stat-title">{model.heightLabel}</div>
-          <div className="stat-value text-lg">{model.height}</div>
-        </div>
-        <div className="stat">
-          <div className="stat-title">{model.massLabel}</div>
-          <div className="stat-value text-lg">{model.mass}</div>
-        </div>
-        <div className="stat">
-          <div className="stat-title">{model.birthYearLabel}</div>
-          <div className="stat-value text-lg">{model.birthYear}</div>
-        </div>
-        <div className="stat">
-          <div className="stat-title">{model.genderLabel}</div>
-          <div className="stat-value text-lg capitalize">{model.gender}</div>
-        </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Stat label={model.heightLabel} value={model.height} />
+        <Stat label={model.massLabel} value={model.mass} />
+        <Stat label={model.birthYearLabel} value={model.birthYear} />
+        <Stat label={model.genderLabel} value={model.gender} />
       </div>
       <dl className="grid gap-3 sm:grid-cols-2">
         <div>
           <dt className="text-xs uppercase tracking-wide opacity-60">
-            {model.homeworldLabel}
+            {model.originLabel}
           </dt>
-          <dd className="text-lg">{model.homeworld.name}</dd>
+          <dd className="text-lg">{model.origin.name}</dd>
         </div>
         <div>
           <dt className="text-xs uppercase tracking-wide opacity-60">

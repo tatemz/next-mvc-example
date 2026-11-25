@@ -1,9 +1,10 @@
 import { it } from "@effect/vitest";
 import { describe, expect } from "vitest";
-import { runtime } from "./Runtime";
+import { ghibliRuntime, swapiRuntime } from "./Runtime";
 
-describe("runtime", () => {
-  it("creates the application runtime", () => {
-    expect(runtime).toBeDefined();
+describe("runtimes", () => {
+  it("creates both dataset runtimes", () => {
+    expect(swapiRuntime).toBeDefined();
+    expect(ghibliRuntime).toBeDefined();
   });
 });

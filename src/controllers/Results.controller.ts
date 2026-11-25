@@ -4,9 +4,9 @@ import {
   makeResultsReadyViewModel,
 } from "../components/Results/Results";
 import { makePersonViewModel } from "../components/PersonCard/PersonCard";
-import { CharacterId } from "../domain/StarWars.model";
+import { CharacterId } from "../domain/FilmUniverse.model";
 import { I18n } from "../i18n/I18n.service";
-import { StarWarsClient } from "../services/StarWarsClient";
+import { PeopleCatalog } from "../services/PeopleCatalog";
 
 export type ResultsSearchParams = Readonly<
   Record<string, string | ReadonlyArray<string> | undefined>
@@ -34,7 +34,7 @@ export const loadResults = (params: ResultsSearchParams) =>
       return makeResultsMissingViewModel(i18n);
     }
 
-    const client = yield* StarWarsClient;
+    const client = yield* PeopleCatalog;
     const person = yield* client.getPerson(decoded.value.character).pipe(
       Effect.match({
         onFailure: () => undefined,
@@ -48,7 +48,7 @@ export const loadResults = (params: ResultsSearchParams) =>
 
     const personViewModel = makePersonViewModel(i18n, person);
     const film = personViewModel.films.find(
-      (candidate) => candidate.episodeId === decoded.value.film,
+      (candidate) => candidate.order === decoded.value.film,
     );
 
     if (film === undefined) {

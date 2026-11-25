@@ -2,11 +2,11 @@
 
 import type { FunnelViewModel } from "../components/Funnel/Funnel";
 import { advanceFunnel } from "../controllers/Funnel.controller";
-import { runtime } from "../server/Runtime";
+import { swapiRuntime } from "../server/Runtime";
 
 export async function submitFunnel(
   previous: FunnelViewModel,
   formData: FormData,
 ) {
-  return runtime.runPromise(advanceFunnel(previous, formData));
+  return swapiRuntime.runPromise(advanceFunnel(previous, formData));
 }

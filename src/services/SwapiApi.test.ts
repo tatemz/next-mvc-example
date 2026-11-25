@@ -4,7 +4,7 @@ import { HttpClient, HttpClientResponse, UrlParams } from "effect/http";
 import { HttpApiClient } from "effect/http-api";
 import { describe, expect } from "vitest";
 import { SwapiApi } from "./SwapiApi";
-import { makeCharacterId } from "../domain/StarWars.fixture";
+import { makeCharacterId } from "../domain/FilmUniverse.fixture";
 
 const personResponse = {
   name: "Luke Skywalker",

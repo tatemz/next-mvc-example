@@ -12,10 +12,16 @@ export default function RootLayout({
         <header className="navbar bg-base-300 px-4 shadow-sm">
           <div className="flex-1">
             <a href="/" className="btn btn-ghost text-xl">
-              SWAPI Dossier
+              Character Dossier
             </a>
           </div>
-          <div className="flex-none">
+          <div className="flex-none flex gap-2">
+            <a href="/star-wars" className="btn btn-ghost">
+              Star Wars
+            </a>
+            <a href="/ghibli" className="btn btn-ghost">
+              Ghibli
+            </a>
             <a href="/funnel" className="btn btn-ghost">
               Build a dossier
             </a>

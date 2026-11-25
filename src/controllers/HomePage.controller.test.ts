@@ -3,9 +3,9 @@ import { ConfigProvider, Effect } from "effect";
 import { describe, expect } from "vitest";
 import { loadHomePage } from "./HomePage.controller";
 import { I18n, makeEn } from "../i18n/I18n.service";
-import { StarWarsError } from "../services/StarWarsClient";
-import { layerStub } from "../services/StarWarsClient.layer";
-import { luke, personNamed } from "../domain/StarWars.fixture";
+import { PeopleCatalogError } from "../services/PeopleCatalog";
+import { layerStub } from "../services/SwapiPeopleCatalog.layer";
+import { luke, personNamed } from "../domain/FilmUniverse.fixture";
 
 const env = (values: Record<string, string>) =>
   ConfigProvider.fromEnv({ env: values });
@@ -27,7 +27,7 @@ describe("loadHomePage", () => {
       ),
       Effect.provideService(
         ConfigProvider.ConfigProvider,
-        env({ STAR_WARS_CHARACTER_ID: "2" }),
+        env({ CHARACTER_ID: "2" }),
       ),
       Effect.provideService(I18n, i18n),
     ),
@@ -62,7 +62,7 @@ describe("loadHomePage", () => {
     }).pipe(
       Effect.provide(
         layerStub(() =>
-          Effect.fail(new StarWarsError({ message: "Person 1 is not available." })),
+          Effect.fail(new PeopleCatalogError({ message: "Person 1 is not available." })),
         ),
       ),
       Effect.provideService(
@@ -85,7 +85,7 @@ describe("loadHomePage", () => {
       Effect.provide(layerStub(() => Effect.succeed(luke))),
       Effect.provideService(
         ConfigProvider.ConfigProvider,
-        env({ STAR_WARS_CHARACTER_ID: "abc" }),
+        env({ CHARACTER_ID: "abc" }),
       ),
       Effect.provideService(I18n, i18n),
     ),

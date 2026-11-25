@@ -2,9 +2,9 @@ import { it } from "@effect/vitest";
 import { Effect, Layer } from "effect";
 import { HttpClient, HttpClientResponse } from "effect/http";
 import { describe, expect } from "vitest";
-import { StarWarsClient } from "./StarWarsClient";
-import { layer as liveLayer, layerStub } from "./StarWarsClient.layer";
-import { makeCharacterId, personNamed } from "../domain/StarWars.fixture";
+import { PeopleCatalog } from "./PeopleCatalog";
+import { layer as liveLayer, layerStub } from "./SwapiPeopleCatalog.layer";
+import { makeCharacterId, personNamed } from "../domain/FilmUniverse.fixture";
 
 const personResponse = {
   name: "Luke Skywalker",
@@ -120,20 +120,20 @@ const expectResourceError = (
       Layer.provide(Layer.succeed(HttpClient.HttpClient, client)),
     );
 
-    const error = yield* StarWarsClient.use((service) =>
+    const error = yield* PeopleCatalog.use((service) =>
       service.getPerson(makeCharacterId("1")),
     ).pipe(Effect.flip, Effect.provide(layer));
 
     expect(error).toMatchObject({
-      _tag: "StarWarsError",
+      _tag: "PeopleCatalogError",
       message,
     });
   });
 
-describe("StarWarsClient", () => {
+describe("PeopleCatalog", () => {
   it.effect("decodes a person dossier into a domain object", () =>
     Effect.gen(function*() {
-      const person = yield* StarWarsClient.use((client) =>
+      const person = yield* PeopleCatalog.use((client) =>
         client.getPerson(makeCharacterId("1")),
       );
 
@@ -145,14 +145,14 @@ describe("StarWarsClient", () => {
         mass: "77",
         birthYear: "19BBY",
         gender: "male",
-        homeworld: { _tag: "Planet", name: "Tatooine" },
+        origin: { _tag: "Origin", name: "Tatooine" },
         species: { _tag: "Species", name: "Human" },
       });
       expect(person.films).toHaveLength(1);
       expect(person.films[0]).toEqual({
         _tag: "Film",
         title: "A New Hope",
-        episodeId: 4,
+        order: 4,
       });
       expect(person.transports).toEqual([
         {
@@ -203,7 +203,7 @@ describe("StarWarsClient", () => {
     );
 
     return Effect.gen(function*() {
-      const person = yield* StarWarsClient.use((service) =>
+      const person = yield* PeopleCatalog.use((service) =>
         service.getPerson(makeCharacterId("1")),
       );
 
@@ -214,7 +214,7 @@ describe("StarWarsClient", () => {
 
   it.effect("searches people by name", () =>
     Effect.gen(function*() {
-      const people = yield* StarWarsClient.use((client) =>
+      const people = yield* PeopleCatalog.use((client) =>
         client.searchPeople("luke"),
       );
 
@@ -226,10 +226,10 @@ describe("StarWarsClient", () => {
 
   it.effect("provides the client built by layerStub", () =>
     Effect.gen(function*() {
-      const person = yield* StarWarsClient.use((client) =>
+      const person = yield* PeopleCatalog.use((client) =>
         client.getPerson(makeCharacterId("3")),
       );
-      const people = yield* StarWarsClient.use((client) =>
+      const people = yield* PeopleCatalog.use((client) =>
         client.searchPeople("stub"),
       );
 
@@ -242,7 +242,7 @@ describe("StarWarsClient", () => {
     ),
   );
 
-  it.effect("maps a person request failure to a StarWarsError", () =>
+  it.effect("maps a person request failure to a PeopleCatalogError", () =>
     expectResourceError(
       personResponse,
       failingStatus("/people/"),
@@ -250,47 +250,47 @@ describe("StarWarsClient", () => {
     ),
   );
 
-  it.effect("maps a homeworld request failure to a StarWarsError", () =>
+  it.effect("maps an origin request failure to a PeopleCatalogError", () =>
     expectResourceError(
       personResponse,
       failingStatus("/planets/"),
-      "A homeworld for person 1 is not available.",
+      "The origin for person 1 is not available.",
     ),
   );
 
-  it.effect("maps a species request failure to a StarWarsError", () =>
+  it.effect("maps a species request failure to a PeopleCatalogError", () =>
     expectResourceError(
       personResponse,
       failingStatus("/species/"),
-      "A species for person 1 is not available.",
+      "The species for person 1 is not available.",
     ),
   );
 
-  it.effect("maps a starship request failure to a StarWarsError", () =>
+  it.effect("maps a starship request failure to a PeopleCatalogError", () =>
     expectResourceError(
       personResponse,
       failingStatus("/starships/"),
-      "A starship for person 1 is not available.",
+      "The starship for person 1 is not available.",
     ),
   );
 
-  it.effect("maps a vehicle request failure to a StarWarsError", () =>
+  it.effect("maps a vehicle request failure to a PeopleCatalogError", () =>
     expectResourceError(
       personResponse,
       failingStatus("/vehicles/"),
-      "A vehicle for person 1 is not available.",
+      "The vehicle for person 1 is not available.",
     ),
   );
 
-  it.effect("maps a film request failure to a StarWarsError", () =>
+  it.effect("maps a film request failure to a PeopleCatalogError", () =>
     expectResourceError(
       personResponse,
       failingStatus("/films/"),
-      "A film for person 1 is not available.",
+      "The film for person 1 is not available.",
     ),
   );
 
-  it.effect("maps a search request failure to a StarWarsError", () => {
+  it.effect("maps a search request failure to a PeopleCatalogError", () => {
     const client = HttpClient.make((request) =>
       Effect.succeed(
         HttpClientResponse.fromWeb(
@@ -304,58 +304,58 @@ describe("StarWarsClient", () => {
     );
 
     return Effect.gen(function*() {
-      const error = yield* StarWarsClient.use((service) =>
+      const error = yield* PeopleCatalog.use((service) =>
         service.searchPeople("luke"),
       ).pipe(Effect.flip);
 
       expect(error).toMatchObject({
-        _tag: "StarWarsError",
+        _tag: "PeopleCatalogError",
         message: "Characters matching luke are not available.",
       });
     }).pipe(Effect.provide(layer));
   });
 
-  it.effect("maps an invalid homeworld URL to a StarWarsError", () =>
+  it.effect("maps an invalid origin URL to a PeopleCatalogError", () =>
     expectResourceError(
       { ...personResponse, homeworld: "not-a-url" },
       () => 200,
-      "A homeworld for person 1 is not available.",
+      "The origin for person 1 is not available.",
     ),
   );
 
-  it.effect("maps a species URL without an id to a StarWarsError", () =>
+  it.effect("maps a species URL without an id to a PeopleCatalogError", () =>
     expectResourceError(
       { ...personResponse, species: ["https://swapi.dev/"] },
       () => 200,
-      "A species for person 1 is not available.",
+      "The species for person 1 is not available.",
     ),
   );
 
-  it.effect("maps a starship URL without an id to a StarWarsError", () =>
+  it.effect("maps a starship URL without an id to a PeopleCatalogError", () =>
     expectResourceError(
       { ...personResponse, starships: ["https://swapi.dev/"] },
       () => 200,
-      "A starship for person 1 is not available.",
+      "The starship for person 1 is not available.",
     ),
   );
 
-  it.effect("maps a vehicle URL without an id to a StarWarsError", () =>
+  it.effect("maps a vehicle URL without an id to a PeopleCatalogError", () =>
     expectResourceError(
       { ...personResponse, vehicles: ["https://swapi.dev/"] },
       () => 200,
-      "A vehicle for person 1 is not available.",
+      "The vehicle for person 1 is not available.",
     ),
   );
 
-  it.effect("maps an invalid film URL to a StarWarsError", () =>
+  it.effect("maps an invalid film URL to a PeopleCatalogError", () =>
     expectResourceError(
       { ...personResponse, films: ["not-a-url"] },
       () => 200,
-      "A film for person 1 is not available.",
+      "The film for person 1 is not available.",
     ),
   );
 
-  it.effect("maps a search result without an id to a StarWarsError", () => {
+  it.effect("maps a search result without an id to a PeopleCatalogError", () => {
     const client = HttpClient.make((request) =>
       Effect.succeed(
         HttpClientResponse.fromWeb(
@@ -383,12 +383,12 @@ describe("StarWarsClient", () => {
     );
 
     return Effect.gen(function*() {
-      const error = yield* StarWarsClient.use((service) =>
+      const error = yield* PeopleCatalog.use((service) =>
         service.searchPeople("luke"),
       ).pipe(Effect.flip);
 
       expect(error).toMatchObject({
-        _tag: "StarWarsError",
+        _tag: "PeopleCatalogError",
         message: "Character Luke Skywalker has no id.",
       });
     }).pipe(Effect.provide(layer));

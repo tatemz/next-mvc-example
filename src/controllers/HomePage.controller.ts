@@ -5,9 +5,9 @@ import {
   makeLoadedHomePageModel,
 } from "../components/HomePage/HomePage";
 import { makePersonViewModel } from "../components/PersonCard/PersonCard";
-import { CharacterId, type Person } from "../domain/StarWars.model";
+import { CharacterId, type Person } from "../domain/FilmUniverse.model";
 import { I18n } from "../i18n/I18n.service";
-import { StarWarsClient } from "../services/StarWarsClient";
+import { PeopleCatalog } from "../services/PeopleCatalog";
 
 const defaultCharacterId = Schema.decodeSync(CharacterId)("1");
 
@@ -27,7 +27,7 @@ export const presentLoadedHomePage = (i18n: I18n, person: Person) => {
 
 const loadHomePageForEffect = Effect.fn("loadHomePageFor")(
   function*(characterId: CharacterId) {
-    const client = yield* StarWarsClient;
+    const client = yield* PeopleCatalog;
     return yield* client.getPerson(characterId);
   },
 );
@@ -51,7 +51,7 @@ export const loadHomePageFor = (characterId: CharacterId) =>
 
 const loadHomePageEffect = Effect.fn("loadHomePage")(function*() {
   const characterIdConfig = Function.pipe(
-    Config.schema(CharacterId, "STAR_WARS_CHARACTER_ID"),
+    Config.schema(CharacterId, "CHARACTER_ID"),
     Config.withDefault(defaultCharacterId),
   );
   const characterId = yield* characterIdConfig;

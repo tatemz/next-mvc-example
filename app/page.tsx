@@ -1,5 +1,5 @@
-import { HomePage } from "../src/page-modules/HomePage/HomePage.page";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
-export default HomePage;
+export default function Page() {
+  redirect("/star-wars");
+}

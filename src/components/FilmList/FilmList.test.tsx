@@ -17,9 +17,9 @@ const i18n = makeEn();
 describe("makeFilmListViewModel", () => {
   it("labels a single film", () => {
     const model = makeFilmListViewModel(i18n, [
-      makeFilmListItemViewModel(i18n, {
+      makeFilmListItemViewModel({
         title: "A New Hope",
-        episodeId: 4,
+        order: 4,
       }),
     ]);
 
@@ -27,21 +27,21 @@ describe("makeFilmListViewModel", () => {
     expect(model.films).toEqual([
       {
         _tag: "FilmListItemViewModel",
-        episodeId: 4,
-        text: "A New Hope (Episode 4)",
+        order: 4,
+        text: "A New Hope",
       },
     ]);
   });
 
   it("pluralizes the count", () => {
     const model = makeFilmListViewModel(i18n, [
-      makeFilmListItemViewModel(i18n, {
+      makeFilmListItemViewModel({
         title: "A New Hope",
-        episodeId: 4,
+        order: 4,
       }),
-      makeFilmListItemViewModel(i18n, {
+      makeFilmListItemViewModel({
         title: "The Empire Strikes Back",
-        episodeId: 5,
+        order: 5,
       }),
     ]);
 
@@ -49,13 +49,13 @@ describe("makeFilmListViewModel", () => {
     expect(model.films).toEqual([
       {
         _tag: "FilmListItemViewModel",
-        episodeId: 4,
-        text: "A New Hope (Episode 4)",
+        order: 4,
+        text: "A New Hope",
       },
       {
         _tag: "FilmListItemViewModel",
-        episodeId: 5,
-        text: "The Empire Strikes Back (Episode 5)",
+        order: 5,
+        text: "The Empire Strikes Back",
       },
     ]);
   });
@@ -69,7 +69,7 @@ describe("FilmList", () => {
           countLabel: "1 film",
           films: [
             FilmListItemViewModel.make({
-              episodeId: 4,
+              order: 4,
               text: "A New Hope (Part 4)",
             }),
           ],

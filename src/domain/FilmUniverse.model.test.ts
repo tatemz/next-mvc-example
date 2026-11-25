@@ -1,7 +1,7 @@
 import { Schema } from "effect";
 import { it } from "@effect/vitest";
 import { describe, expect } from "vitest";
-import { CharacterId, Person } from "./StarWars.model";
+import { CharacterId, Person } from "./FilmUniverse.model";
 
 describe("CharacterId", () => {
   it("accepts a positive whole number written as a string", () => {
@@ -29,14 +29,14 @@ const person = {
   mass: "77",
   birthYear: "19BBY",
   gender: "male",
-  homeworld: {
-    _tag: "Planet",
+  origin: {
+    _tag: "Origin",
     name: "Tatooine",
     climate: "arid",
     terrain: "desert",
   },
   species: null,
-  films: [{ _tag: "Film", title: "A New Hope", episodeId: 4 }],
+  films: [{ _tag: "Film", title: "A New Hope", order: 4 }],
   transports: [],
 };
 

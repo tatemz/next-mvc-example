@@ -14,20 +14,20 @@ import {
   Film,
   Person,
   PersonSummary,
-  Planet,
+  Origin,
   Species,
   Transport,
-} from "../domain/StarWars.model";
+} from "../domain/FilmUniverse.model";
 import type {
-  FilmResponse,
-  PersonResponse,
-  PlanetResponse,
-  SpeciesResponse,
-  StarshipResponse,
-  VehicleResponse,
-  SwapiClient,
+  SwapiFilmResponse,
+  SwapiPersonResponse,
+  SwapiPlanetResponse,
+  SwapiSpeciesResponse,
+  SwapiStarshipResponse,
+  SwapiVehicleResponse,
+  SwapiApiClient,
 } from "./SwapiApi";
-import { StarWarsClient, StarWarsError } from "./StarWarsClient";
+import { PeopleCatalog, PeopleCatalogError } from "./PeopleCatalog";
 
 const idFromPath = Function.flow(
   Str.split("/"),
@@ -45,8 +45,8 @@ const idFromUrl = Function.flow(
 );
 
 const unavailable = (kind: string, personId: CharacterId) =>
-  new StarWarsError({
-    message: `A ${kind} for person ${personId} is not available.`,
+  new PeopleCatalogError({
+    message: `The ${kind} for person ${personId} is not available.`,
   });
 
 const resourceId = (kind: string, personId: CharacterId) => (url: string) =>
@@ -58,14 +58,14 @@ const resourceId = (kind: string, personId: CharacterId) => (url: string) =>
     }),
   );
 
-const toFilm = (film: FilmResponse) =>
+const toFilm = (film: SwapiFilmResponse) =>
   Film.make({
     title: film.title,
-    episodeId: film.episode_id,
+    order: film.episode_id,
   });
 
-export const make = (swapi: SwapiClient) => {
-  const getFilms = (urls: PersonResponse["films"], id: CharacterId) =>
+export const make = (swapi: SwapiApiClient) => {
+  const getFilms = (urls: SwapiPersonResponse["films"], id: CharacterId) =>
     Effect.forEach(
       urls,
       (url) =>
@@ -80,21 +80,21 @@ export const make = (swapi: SwapiClient) => {
       { concurrency: "unbounded" },
     );
 
-  const getHomeworld = (url: string, id: CharacterId) =>
+  const getOrigin = (url: string, id: CharacterId) =>
     Effect.gen(function*() {
-      const planetId = yield* resourceId("homeworld", id)(url);
+      const planetId = yield* resourceId("origin", id)(url);
       const planet = yield* Function.pipe(
         swapi.planets.get({ params: { id: planetId } }),
-        Effect.mapError(() => unavailable("homeworld", id)),
+        Effect.mapError(() => unavailable("origin", id)),
       );
-      return Planet.make({
+      return Origin.make({
         name: planet.name,
         climate: planet.climate,
         terrain: planet.terrain,
       });
     });
 
-  const getSpecies = (urls: PersonResponse["species"], id: CharacterId) =>
+  const getSpecies = (urls: SwapiPersonResponse["species"], id: CharacterId) =>
     Function.pipe(
       urls,
       Array.head,
@@ -137,7 +137,7 @@ export const make = (swapi: SwapiClient) => {
       });
     });
 
-  const getTransports = (person: PersonResponse, id: CharacterId) =>
+  const getTransports = (person: SwapiPersonResponse, id: CharacterId) =>
     Effect.all(
       [
         ...Array.map(person.starships, (url) =>
@@ -148,21 +148,21 @@ export const make = (swapi: SwapiClient) => {
       { concurrency: "unbounded" },
     );
 
-  const getPerson = Effect.fn("StarWarsClient.getPerson")(
+  const getPerson = Effect.fn("PeopleCatalog.getPerson")(
     function*(id: CharacterId) {
       const person = yield* Function.pipe(
         swapi.people.get({ params: { id } }),
         Effect.mapError(
           () =>
-            new StarWarsError({
+            new PeopleCatalogError({
               message: `Person ${id} is not available.`,
             }),
         ),
       );
 
-      const [homeworld, species, films, transports] = yield* Effect.all(
+      const [origin, species, films, transports] = yield* Effect.all(
         [
-          getHomeworld(person.homeworld, id),
+          getOrigin(person.homeworld, id),
           getSpecies(person.species, id),
           getFilms(person.films, id),
           getTransports(person, id),
@@ -177,7 +177,7 @@ export const make = (swapi: SwapiClient) => {
         mass: person.mass,
         birthYear: person.birth_year,
         gender: person.gender,
-        homeworld,
+        origin,
         species,
         films,
         transports,
@@ -191,7 +191,7 @@ export const make = (swapi: SwapiClient) => {
         swapi.people.search({ query: { search: query } }),
         Effect.mapError(
           () =>
-            new StarWarsError({
+            new PeopleCatalogError({
               message: `Characters matching ${query} are not available.`,
             }),
         ),
@@ -206,7 +206,7 @@ export const make = (swapi: SwapiClient) => {
               Option.match({
                 onNone: () =>
                   Effect.fail(
-                    new StarWarsError({
+                    new PeopleCatalogError({
                       message: `Character ${person.name} has no id.`,
                     }),
                   ),
@@ -222,10 +222,10 @@ export const make = (swapi: SwapiClient) => {
       );
     });
 
-  return StarWarsClient.of({ getPerson, searchPeople });
+  return PeopleCatalog.of({ getPerson, searchPeople });
 };
 
 export const makeStub = (
-  getPerson: StarWarsClient["getPerson"],
-  searchPeople: StarWarsClient["searchPeople"] = () => Effect.succeed([]),
-) => StarWarsClient.of({ getPerson, searchPeople });
+  getPerson: PeopleCatalog["getPerson"],
+  searchPeople: PeopleCatalog["searchPeople"] = () => Effect.succeed([]),
+) => PeopleCatalog.of({ getPerson, searchPeople });

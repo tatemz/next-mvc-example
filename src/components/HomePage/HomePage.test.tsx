@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { it } from "@effect/vitest";
 import { describe, expect } from "vitest";
 import { presentLoadedHomePage } from "../../controllers/HomePage.controller";
-import { luke } from "../../domain/StarWars.fixture";
+import { luke } from "../../domain/FilmUniverse.fixture";
 import { makeEn } from "../../i18n/I18n.service";
 import {
   HomePage,
@@ -39,7 +39,7 @@ describe("presentLoadedHomePage", () => {
         gender: "male",
         heightLabel: "Height",
         massLabel: "Mass",
-        homeworld: { _tag: "PlanetViewModel", name: "Tatooine" },
+        origin: { _tag: "OriginViewModel", name: "Tatooine" },
         species: null,
       },
       filmList: {
@@ -48,13 +48,13 @@ describe("presentLoadedHomePage", () => {
         films: [
           {
             _tag: "FilmListItemViewModel",
-            episodeId: 4,
-            text: "A New Hope (Episode 4)",
+            order: 4,
+            text: "A New Hope",
           },
           {
             _tag: "FilmListItemViewModel",
-            episodeId: 5,
-            text: "The Empire Strikes Back (Episode 5)",
+            order: 5,
+            text: "The Empire Strikes Back",
           },
         ],
       },
@@ -98,7 +98,7 @@ describe("HomePage", () => {
 
     expect(html).toContain("Luke Skywalker");
     expect(html.match(/<li/g)).toHaveLength(2);
-    expect(html).toContain("A New Hope (Episode 4)");
+    expect(html).toContain("A New Hope");
     expect(html).toContain("2 films");
     expect(html).toContain("Load character");
     expect(html).toContain("Build a dossier");
@@ -142,7 +142,12 @@ describe("HomePage", () => {
 describe("ConnectedHomePage", () => {
   it("renders the initial model", () => {
     const html = renderToStaticMarkup(
-      <ConnectedHomePage {...presentLoadedHomePage(makeEn(), luke)} />,
+      <ConnectedHomePage
+        model={presentLoadedHomePage(makeEn(), luke)}
+        searchAction={async () => {
+          throw new Error("not submitted");
+        }}
+      />,
     );
 
     expect(html).toContain("Luke Skywalker");

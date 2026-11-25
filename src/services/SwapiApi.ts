@@ -5,9 +5,9 @@ import {
   HttpApiEndpoint,
   HttpApiGroup,
 } from "effect/http-api";
-import { CharacterId } from "../domain/StarWars.model";
+import { CharacterId } from "../domain/FilmUniverse.model";
 
-export const PersonResponse = Schema.Struct({
+export const SwapiPersonResponse = Schema.Struct({
   name: Schema.NonEmptyString,
   height: Schema.String,
   mass: Schema.String,
@@ -20,96 +20,96 @@ export const PersonResponse = Schema.Struct({
   vehicles: Schema.Array(Schema.String),
   url: Schema.String,
 });
-export type PersonResponse = typeof PersonResponse.Type;
+export type SwapiPersonResponse = typeof SwapiPersonResponse.Type;
 
-export const PeopleResponse = Schema.Struct({
+export const SwapiPeopleResponse = Schema.Struct({
   count: Schema.Int,
-  results: Schema.Array(PersonResponse),
+  results: Schema.Array(SwapiPersonResponse),
 });
-export type PeopleResponse = typeof PeopleResponse.Type;
+export type SwapiPeopleResponse = typeof SwapiPeopleResponse.Type;
 
-export const FilmResponse = Schema.Struct({
+export const SwapiFilmResponse = Schema.Struct({
   title: Schema.NonEmptyString,
   episode_id: Schema.Int,
 });
-export type FilmResponse = typeof FilmResponse.Type;
+export type SwapiFilmResponse = typeof SwapiFilmResponse.Type;
 
-export const PlanetResponse = Schema.Struct({
+export const SwapiPlanetResponse = Schema.Struct({
   name: Schema.NonEmptyString,
   climate: Schema.String,
   terrain: Schema.String,
   url: Schema.String,
 });
-export type PlanetResponse = typeof PlanetResponse.Type;
+export type SwapiPlanetResponse = typeof SwapiPlanetResponse.Type;
 
-export const SpeciesResponse = Schema.Struct({
+export const SwapiSpeciesResponse = Schema.Struct({
   name: Schema.NonEmptyString,
   classification: Schema.String,
   language: Schema.String,
   url: Schema.String,
 });
-export type SpeciesResponse = typeof SpeciesResponse.Type;
+export type SwapiSpeciesResponse = typeof SwapiSpeciesResponse.Type;
 
-export const StarshipResponse = Schema.Struct({
+export const SwapiStarshipResponse = Schema.Struct({
   name: Schema.NonEmptyString,
   model: Schema.NonEmptyString,
   url: Schema.String,
 });
-export type StarshipResponse = typeof StarshipResponse.Type;
+export type SwapiStarshipResponse = typeof SwapiStarshipResponse.Type;
 
-export const VehicleResponse = Schema.Struct({
+export const SwapiVehicleResponse = Schema.Struct({
   name: Schema.NonEmptyString,
   model: Schema.NonEmptyString,
   url: Schema.String,
 });
-export type VehicleResponse = typeof VehicleResponse.Type;
+export type SwapiVehicleResponse = typeof SwapiVehicleResponse.Type;
 
 export class SwapiPeopleApi extends HttpApiGroup.make("people")
   .add(
     HttpApiEndpoint.get("get", "/people/:id/", {
       params: { id: CharacterId },
-      success: PersonResponse,
+      success: SwapiPersonResponse,
     }),
   )
   .add(
     HttpApiEndpoint.get("search", "/people/", {
       query: { search: Schema.optional(Schema.String) },
-      success: PeopleResponse,
+      success: SwapiPeopleResponse,
     }),
   ) {}
 
 export class SwapiFilmsApi extends HttpApiGroup.make("films").add(
   HttpApiEndpoint.get("get", "/films/:id/", {
     params: { id: Schema.Int },
-    success: FilmResponse,
+    success: SwapiFilmResponse,
   }),
 ) {}
 
 export class SwapiPlanetsApi extends HttpApiGroup.make("planets").add(
   HttpApiEndpoint.get("get", "/planets/:id/", {
     params: { id: Schema.Int },
-    success: PlanetResponse,
+    success: SwapiPlanetResponse,
   }),
 ) {}
 
 export class SwapiSpeciesApi extends HttpApiGroup.make("species").add(
   HttpApiEndpoint.get("get", "/species/:id/", {
     params: { id: Schema.Int },
-    success: SpeciesResponse,
+    success: SwapiSpeciesResponse,
   }),
 ) {}
 
 export class SwapiStarshipsApi extends HttpApiGroup.make("starships").add(
   HttpApiEndpoint.get("get", "/starships/:id/", {
     params: { id: Schema.Int },
-    success: StarshipResponse,
+    success: SwapiStarshipResponse,
   }),
 ) {}
 
 export class SwapiVehiclesApi extends HttpApiGroup.make("vehicles").add(
   HttpApiEndpoint.get("get", "/vehicles/:id/", {
     params: { id: Schema.Int },
-    success: VehicleResponse,
+    success: SwapiVehicleResponse,
   }),
 ) {}
 
@@ -121,4 +121,4 @@ export class SwapiApi extends HttpApi.make("SwapiApi")
   .add(SwapiStarshipsApi)
   .add(SwapiVehiclesApi) {}
 
-export type SwapiClient = HttpApiClient.ForApi<typeof SwapiApi>;
+export type SwapiApiClient = HttpApiClient.ForApi<typeof SwapiApi>;

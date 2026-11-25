@@ -3,11 +3,17 @@ import { it } from "@effect/vitest";
 import { describe, expect } from "vitest";
 import RootLayout from "./layout";
 import Page from "./page";
-import { HomePage } from "../src/page-modules/HomePage/HomePage.page";
+import GhibliPage from "./ghibli/page";
+import StarWarsPage from "./star-wars/page";
 
 describe("app", () => {
-  it("exposes the HomePage page as the route", () => {
-    expect(Page).toBe(HomePage);
+  it("redirects the root to the Star Wars page", () => {
+    expect(() => Page()).toThrow();
+  });
+
+  it("exposes each dataset page", () => {
+    expect(typeof StarWarsPage).toBe("function");
+    expect(typeof GhibliPage).toBe("function");
   });
 
   it("renders children inside the document", () => {

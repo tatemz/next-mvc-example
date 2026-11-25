@@ -19,9 +19,9 @@ const input = (
   mass: "77",
   birthYear: "19BBY",
   gender: "male",
-  homeworld: { name: "Tatooine", climate: "arid", terrain: "desert" },
+  origin: { name: "Tatooine", climate: "arid", terrain: "desert" },
   species: null,
-  films: [{ title: "A New Hope", episodeId: 4 }],
+  films: [{ title: "A New Hope", order: 4 }],
   transports: [],
   ...overrides,
 });
@@ -40,11 +40,11 @@ describe("makePersonViewModel", () => {
       massLabel: "Mass",
       birthYearLabel: "Born",
       genderLabel: "Gender",
-      homeworldLabel: "Homeworld",
+      originLabel: "Origin",
       speciesLabel: "Species",
       speciesUnknownLabel: "Unknown species",
-      homeworld: {
-        _tag: "PlanetViewModel",
+      origin: {
+        _tag: "OriginViewModel",
         name: "Tatooine",
         climate: "arid",
         terrain: "desert",
@@ -53,8 +53,8 @@ describe("makePersonViewModel", () => {
       films: [
         {
           _tag: "FilmListItemViewModel",
-          episodeId: 4,
-          text: "A New Hope (Episode 4)",
+          order: 4,
+          text: "A New Hope",
         },
       ],
       transports: [],
