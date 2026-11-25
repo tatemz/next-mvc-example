@@ -1,16 +1,3 @@
-const characterIdMessages = {
-  "characterId.label": "Character id",
-  "search.characterId.required": "Character id is required.",
-  "search.characterId.invalid":
-    "Character id must be a positive whole number.",
-} as const;
-
-const searchFormMessages = {
-  "search.submit": "Load character",
-  "search.retry": "Try again",
-  "search.pending": "Loading...",
-} as const;
-
 const personCardMessages = {
   "person.heightLabel": "Height",
   "person.massLabel": "Mass",
@@ -22,10 +9,6 @@ const personCardMessages = {
   "person.unknownSpecies": "Unknown species",
 } as const;
 
-const filmListMessages = {
-  "film.count": "{count, plural, one {# film} other {# films}}",
-} as const;
-
 const shellMessages = {
   "shell.brand": "Character Dossier",
   "shell.starWars": "Star Wars",
@@ -33,10 +16,12 @@ const shellMessages = {
 } as const;
 
 const homePageMessages = {
-  "homePage.loadError": "The character could not be loaded.",
-  "homePage.hero.title": "One dossier, two universes",
-  "homePage.hero.subtitle":
-    "The same controller and views, served from Star Wars or Studio Ghibli.",
+  "homePage.starWars.title": "Star Wars character dossier",
+  "homePage.starWars.subtitle":
+    "Build a dossier from the Star Wars universe.",
+  "homePage.ghibli.title": "Studio Ghibli character dossier",
+  "homePage.ghibli.subtitle":
+    "Build a dossier from the Studio Ghibli universe.",
   "homePage.hero.funnel": "Build a dossier",
 } as const;
 
@@ -95,10 +80,7 @@ const resultsMessages = {
 } as const;
 
 export const MESSAGES = {
-  ...characterIdMessages,
-  ...searchFormMessages,
   ...personCardMessages,
-  ...filmListMessages,
   ...shellMessages,
   ...homePageMessages,
   ...funnelMessages,

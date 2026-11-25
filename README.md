@@ -3,7 +3,7 @@
 One character-dossier UI, served from two film universes: Star Wars through
 SWAPI and Studio Ghibli through the Ghibli API. Controllers, view models, and
 views are shared. Each experience page module supplies its own runtime and
-daisyUI theme; the home and funnel modules also supply their server actions.
+daisyUI theme; the funnel modules also supply their server actions.
 
 | Star Wars (`/star-wars`, night) | Studio Ghibli (`/ghibli`, autumn) |
 | --- | --- |
@@ -53,6 +53,8 @@ export const StarWarsFunnelPage = makeNextPage(
   `<body>`.
 - The AppShell sets `data-theme`: `night` for Star Wars, `autumn` for Ghibli.
   The page views do not know which theme is active.
+- Each home page is a splash: a universe image with a visible credit and one
+  CTA into that universe's funnel. It loads no character data.
 
 ## What it shows
 
@@ -78,9 +80,9 @@ export const StarWarsFunnelPage = makeNextPage(
   choice, not a default.
 - The review link is relative (`results?...`); the results page's links use the
   selected universe's base path.
-- `searchPerson`, `searchGhibliPerson`, `submitFunnel`, and
-  `submitGhibliFunnel` are server actions. `HomePage.connected.tsx` and
-  `Funnel.connected.tsx` are the two `"use client"` boundaries.
+- `submitFunnel` and `submitGhibliFunnel` are the server actions.
+  `HomePage.connected.tsx`, `Funnel.connected.tsx`, and
+  `Results.connected.tsx` are the client event boundaries.
 
 ## UI events
 
@@ -99,9 +101,9 @@ metadata. `makeUiEventHandler` transforms an event into a flat
 
 `AppUiEventProvider` mounts the handler once at the root. The default browser
 sink dispatches a `ui-event` `CustomEvent`; replace the provider or sink to
-route the same events to analytics. The connected `HomePage`, `Funnel`, and
-`Results` components supply the CTA, input, validation, and page-load
-dispatches.
+route the same events to analytics. Connected `HomePage` supplies page-load
+and CTA events, `Funnel` supplies input, validation, and CTA events, and
+`Results` supplies page-load and CTA events.
 
 ## Storybook
 
@@ -113,8 +115,7 @@ The stories in `src/components/*.stories.tsx` render the three top-level page
 views. Every tagged view-model variant is represented, including pending,
 validation-error, known-species, film-poster, transport/no-transport, and both
 `night` and `autumn` shells. `.storybook/pageFixtures.ts` builds the models from
-the app fixtures and view-model factories; `HomePageOptics` derives the form
-value and validation-error variants.
+the app fixtures and view-model factories.
 
 `pnpm build-storybook` writes a static site to `storybook-static/`.
 
@@ -163,11 +164,11 @@ and step timeout.
 
 ## Integration tests
 
-Six features and 18 scenarios cover both universes:
+Six features and 16 scenarios cover both universes:
 
-- Star Wars home: configured character, another character, invalid id, unknown id.
-- Ghibli home: configured character, unknown id.
-- Navigation: root redirect and theme, header switch and theme.
+- Star Wars splash: the branded introduction and the funnel CTA.
+- Ghibli splash: the branded introduction and the funnel CTA.
+- Navigation: root and header splash themes.
 - Star Wars funnel: review, open dossier, no search matches.
 - Star Wars results: complete dossier, missing transport, unknown transport,
   explicit no transport.
@@ -207,7 +208,6 @@ the `prepare` script patches TypeScript and Oxlint after install. The
 - Chrome or Chromium for the browser scenarios
 - ffmpeg for `pnpm test:e2e:debug`
 
-Copy `.env.example` to `.env.local` to set the starting character and API
-hosts. The example values are `CHARACTER_ID=1`,
-`STAR_WARS_API_URL=https://swapi.dev/api`, and
+Copy `.env.example` to `.env.local` to point either adapter at another host.
+The example values are `STAR_WARS_API_URL=https://swapi.dev/api` and
 `GHIBLI_API_URL=https://ghibliapi.vercel.app`.

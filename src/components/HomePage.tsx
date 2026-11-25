@@ -1,128 +1,72 @@
-import { Prism } from "@fuiste/optics";
 import { Schema } from "effect";
 import type { I18n } from "../i18n/I18n.service";
 import { AppShell, AppShellViewModel } from "./AppShell";
-import { FilmList, FilmListViewModel } from "./FilmList";
-import { PersonCard, PersonViewModel } from "./PersonCard";
-import {
-  makeInitialSearchFormViewModel,
-  makeRetrySearchFormViewModel,
-  SearchForm,
-  SearchFormOptics,
-  SearchFormViewModel,
-} from "./SearchForm";
+
+export const HomeUniverse = Schema.Literals(["star-wars", "ghibli"]);
+export type HomeUniverse = typeof HomeUniverse.Type;
+
+export const HomeHeroImageViewModel = Schema.TaggedStruct(
+  "HomeHeroImageViewModel",
+  {
+    url: Schema.NonEmptyString,
+    alt: Schema.NonEmptyString,
+    credit: Schema.NonEmptyString,
+    creditHref: Schema.NonEmptyString,
+  },
+);
+export type HomeHeroImageViewModel = typeof HomeHeroImageViewModel.Type;
 
 const HomeHeroViewModel = Schema.TaggedStruct("HomeHeroViewModel", {
+  kicker: Schema.NonEmptyString,
   title: Schema.NonEmptyString,
   subtitle: Schema.NonEmptyString,
   funnelLabel: Schema.NonEmptyString,
   funnelHref: Schema.NonEmptyString,
+  image: HomeHeroImageViewModel,
 });
 type HomeHeroViewModel = typeof HomeHeroViewModel.Type;
 
-const makeHomeHeroViewModel = (i18n: I18n, funnelHref: string) =>
-  HomeHeroViewModel.make({
-    title: i18n._({ id: "homePage.hero.title" }),
-    subtitle: i18n._({ id: "homePage.hero.subtitle" }),
-    funnelLabel: i18n._({ id: "homePage.hero.funnel" }),
-    funnelHref,
-  });
-
-export const HomePageViewModel = Schema.TaggedUnion({
-  Loaded: {
-    shell: AppShellViewModel,
-    hero: HomeHeroViewModel,
-    form: SearchFormViewModel,
-    person: PersonViewModel,
-    filmList: FilmListViewModel,
-  },
-  Failed: {
-    shell: AppShellViewModel,
-    hero: HomeHeroViewModel,
-    form: SearchFormViewModel,
-    message: Schema.NonEmptyString,
-  },
+export const HomePageViewModel = Schema.TaggedStruct("HomePageViewModel", {
+  universe: HomeUniverse,
+  shell: AppShellViewModel,
+  hero: HomeHeroViewModel,
 });
 export type HomePageViewModel = typeof HomePageViewModel.Type;
 
-const FormPrism = Prism<HomePageViewModel>().of({
-  get: (model) => model.form,
-  set: (form) => (model) => ({ ...model, form }),
-});
+const copyFor = (i18n: I18n, universe: HomeUniverse) =>
+  universe === "star-wars"
+    ? {
+        kicker: i18n._({ id: "shell.starWars" }),
+        title: i18n._({ id: "homePage.starWars.title" }),
+        subtitle: i18n._({ id: "homePage.starWars.subtitle" }),
+      }
+    : {
+        kicker: i18n._({ id: "shell.ghibli" }),
+        title: i18n._({ id: "homePage.ghibli.title" }),
+        subtitle: i18n._({ id: "homePage.ghibli.subtitle" }),
+      };
 
-export const HomePageOptics = {
-  FormValue: Prism<HomePageViewModel>().compose(
-    FormPrism,
-    SearchFormOptics.Value,
-  ),
-  FormError: Prism<HomePageViewModel>().compose(
-    FormPrism,
-    SearchFormOptics.Error,
-  ),
-};
-
-export const LoadedHomePageInput = Schema.Struct({
-  formValue: Schema.String,
-  funnelHref: Schema.NonEmptyString,
-  shell: AppShellViewModel,
-  person: PersonViewModel,
-  filmList: FilmListViewModel,
-});
-export type LoadedHomePageInput = typeof LoadedHomePageInput.Type;
-
-export const FailedHomePageInput = Schema.Struct({
-  formValue: Schema.String,
-  funnelHref: Schema.NonEmptyString,
-  shell: AppShellViewModel,
-});
-export type FailedHomePageInput = typeof FailedHomePageInput.Type;
-
-export const makeLoadedHomePageModel = (
+export const makeHomePageViewModel = (
   i18n: I18n,
-  input: LoadedHomePageInput,
+  universe: HomeUniverse,
+  funnelHref: string,
+  shell: AppShellViewModel,
+  image: HomeHeroImageViewModel,
 ) =>
-  HomePageViewModel.cases.Loaded.make({
-    shell: input.shell,
-    hero: makeHomeHeroViewModel(i18n, input.funnelHref),
-    form: makeInitialSearchFormViewModel(i18n, input.formValue),
-    person: input.person,
-    filmList: input.filmList,
+  HomePageViewModel.make({
+    universe,
+    shell,
+    hero: HomeHeroViewModel.make({
+      ...copyFor(i18n, universe),
+      funnelLabel: i18n._({ id: "homePage.hero.funnel" }),
+      funnelHref,
+      image,
+    }),
   });
 
-export const makeFailedHomePageModel = (
-  i18n: I18n,
-  input: FailedHomePageInput,
-) =>
-  HomePageViewModel.cases.Failed.make({
-    shell: input.shell,
-    hero: makeHomeHeroViewModel(i18n, input.funnelHref),
-    form: makeRetrySearchFormViewModel(i18n, input.formValue),
-    message: i18n._({ id: "homePage.loadError" }),
-  });
-
-type HomePageExtras = {
-  readonly dispatch: (formData: FormData) => void;
-  readonly isPending: boolean;
+export type HomePageProps = HomePageViewModel & {
   readonly onCtaClick: () => void;
-  readonly onCharacterIdChange: (value: string) => void;
-  readonly onSubmit: () => void;
 };
-
-export type HomePageProps = HomePageViewModel & HomePageExtras;
-
-type LoadedHomePageViewModel = Extract<
-  HomePageViewModel,
-  { readonly _tag: "Loaded" }
->;
-
-type FailedHomePageViewModel = Extract<
-  HomePageViewModel,
-  { readonly _tag: "Failed" }
->;
-
-type LoadedHomePageProps = LoadedHomePageViewModel & HomePageExtras;
-
-type FailedHomePageProps = FailedHomePageViewModel & HomePageExtras;
 
 const HomeHero = ({
   hero,
@@ -131,99 +75,48 @@ const HomeHero = ({
   readonly hero: HomeHeroViewModel;
   readonly onCtaClick: () => void;
 }) => (
-  <section className="hero rounded-box bg-base-100 shadow-xl">
-    <div className="hero-content py-10 text-center">
-      <div className="max-w-2xl">
-        <h1 className="text-4xl font-bold">{hero.title}</h1>
-        <p className="py-4 text-base-content/70">{hero.subtitle}</p>
-        <a href={hero.funnelHref} onClick={onCtaClick} className="btn btn-primary">
+  <section className="hero min-h-[70vh] rounded-box bg-base-100 shadow-xl">
+    <div className="hero-content grid w-full max-w-6xl gap-10 py-12 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="max-w-xl">
+        <span className="badge badge-secondary badge-lg mb-4">
+          {hero.kicker}
+        </span>
+        <h1 className="text-4xl font-black sm:text-5xl">{hero.title}</h1>
+        <p className="py-5 text-base-content/70">{hero.subtitle}</p>
+        <a
+          href={hero.funnelHref}
+          onClick={onCtaClick}
+          className="btn btn-primary btn-lg"
+        >
           {hero.funnelLabel}
         </a>
       </div>
+      <figure className="w-full">
+        <img
+          src={hero.image.url}
+          alt={hero.image.alt}
+          className="h-[420px] w-full rounded-box object-cover shadow-2xl"
+        />
+        <figcaption className="mt-3 text-xs text-base-content/60">
+          <a
+            href={hero.image.creditHref}
+            target="_blank"
+            rel="noreferrer"
+            className="link link-hover"
+          >
+            {hero.image.credit}
+          </a>
+        </figcaption>
+      </figure>
     </div>
   </section>
 );
 
-const LoadedHomePage = ({
-  dispatch,
-  isPending,
-  onCtaClick,
-  onCharacterIdChange,
-  onSubmit,
-  ...model
-}: LoadedHomePageProps) => (
-  <div className="flex flex-col gap-6">
-    <HomeHero hero={model.hero} onCtaClick={onCtaClick} />
-    <div className="grid gap-6 lg:grid-cols-2">
-      <PersonCard {...model.person} />
-      <div className="flex flex-col gap-6">
-        <FilmList {...model.filmList} />
-        <SearchForm
-          {...model.form}
-          dispatch={dispatch}
-          isPending={isPending}
-          onValueChange={onCharacterIdChange}
-          onSubmit={onSubmit}
-        />
-      </div>
-    </div>
-  </div>
-);
-
-const FailedHomePage = ({
-  dispatch,
-  isPending,
-  onCtaClick,
-  onCharacterIdChange,
-  onSubmit,
-  ...model
-}: FailedHomePageProps) => (
-  <div className="flex flex-col gap-6">
-    <HomeHero hero={model.hero} onCtaClick={onCtaClick} />
-    <div role="alert" className="alert alert-error">
-      {model.message}
-    </div>
-    <SearchForm
-      {...model.form}
-      dispatch={dispatch}
-      isPending={isPending}
-      onValueChange={onCharacterIdChange}
-      onSubmit={onSubmit}
-    />
-  </div>
-);
-
 export const HomePage = ({
-  dispatch,
-  isPending,
   onCtaClick,
-  onCharacterIdChange,
-  onSubmit,
   ...model
-}: HomePageProps) =>
-  HomePageViewModel.match(model, {
-    Loaded: (loaded) => (
-      <AppShell {...loaded.shell}>
-        <LoadedHomePage
-          {...loaded}
-          dispatch={dispatch}
-          isPending={isPending}
-          onCtaClick={onCtaClick}
-          onCharacterIdChange={onCharacterIdChange}
-          onSubmit={onSubmit}
-        />
-      </AppShell>
-    ),
-    Failed: (failed) => (
-      <AppShell {...failed.shell}>
-        <FailedHomePage
-          {...failed}
-          dispatch={dispatch}
-          isPending={isPending}
-          onCtaClick={onCtaClick}
-          onCharacterIdChange={onCharacterIdChange}
-          onSubmit={onSubmit}
-        />
-      </AppShell>
-    ),
-  });
+}: HomePageProps) => (
+  <AppShell {...model.shell}>
+    <HomeHero hero={model.hero} onCtaClick={onCtaClick} />
+  </AppShell>
+);

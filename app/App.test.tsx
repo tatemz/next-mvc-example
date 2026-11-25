@@ -15,6 +15,7 @@ vi.mock("../src/server/Runtime", async () => {
   );
 
   return {
+    shellRuntime: ManagedRuntime.make(i18nLayer),
     swapiRuntime: catalogRuntime,
     ghibliRuntime: catalogRuntime,
   };

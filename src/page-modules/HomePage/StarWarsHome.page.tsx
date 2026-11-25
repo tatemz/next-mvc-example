@@ -1,17 +1,19 @@
 import { Effect } from "effect";
-import { searchPerson } from "../../actions/SearchPerson.serverAction";
 import { ConnectedHomePage } from "../../components/HomePage.connected";
 import { loadHomePage } from "../../controllers/HomePage.controller";
 import { makeNextPage } from "../../platform/NextPage";
-import { swapiRuntime } from "../../server/Runtime";
+import { shellRuntime } from "../../server/Runtime";
+import { starWarsSplashImage } from "./SplashImages";
 
 export const StarWarsHomePage = makeNextPage(
-  swapiRuntime,
-  Effect.map(loadHomePage("/star-wars/funnel", "night"), (model) => (
-    <ConnectedHomePage
-      model={model}
-      searchAction={searchPerson}
-      universe="star-wars"
-    />
-  )),
+  shellRuntime,
+  Effect.map(
+    loadHomePage(
+      "star-wars",
+      "/star-wars/funnel",
+      "night",
+      starWarsSplashImage,
+    ),
+    (model) => <ConnectedHomePage model={model} />,
+  ),
 );

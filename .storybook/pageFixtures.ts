@@ -16,9 +16,10 @@ import {
 } from "../src/components/Funnel";
 import type { FilmListItemViewModel } from "../src/components/FilmListItem";
 import {
-  HomePageOptics,
-  makeFailedHomePageModel,
+  makeHomePageViewModel,
+  type HomeHeroImageViewModel,
   type HomePageViewModel,
+  type HomeUniverse,
 } from "../src/components/HomePage";
 import {
   makePersonViewModel,
@@ -30,7 +31,7 @@ import {
   makeResultsReadyViewModel,
   type ResultsViewModel,
 } from "../src/components/Results";
-import { presentLoadedHomePage } from "../src/controllers/HomePage.controller";
+import { ghibliSplashImage, starWarsSplashImage } from "../src/page-modules/HomePage/SplashImages";
 import { luke, makeCharacterId } from "../src/domain/FilmUniverse.fixture";
 import type { Person } from "../src/domain/FilmUniverse.model";
 import { makeEn } from "../src/i18n/I18n.service";
@@ -121,6 +122,8 @@ const humanLuke: Person = {
 };
 
 export type PageDataset = {
+  readonly universe: HomeUniverse;
+  readonly image: HomeHeroImageViewModel;
   readonly shell: AppShellViewModel;
   readonly person: Person;
   readonly view: PersonViewModel;
@@ -133,15 +136,19 @@ export type PageDataset = {
 
 const datasetFor = (
   person: Person,
+  universe: HomeUniverse,
   theme: ExperienceTheme,
   basePath: string,
   query: string,
+  image: HomeHeroImageViewModel,
 ): PageDataset => {
   const view = makePersonViewModel(i18n, person);
   const film = Option.getOrThrow(Array.head(view.films));
   const transport = Option.getOrNull(Array.head(view.transports));
 
   return {
+    universe,
+    image,
     shell: makeAppShellViewModel(i18n, theme),
     person,
     view,
@@ -153,46 +160,46 @@ const datasetFor = (
   };
 };
 
-export const starWars = datasetFor(luke, "night", "/star-wars", "Luke");
-export const starWarsHuman = datasetFor(
-  humanLuke,
+export const starWars = datasetFor(
+  luke,
+  "star-wars",
   "night",
   "/star-wars",
   "Luke",
+  starWarsSplashImage,
 );
-export const ghibli = datasetFor(haku, "autumn", "/ghibli", "Haku");
+export const starWarsHuman = datasetFor(
+  humanLuke,
+  "star-wars",
+  "night",
+  "/star-wars",
+  "Luke",
+  starWarsSplashImage,
+);
+export const ghibli = datasetFor(
+  haku,
+  "ghibli",
+  "autumn",
+  "/ghibli",
+  "Haku",
+  ghibliSplashImage,
+);
 export const ghibliPilot = datasetFor(
   porco,
+  "ghibli",
   "autumn",
   "/ghibli",
   "Porco",
+  ghibliSplashImage,
 );
 
-export const homeLoaded = (dataset: PageDataset): HomePageViewModel =>
-  presentLoadedHomePage(
+export const homeSplash = (dataset: PageDataset): HomePageViewModel =>
+  makeHomePageViewModel(
     i18n,
-    dataset.person,
+    dataset.universe,
     dataset.funnelHref,
     dataset.shell,
-  );
-
-export const homeLoadedWithError = (
-  dataset: PageDataset,
-): HomePageViewModel =>
-  HomePageOptics.FormError.set(
-    i18n._({ id: "search.characterId.invalid" }),
-  )(homeLoaded(dataset));
-
-export const homeFailed = (
-  dataset: PageDataset,
-  formValue: string,
-): HomePageViewModel =>
-  HomePageOptics.FormValue.set(formValue)(
-    makeFailedHomePageModel(i18n, {
-      formValue: "",
-      funnelHref: dataset.funnelHref,
-      shell: dataset.shell,
-    }),
+    dataset.image,
   );
 
 export const funnelSearch = (dataset: PageDataset): FunnelViewModel =>

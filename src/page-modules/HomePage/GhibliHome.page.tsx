@@ -1,17 +1,19 @@
 import { Effect } from "effect";
-import { searchGhibliPerson } from "../../actions/GhibliSearchPerson.serverAction";
 import { ConnectedHomePage } from "../../components/HomePage.connected";
 import { loadHomePage } from "../../controllers/HomePage.controller";
 import { makeNextPage } from "../../platform/NextPage";
-import { ghibliRuntime } from "../../server/Runtime";
+import { shellRuntime } from "../../server/Runtime";
+import { ghibliSplashImage } from "./SplashImages";
 
 export const GhibliHomePage = makeNextPage(
-  ghibliRuntime,
-  Effect.map(loadHomePage("/ghibli/funnel", "autumn"), (model) => (
-    <ConnectedHomePage
-      model={model}
-      searchAction={searchGhibliPerson}
-      universe="ghibli"
-    />
-  )),
+  shellRuntime,
+  Effect.map(
+    loadHomePage(
+      "ghibli",
+      "/ghibli/funnel",
+      "autumn",
+      ghibliSplashImage,
+    ),
+    (model) => <ConnectedHomePage model={model} />,
+  ),
 );

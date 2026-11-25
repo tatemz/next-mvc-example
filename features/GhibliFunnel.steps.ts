@@ -95,7 +95,9 @@ const see = (expected: string) =>
           `expected "${expected}", got "${text}"`,
         );
       }
-      yield* page.getByText(text).pipe(Expect.toBeVisible);
+      yield* page.getByText(text, { exact: true }).pipe(
+        Expect.toBeVisible,
+      );
       return page;
     }),
   );
@@ -120,7 +122,7 @@ const theThemeIs = (expected: string) =>
 
 const environment = (scenario: string, index: number) =>
   Layer.merge(
-    scenarioApp({ CHARACTER_ID: "1" }),
+    scenarioApp({}),
     scenarioPage({ feature: "ghibli-funnel", index, scenario }),
   );
 

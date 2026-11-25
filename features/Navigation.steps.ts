@@ -56,7 +56,9 @@ const see = (expected: string) =>
           `expected "${expected}", got "${text}"`,
         );
       }
-      yield* page.getByText(text).pipe(Expect.toBeVisible);
+      yield* page.getByText(text, { exact: true }).pipe(
+        Expect.toBeVisible,
+      );
       return page;
     }),
   );
@@ -81,7 +83,7 @@ const theThemeIs = (expected: string) =>
 
 const environment = (scenario: string, index: number) =>
   Layer.merge(
-    scenarioApp({ CHARACTER_ID: "1" }),
+    scenarioApp({}),
     scenarioPage({ feature: "navigation", index, scenario }),
   );
 
@@ -90,7 +92,8 @@ const rootOpensStarWars = Bdd.scenario(
 ).pipe(
   givenTheAppIsRunning,
   openTheAppRoot,
-  see("Luke Skywalker"),
+  see("Star Wars character dossier"),
+  see("Build a dossier"),
   theThemeIs("night"),
   Bdd.provide(environment("root-opens-star-wars", 0)),
 );
@@ -100,7 +103,8 @@ const headerSwitchesToGhibli = Bdd.scenario(
 ).pipe(
   openStarWarsHome,
   chooseUniverse,
-  see("Haku"),
+  see("Studio Ghibli character dossier"),
+  see("Build a dossier"),
   theThemeIs("autumn"),
   Bdd.provide(environment("header-switches-to-ghibli", 1)),
 );

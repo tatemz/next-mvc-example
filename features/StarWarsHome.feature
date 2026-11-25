@@ -1,30 +1,14 @@
-Feature: Looking up a Star Wars character
+Feature: The Star Wars splash page
 
-  Background:
-    Given the Star Wars home is open
-
-  Scenario: The configured character loads
-    When I load the character
-    Then I see "Luke Skywalker"
-    And I see "A New Hope"
-    And I see 4 films
+  Scenario: The splash introduces the Star Wars experience
+    Given the app is running
+    When I open the Star Wars home
+    Then I see "Star Wars character dossier"
+    And I see "Build a dossier"
     And the page uses the "night" theme
 
-  Scenario: Loading another character
-    When I enter "3" as the character id
-    And I load the character
-    Then I see "R2-D2"
-    And I see 6 films
-    And the character id field contains "3"
-
-  Scenario: Rejecting a non-numeric id
-    When I enter "abc" as the character id
-    And I load the character
-    Then I see "Character id must be a positive whole number."
-    And the character id field contains "abc"
-
-  Scenario: Reporting an unknown character
-    When I enter "9999" as the character id
-    And I load the character
-    Then I see "The character could not be loaded."
-    And I see "Try again"
+  Scenario: The splash CTA opens the funnel
+    Given the Star Wars home is open
+    When I open the funnel from the splash
+    Then I see "Find a character"
+    And the page uses the "night" theme

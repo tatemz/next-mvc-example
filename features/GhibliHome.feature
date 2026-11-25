@@ -1,18 +1,14 @@
-Feature: Looking up a Ghibli character
+Feature: The Studio Ghibli splash page
 
-  Background:
-    Given the Ghibli home is open
-
-  Scenario: The configured character loads
-    When I load the character
-    Then I see "Haku"
-    And I see "Spirited Away"
-    And I see "Dragon"
-    And I see 1 film
+  Scenario: The splash introduces the Ghibli experience
+    Given the app is running
+    When I open the Ghibli home
+    Then I see "Studio Ghibli character dossier"
+    And I see "Build a dossier"
     And the page uses the "autumn" theme
 
-  Scenario: Reporting an unknown character
-    When I enter "999" as the character id
-    And I load the character
-    Then I see "The character could not be loaded."
-    And I see "Try again"
+  Scenario: The splash CTA opens the funnel
+    Given the Ghibli home is open
+    When I open the funnel from the splash
+    Then I see "Find a character"
+    And the page uses the "autumn" theme
