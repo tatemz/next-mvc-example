@@ -13,3 +13,8 @@ Feature: Building a Ghibli dossier
     And I see "Haku"
     And I see "Spirited Away"
     And I see "No transport selected"
+    And the page uses the "autumn" theme
+
+  Scenario: Searching with no matches
+    When I search the funnel for "NoSuchCharacter"
+    Then I see "No characters matched that name."

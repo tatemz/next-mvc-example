@@ -2,7 +2,18 @@
   "name": "next-mvc-example",
   "version": "0.1.0",
   "packageManager": "pnpm@10.28.2",
-  "description": "Next.js App Router example with Effect v4: one dossier UI served from SWAPI or the Ghibli API through a shared PeopleCatalog port.",
+  "description": "One character-dossier UI, two universes: Next.js App Router and Effect v4 with SWAPI and Studio Ghibli.",
+  "keywords": [
+    "nextjs",
+    "effect",
+    "typescript",
+    "tailwindcss",
+    "daisyui",
+    "swapi",
+    "ghibli",
+    "mvc",
+    "bdd"
+  ],
   "private": true,
   "engines": {
     "node": ">=22.12"
@@ -16,9 +27,10 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "pretest:e2e": "next build",
-    "test:e2e": "NODE_OPTIONS=\"--import tsx\" effect-bdd --features \"features/**/*.feature\" --steps \"features/**/*.steps.ts\" --reporter text --parallel=2 --strict --step-timeout \"60 seconds\"",
+    "test:e2e": "pnpm test:e2e:run --parallel=2",
     "pretest:e2e:debug": "next build",
-    "test:e2e:debug": "E2E_DEBUG=1 NODE_OPTIONS=\"--import tsx\" effect-bdd --features \"features/**/*.feature\" --steps \"features/**/*.steps.ts\" --reporter text --parallel=1 --verbose --strict --step-timeout \"60 seconds\""
+    "test:e2e:debug": "E2E_DEBUG=1 pnpm test:e2e:run --parallel=1 --verbose",
+    "test:e2e:run": "NODE_OPTIONS=\"--import tsx\" effect-bdd --features \"features/**/*.feature\" --steps \"features/**/*.steps.ts\" --reporter text --strict --step-timeout \"60 seconds\""
   },
   "dependencies": {
     "@formatjs/intl": "^3.1.8",
@@ -44,5 +56,12 @@
     "tsx": "4.23.13",
     "typescript": "7.0.2",
     "vitest": "5.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tatemz/next-mvc-example.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tatemz/next-mvc-example/issues"
   }
 }

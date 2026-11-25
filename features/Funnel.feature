@@ -1,7 +1,7 @@
-Feature: Building a character dossier
+Feature: Building a Star Wars dossier
 
   Background:
-    Given the funnel is open
+    Given the Star Wars funnel is open
 
   Scenario: Reviewing the dossier
     When I search the funnel for "Luke"
@@ -10,6 +10,7 @@ Feature: Building a character dossier
     And I choose the transport "X-wing Starship"
     Then I see "Ready for the dossier"
     And I see "X-wing (Starship)"
+    And the page uses the "night" theme
 
   Scenario: Opening the dossier
     When I search the funnel for "Luke"
@@ -20,3 +21,8 @@ Feature: Building a character dossier
     Then I see "Your dossier"
     And I see "Tatooine"
     And I see "X-wing (Starship)"
+
+  Scenario: Searching with no matches
+    When I search the funnel for "NoSuchCharacter"
+    Then I see "No characters matched that name."
+    And I see "Find a character"
