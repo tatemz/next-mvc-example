@@ -74,13 +74,9 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - id: chrome
-        uses: browser-actions/setup-chrome@v2
-        with:
-          chrome-version: stable
       - run: pnpm test:e2e
         env:
-          CHROMIUM_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          CHROMIUM_PATH: /usr/bin/google-chrome
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
