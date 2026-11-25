@@ -126,7 +126,7 @@ describe("Funnel", () => {
     );
 
     expect(model.resultsHref).toBe(
-      "/results?character=1&film=4&transport=starship-12",
+      "results?character=1&film=4&transport=starship-12",
     );
 
     const html = render(model);
@@ -161,7 +161,10 @@ describe("Funnel", () => {
 
   it("renders the connected funnel with its initial model", () => {
     const html = renderToStaticMarkup(
-      <ConnectedFunnel {...makeFunnelSearchViewModel(i18n)} />,
+      <ConnectedFunnel
+        model={makeFunnelSearchViewModel(i18n)}
+        submitAction={async (previous) => previous}
+      />,
     );
 
     expect(html).toContain("Find a character");

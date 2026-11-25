@@ -54,8 +54,8 @@ export const makeResultsReadyViewModel = (
     noneLabel: i18n._({ id: "results.ready.noneTransport" }),
     startOverLabel: i18n._({ id: "results.ready.startOver" }),
     homeLabel: i18n._({ id: "results.ready.home" }),
-    startOverHref: "/funnel",
-    homeHref: "/",
+    startOverHref: "/star-wars/funnel",
+    homeHref: "/star-wars",
   });
 
 export const makeResultsMissingViewModel = (i18n: I18n) =>
@@ -63,7 +63,7 @@ export const makeResultsMissingViewModel = (i18n: I18n) =>
     heading: i18n._({ id: "results.missing.heading" }),
     message: i18n._({ id: "results.missing.message" }),
     startOverLabel: i18n._({ id: "results.missing.startOver" }),
-    startOverHref: "/funnel",
+    startOverHref: "/star-wars/funnel",
   });
 
 const ReadyResults = ({ model }: { readonly model: ResultsReadyViewModel }) => (

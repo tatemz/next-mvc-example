@@ -1,8 +1,12 @@
 {
   "name": "next-mvc-example",
   "version": "0.1.0",
-  "description": "Next.js App Router MVC example with Effect v4, a Star Wars API client, and a server-action form.",
+  "packageManager": "pnpm@10.28.2",
+  "description": "Next.js App Router example with Effect v4: one dossier UI served from SWAPI or the Ghibli API through a shared PeopleCatalog port.",
   "private": true,
+  "engines": {
+    "node": ">=22.12"
+  },
   "type": "module",
   "scripts": {
     "dev": "next dev",

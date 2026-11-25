@@ -15,7 +15,7 @@ export const givenTheFunnelIsOpen = Bdd.given`the funnel is open`(
   Effect.fn("givenTheFunnelIsOpen")(function*() {
     const app = yield* ScenarioApp;
     const page = yield* ScenarioPage;
-    yield* page.goto(`${app.url}/funnel`, { waitUntil: "load" });
+    yield* page.goto(`${app.url}/star-wars/funnel`, { waitUntil: "load" });
     yield* interactionPause;
     return page;
   }),

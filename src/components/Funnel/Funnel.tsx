@@ -70,6 +70,7 @@ export const FunnelReviewViewModel = Schema.TaggedStruct("Review", {
   noneLabel: Schema.NonEmptyString,
   openLabel: Schema.NonEmptyString,
   startOverLabel: Schema.NonEmptyString,
+  startOverHref: Schema.NonEmptyString,
   resultsHref: Schema.NonEmptyString,
 });
 export type FunnelReviewViewModel = typeof FunnelReviewViewModel.Type;
@@ -180,7 +181,8 @@ export const makeFunnelReviewViewModel = (
     noneLabel: i18n._({ id: "funnel.transport.none" }),
     openLabel: i18n._({ id: "funnel.review.open" }),
     startOverLabel: i18n._({ id: "funnel.review.startOver" }),
-    resultsHref: `/results?${params.toString()}`,
+    startOverHref: "funnel",
+    resultsHref: `results?${params.toString()}`,
   });
 };
 
@@ -194,7 +196,7 @@ export const makeFunnelFailedViewModel = (
     subtitle: i18n._({ id: "funnel.failed.message" }),
     message,
     startOverLabel: i18n._({ id: "funnel.failed.startOver" }),
-    startOverHref: "/funnel",
+    startOverHref: "funnel",
   });
 
 type FunnelExtras = {
@@ -401,7 +403,7 @@ const ReviewStep = ({ step }: { readonly step: FunnelReviewViewModel }) => (
       <a href={step.resultsHref} className="btn btn-primary">
         {step.openLabel}
       </a>
-      <a href="/funnel" className="btn btn-ghost">
+      <a href={step.startOverHref} className="btn btn-ghost">
         {step.startOverLabel}
       </a>
     </div>

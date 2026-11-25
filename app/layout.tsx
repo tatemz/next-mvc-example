@@ -22,9 +22,6 @@ export default function RootLayout({
             <a href="/ghibli" className="btn btn-ghost">
               Ghibli
             </a>
-            <a href="/funnel" className="btn btn-ghost">
-              Build a dossier
-            </a>
           </div>
         </header>
         <main className="mx-auto w-full max-w-5xl p-4">{children}</main>

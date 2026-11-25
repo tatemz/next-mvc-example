@@ -1,10 +1,22 @@
 "use client";
 
 import { useActionState } from "react";
-import { submitFunnel } from "../../actions/Funnel.serverAction";
 import { Funnel, type FunnelViewModel } from "./Funnel";
 
-export const ConnectedFunnel = (model: FunnelViewModel) => {
-  const [state, dispatch, isPending] = useActionState(submitFunnel, model);
+export type FunnelAction = (
+  previous: FunnelViewModel,
+  formData: FormData,
+) => Promise<FunnelViewModel>;
+
+export type ConnectedFunnelProps = {
+  readonly model: FunnelViewModel;
+  readonly submitAction: FunnelAction;
+};
+
+export const ConnectedFunnel = ({
+  model,
+  submitAction,
+}: ConnectedFunnelProps) => {
+  const [state, dispatch, isPending] = useActionState(submitAction, model);
   return <Funnel {...state} dispatch={dispatch} isPending={isPending} />;
 };

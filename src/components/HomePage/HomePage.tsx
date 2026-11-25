@@ -24,7 +24,22 @@ export const makeHomeHeroViewModel = (i18n: I18n) =>
     title: i18n._({ id: "homePage.hero.title" }),
     subtitle: i18n._({ id: "homePage.hero.subtitle" }),
     funnelLabel: i18n._({ id: "homePage.hero.funnel" }),
-    funnelHref: "/funnel",
+    funnelHref: "/star-wars/funnel",
+  });
+
+export const setHeroFunnelHref = (
+  model: HomePageViewModel,
+  funnelHref: string,
+): HomePageViewModel =>
+  HomePageViewModel.match(model, {
+    Loaded: (loaded) => ({
+      ...loaded,
+      hero: { ...loaded.hero, funnelHref },
+    }),
+    Failed: (failed) => ({
+      ...failed,
+      hero: { ...failed.hero, funnelHref },
+    }),
   });
 
 export const HomePageViewModel = Schema.TaggedUnion({

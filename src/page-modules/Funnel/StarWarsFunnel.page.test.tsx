@@ -18,17 +18,19 @@ vi.mock("../../server/Runtime", async () => {
   return { swapiRuntime: runtime };
 });
 
-import { FunnelPage } from "./Funnel.page";
+import { ConnectedFunnel } from "../../components/Funnel/Funnel.connected";
+import { StarWarsFunnelPage } from "./StarWarsFunnel.page";
 
-describe("Funnel page", () => {
-  it.effect("loads the initial funnel model through the runtime", () =>
+describe("StarWars funnel page", () => {
+  it.effect("loads the initial funnel through the SWAPI runtime", () =>
     Effect.gen(function*() {
-      const element = yield* Effect.promise(() => FunnelPage());
+      const element = yield* Effect.promise(() => StarWarsFunnelPage());
 
+      expect(element.type).toBe(ConnectedFunnel);
       expect(element.props).toMatchObject({
-        _tag: "Search",
-        stepLabel: "Step 1 of 4",
+        model: { _tag: "Search", stepLabel: "Step 1 of 4" },
       });
+      expect(typeof element.props.submitAction).toBe("function");
     }),
   );
 });

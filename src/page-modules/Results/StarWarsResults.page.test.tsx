@@ -20,13 +20,13 @@ vi.mock("../../server/Runtime", async () => {
 });
 
 import { Results } from "../../components/Results/Results";
-import { ResultsPage } from "./Results.page";
+import { StarWarsResultsPage } from "./StarWarsResults.page";
 
 describe("Results page", () => {
   it.effect("loads typed search params through the runtime", () =>
     Effect.gen(function*() {
       const element = yield* Effect.promise(() =>
-        ResultsPage({
+        StarWarsResultsPage({
           searchParams: Promise.resolve({
             character: "1",
             film: "4",
@@ -42,6 +42,8 @@ describe("Results page", () => {
         _tag: "Ready",
         person: { name: "Luke Skywalker" },
         transport: { key: "starship-12" },
+        startOverHref: "/star-wars/funnel",
+        homeHref: "/star-wars",
       });
     }),
   );
@@ -49,7 +51,7 @@ describe("Results page", () => {
   it.effect("takes the first value of array search params", () =>
     Effect.gen(function*() {
       const element = yield* Effect.promise(() =>
-        ResultsPage({
+        StarWarsResultsPage({
           searchParams: Promise.resolve({
             character: ["1"],
             film: ["4"],
@@ -62,6 +64,8 @@ describe("Results page", () => {
       expect(element.props).toMatchObject({
         _tag: "Ready",
         transport: null,
+        startOverHref: "/star-wars/funnel",
+        homeHref: "/star-wars",
       });
     }),
   );
@@ -69,14 +73,17 @@ describe("Results page", () => {
   it.effect("renders a missing dossier when params do not decode", () =>
     Effect.gen(function*() {
       const element = yield* Effect.promise(() =>
-        ResultsPage({
+        StarWarsResultsPage({
           searchParams: Promise.resolve({ character: "1" }),
         }),
       );
 
       expect(isValidElement(element)).toBe(true);
       if (!isValidElement(element)) throw new Error("expected an element");
-      expect(element.props).toMatchObject({ _tag: "Missing" });
+      expect(element.props).toMatchObject({
+        _tag: "Missing",
+        startOverHref: "/star-wars/funnel",
+      });
     }),
   );
 });

@@ -23,7 +23,7 @@ describe("presentLoadedHomePage", () => {
       _tag: "Loaded",
       hero: {
         _tag: "HomeHeroViewModel",
-        funnelHref: "/funnel",
+        funnelHref: "/star-wars/funnel",
       },
       form: {
         _tag: "SearchFormViewModel",

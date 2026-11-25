@@ -6,6 +6,22 @@ Star Wars through SWAPI, and Studio Ghibli through the Ghibli API. The
 controllers, view models, and components are shared; only the runtime and server
 action injected at the route change.
 
+| Star Wars (`/star-wars`) | Studio Ghibli (`/ghibli`) |
+| --- | --- |
+| ![Star Wars dossier](docs/star-wars.jpg) | ![Ghibli dossier](docs/ghibli.jpg) |
+
+Run `pnpm install && pnpm dev`, then open `/star-wars` or `/ghibli`.
+
+## Routes
+
+| Experience | Home | Funnel | Results |
+| --- | --- | --- | --- |
+| Star Wars | `/star-wars` | `/star-wars/funnel` | `/star-wars/results` |
+| Studio Ghibli | `/ghibli` | `/ghibli/funnel` | `/ghibli/results` |
+
+The root redirects to `/star-wars`. The header switches between the two
+experiences; each home's CTA enters its own funnel.
+
 ## What it shows
 
 - Every model is a `Schema.TaggedStruct` or `Schema.TaggedUnion`, and nested
@@ -27,9 +43,9 @@ action injected at the route change.
     `unknown`; transports are empty.
 - `makeHomePage(runtime, searchAction)` is the dependency-injection seam. The
   same `loadHomePage` controller and `ConnectedHomePage` render against any
-  `PeopleCatalog` runtime and matching server action. `app/star-wars/page.tsx`
-  injects `swapiRuntime` + `searchPerson`; `app/ghibli/page.tsx` injects
-  `ghibliRuntime` + `searchGhibliPerson`.
+  `PeopleCatalog` runtime and matching server action. The `StarWarsHome.page.tsx`
+  and `GhibliHome.page.tsx` page modules inject `swapiRuntime` + `searchPerson`
+  or `ghibliRuntime` + `searchGhibliPerson`; the routes re-export those modules.
 - `FilmUniverse.model.ts` uses universe-neutral terms: `Person`, `Film` with an
   `order`, `Origin`, `Species`, `Transport`. A film is a film in either
   universe; its order is an episode number or a list position.
@@ -41,10 +57,15 @@ action injected at the route change.
 - `FunnelViewModel` is a `Schema.TaggedUnion` of `Search`, `Choose`, `Film`,
   `Transport`, `Review`, and `Failed`. `Funnel.controller.ts` advances it with an
   exhaustive Effect `Match` over the current step. Its controller also depends
-  only on `PeopleCatalog`; the funnel and results routes are currently mounted
-  with the SWAPI runtime.
-- The results page reads `?character=&film=&transport=` through the Next 16
-  `searchParams` promise and rebuilds the dossier from the same catalog.
+  only on `PeopleCatalog`.
+- `makeFunnelPage(runtime, submitAction)` and `makeResultsPage(runtime,
+  basePath)` are the same seam for the other two features. `/star-wars/funnel`
+  and `/ghibli/funnel` run the same funnel controller and view models with their
+  own runtime and action. The review's relative `results?` link stays inside the
+  dataset, and the results page's home/start-over links use the dataset base.
+- The results page module declares `ResultsParams`; the `makeNextPage` adapter
+  parses `/results?character=&film=&transport=`, and `loadResults` receives
+  typed params before rebuilding the dossier from the same catalog.
 - `searchPerson`, `searchGhibliPerson`, and `submitFunnel` are server actions.
 - `HomePage.connected.tsx` and `Funnel.connected.tsx` are the two client
   components. Both use `useActionState`; the home page receives its action as a
@@ -63,14 +84,20 @@ boundaries.
 ```text
 app/page.tsx                                 redirects / to /star-wars
 app/star-wars/page.tsx                       re-exports StarWarsHome.page
+app/star-wars/funnel/page.tsx                re-exports StarWarsFunnel.page
+app/star-wars/results/page.tsx               re-exports StarWarsResults.page
 app/ghibli/page.tsx                          re-exports GhibliHome.page
-app/funnel/page.tsx                          re-exports Funnel.page
-app/results/page.tsx                         re-exports Results.page
-src/page-modules/HomePage/StarWarsHome.page.tsx  SWAPI runtime + action -> makeHomePage
-src/page-modules/HomePage/GhibliHome.page.tsx    Ghibli runtime + action -> makeHomePage
-src/page-modules/HomePage/HomePage.factory.tsx   runtime + action -> page component
-src/page-modules/Funnel/Funnel.page.tsx      start the funnel, render it
-src/page-modules/Results/Results.page.tsx    schema + runtime -> Results; invalid -> Missing
+app/ghibli/funnel/page.tsx                   re-exports GhibliFunnel.page
+app/ghibli/results/page.tsx                  re-exports GhibliResults.page
+src/page-modules/HomePage/HomePage.factory.tsx    runtime + action + funnel href -> home page
+src/page-modules/HomePage/StarWarsHome.page.tsx   SWAPI runtime + action
+src/page-modules/HomePage/GhibliHome.page.tsx     Ghibli runtime + action
+src/page-modules/Funnel/Funnel.factory.tsx        runtime + action -> funnel page
+src/page-modules/Funnel/StarWarsFunnel.page.tsx   SWAPI runtime + submitFunnel
+src/page-modules/Funnel/GhibliFunnel.page.tsx     Ghibli runtime + submitGhibliFunnel
+src/page-modules/Results/Results.factory.tsx      runtime + dataset base -> results page
+src/page-modules/Results/StarWarsResults.page.tsx SWAPI runtime + /star-wars
+src/page-modules/Results/GhibliResults.page.tsx   Ghibli runtime + /ghibli
 src/platform/NextPage.ts                     Next searchParams -> typed page params
 src/components/HomePage/                     HomePage.tsx, HomePage.connected.tsx
 src/components/Funnel/                       Funnel.tsx, Funnel.connected.tsx
@@ -82,10 +109,11 @@ src/components/SearchForm/                   SearchForm.tsx
 src/controllers/HomePage.controller.ts       Config + PeopleCatalog -> home view model
 src/controllers/SearchPerson.controller.ts   form schema + catalog -> home view model
 src/controllers/Funnel.controller.ts         Match state machine for the funnel
-src/controllers/Results.controller.ts        searchParams + catalog -> dossier
-src/actions/SearchPerson.serverAction.ts     SWAPI "use server" boundary
-src/actions/GhibliSearchPerson.serverAction.ts  Ghibli "use server" boundary
-src/actions/Funnel.serverAction.ts           "use server" boundary
+src/controllers/Results.controller.ts        typed params + catalog -> dossier
+src/actions/SearchPerson.serverAction.ts     SWAPI home "use server" boundary
+src/actions/GhibliSearchPerson.serverAction.ts  Ghibli home "use server" boundary
+src/actions/Funnel.serverAction.ts           SWAPI funnel "use server" boundary
+src/actions/GhibliFunnel.serverAction.ts     Ghibli funnel "use server" boundary
 src/domain/FilmUniverse.model.ts             CharacterId, Person, Film, Origin,
                                              Species, Transport
 src/server/Runtime.ts                        swapiRuntime and ghibliRuntime
@@ -97,7 +125,8 @@ src/services/GhibliApi.ts                    typed Ghibli endpoints
 src/services/GhibliPeopleCatalog.factory.ts  Ghibli records -> domain
 src/services/GhibliPeopleCatalog.layer.ts    Ghibli Config + HttpClient layer
 features/CharacterLookup.feature             Star Wars home lookup scenarios
-features/Funnel.feature                      dossier funnel scenarios
+features/Funnel.feature                      Star Wars dossier funnel scenarios
+features/GhibliFunnel.feature                Ghibli dossier funnel through the same page
 features/Datasets.feature                    the Ghibli home through the same page
 features/SharedSteps.ts                      shared browser steps
 features/support/ScenarioApp.ts              boots the built Next app per scenario
@@ -118,6 +147,7 @@ layers.
 pnpm install
 pnpm dev
 pnpm test
+pnpm test:coverage
 pnpm typecheck
 pnpm build
 pnpm start
@@ -128,14 +158,20 @@ pnpm test:e2e:debug
 Open `/star-wars` or `/ghibli` to compare the two datasets. The root redirects
 to `/star-wars`.
 
+## Requirements
+
+- Node.js 22.12+
+- pnpm 10
+- Chrome or Chromium for `pnpm test:e2e`, plus ffmpeg for `pnpm test:e2e:debug`
+
 ## Integration tests
 
 `pnpm test:e2e` builds the app, then runs the Gherkin scenarios with
-`effect-bdd`. Three features cover the Star Wars home lookup, the dossier
-funnel, and the Ghibli home through the same page. Scenarios run in parallel;
-each starts its own `next start -p 0`, so the OS assigns a free port, opens a
-Chromium page with Strider, and closes both when the scenario ends. It records
-nothing and pauses nowhere.
+`effect-bdd`. Four features cover the Star Wars home and funnel and the Ghibli
+home and funnel through the same page modules. Scenarios run in parallel; each
+starts its own `next start -p 0`, so the OS assigns a free port, opens a Chromium
+page with Strider, and closes both when the scenario ends. It records nothing and
+pauses nowhere.
 
 `pnpm test:e2e:debug` runs the same scenarios one at a time, pauses a second
 after each browser interaction, and records the whole feature into one
