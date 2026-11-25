@@ -25,7 +25,7 @@ export const loadResults = Effect.gen(function*() {
   return makeResultsPageViewModel(
     i18n,
     universe,
-    Option.map(params, ({ film, transport }) => ({ film, transport })),
+    params,
     person,
   );
 });
