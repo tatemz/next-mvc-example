@@ -26,6 +26,22 @@ const run = (
   );
 
 describe("loadResults", () => {
+  it.effect("returns not found for an unknown universe", () =>
+    Effect.gen(function*() {
+      const model = yield* loadResults.pipe(
+        Effect.provide(layerStub(() => Effect.succeed(luke))),
+        Effect.provideService(I18n, i18n),
+        Effect.provideService(pathParamsTag, { universe: "unknown" }),
+        Effect.provideService(parsedSearchParamsTag, {
+          character: "1",
+          film: "4",
+          transport: "none",
+        }),
+      );
+
+      expect(model).toMatchObject({ _tag: "NotFoundViewModel" });
+    }));
+
   it.effect("loads a complete dossier", () =>
     Effect.gen(function*() {
       const model = yield* run({

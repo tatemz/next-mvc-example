@@ -3,13 +3,13 @@ import { Effect } from "effect";
 import { isValidElement } from "react";
 import { describe, expect } from "vitest";
 import { ConnectedHomeView } from "../../components/HomeView.connected";
-import type { Universe } from "../../domain/FilmUniverse.model";
+import { NotFoundView } from "../../components/NotFoundView";
 import { unusedCatalog } from "../../services/PeopleCatalog.fixture";
 import { runInRenderContext } from "../../server/RenderContext";
 import { renderContext } from "../../server/RenderContext.fixture";
 import { HomePage } from "./Home.page";
 
-const render = (universe: Universe) =>
+const render = (universe: string) =>
   Effect.promise(() =>
     runInRenderContext(renderContext(unusedCatalog), () =>
       HomePage({
@@ -37,6 +37,18 @@ describe("Home page", () => {
         },
         shell: { universe: "star-wars", theme: "night" },
       });
+    }));
+
+  it.effect("renders not found for an unknown universe", () =>
+    Effect.gen(function*() {
+      const element = yield* render("unknown");
+
+      expect(isValidElement(element)).toBe(true);
+      if (!isValidElement<{ model: { _tag: string } }>(element)) {
+        throw new Error("expected an element");
+      }
+      expect(element.type).toBe(NotFoundView);
+      expect(element.props.model._tag).toBe("NotFoundViewModel");
     }));
 
   it.effect("loads the Ghibli splash", () =>

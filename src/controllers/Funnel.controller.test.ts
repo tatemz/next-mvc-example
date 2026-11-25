@@ -52,6 +52,16 @@ const review = makeFunnelReviewViewModel(i18n, shell, person, film, transport);
 const failed = makeFunnelFailedViewModel(i18n, shell, "unavailable");
 
 describe("startFunnel", () => {
+  it.effect("returns not found for an unknown universe", () =>
+    Effect.gen(function*() {
+      const model = yield* startFunnel.pipe(
+        Effect.provideService(I18n, i18n),
+        Effect.provideService(pathParamsTag, { universe: "unknown" }),
+      );
+
+      expect(model).toMatchObject({ _tag: "NotFoundViewModel" });
+    }));
+
   it.effect("starts on the search step", () =>
     Effect.gen(function*() {
       const model = yield* startFunnel.pipe(

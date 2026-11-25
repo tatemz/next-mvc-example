@@ -148,9 +148,9 @@ export const FunnelPage = Function.pipe(
 ```
 
 - `makeNextPage` provides `ParsedSearchParams` and `ParsedPathParams`.
-  Controllers decode their own schemas; `currentUniverse` reads
-  `params.universe`, calls `notFound()` for an unknown value, and yields the
-  `Universe`.
+  Controllers decode their own schemas. `currentUniverse` reads
+  `params.universe` and returns an Option; an unknown universe becomes a
+  `NotFoundViewModel` that the page renders.
 - The request context carries `I18n` and one `PeopleCatalog`. `boot/app.ts`
   mounts `/star-wars` with the SWAPI catalog and `/ghibli` with the Ghibli
   one, so a controller never chooses its adapter.

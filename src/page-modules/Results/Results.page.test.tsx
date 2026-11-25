@@ -3,15 +3,16 @@ import { Effect } from "effect";
 import { isValidElement } from "react";
 import { describe, expect } from "vitest";
 import { ConnectedResultsView } from "../../components/ResultsView.connected";
+import { NotFoundView } from "../../components/NotFoundView";
 import { haku, luke } from "../../domain/FilmUniverse.fixture";
-import type { Person, Universe } from "../../domain/FilmUniverse.model";
+import type { Person } from "../../domain/FilmUniverse.model";
 import { catalogOf } from "../../services/PeopleCatalog.fixture";
 import { runInRenderContext } from "../../server/RenderContext";
 import { renderContext } from "../../server/RenderContext.fixture";
 import { ResultsPage } from "./Results.page";
 
 const render = (
-  universe: Universe,
+  universe: string,
   searchParams: Readonly<Record<string, string>>,
   people: ReadonlyArray<Person>,
 ) =>
@@ -47,6 +48,18 @@ describe("Results page", () => {
         homeHref: "/star-wars",
         shell: { universe: "star-wars", theme: "night" },
       });
+    }));
+
+  it.effect("renders not found for an unknown universe", () =>
+    Effect.gen(function*() {
+      const element = yield* render("unknown", {}, [luke]);
+
+      expect(isValidElement(element)).toBe(true);
+      if (!isValidElement<{ model: { _tag: string } }>(element)) {
+        throw new Error("expected an element");
+      }
+      expect(element.type).toBe(NotFoundView);
+      expect(element.props.model._tag).toBe("NotFoundViewModel");
     }));
 
   it.effect("loads a Ghibli dossier", () =>

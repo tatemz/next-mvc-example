@@ -63,6 +63,12 @@ const funnelMessages = {
   "funnel.pending": "Loading...",
 } as const;
 
+const notFoundMessages = {
+  "notFound.heading": "Page not found",
+  "notFound.message": "That universe does not exist.",
+  "notFound.home": "Back home",
+} as const;
+
 const resultsMessages = {
   "results.ready.heading": "Your dossier",
   "results.ready.subtitle":
@@ -84,4 +90,5 @@ export const MESSAGES = {
   ...homePageMessages,
   ...funnelMessages,
   ...resultsMessages,
+  ...notFoundMessages,
 } as const;

@@ -5,12 +5,11 @@ import {
   ghibliSplashImage,
   starWarsSplashImage,
 } from "../components/HomeHero";
-import type { Universe } from "../domain/FilmUniverse.model";
 import { I18n, makeEn } from "../i18n/I18n.service";
 import { tag as pathParamsTag } from "../platform/ParsedPathParams";
 import { loadHome } from "./Home.controller";
 
-const run = (universe: Universe) =>
+const run = (universe: string) =>
   loadHome.pipe(
     Effect.provideService(I18n, makeEn()),
     Effect.provideService(pathParamsTag, { universe }),
@@ -33,6 +32,13 @@ describe("loadHome", () => {
       });
     }),
   );
+
+  it.effect("returns not found for an unknown universe", () =>
+    Effect.gen(function*() {
+      const model = yield* run("unknown");
+
+      expect(model).toMatchObject({ _tag: "NotFoundViewModel" });
+    }));
 
   it.effect("builds the Ghibli splash", () =>
     Effect.gen(function*() {
