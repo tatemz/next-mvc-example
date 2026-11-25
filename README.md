@@ -2,8 +2,8 @@
 
 One character-dossier UI, served from two film universes: Star Wars through
 SWAPI and Studio Ghibli through the Ghibli API. Controllers, view models, and
-views are shared. Each experience page module supplies its own runtime, server
-action, and daisyUI theme.
+views are shared. Each experience page module supplies its own runtime and
+daisyUI theme; the home and funnel modules also supply their server actions.
 
 | Star Wars (`/star-wars`, night) | Studio Ghibli (`/ghibli`, autumn) |
 | --- | --- |
@@ -147,7 +147,7 @@ CHROMIUM_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
 - Chrome or Chromium for the browser scenarios
 - ffmpeg for `pnpm test:e2e:debug`
 
-Copy `.env.example` to `.env.local` to choose the starting character or point
-either adapter at another host. The defaults are `CHARACTER_ID=1`,
+Copy `.env.example` to `.env.local` to set the starting character and API
+hosts. The example values are `CHARACTER_ID=1`,
 `STAR_WARS_API_URL=https://swapi.dev/api`, and
 `GHIBLI_API_URL=https://ghibliapi.vercel.app`.
