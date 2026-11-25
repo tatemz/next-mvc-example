@@ -20,9 +20,9 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next build && tsx server.ts",
     "build": "next build",
-    "start": "next start",
+    "start": "tsx server.ts",
     "typecheck": "effect-tsgo tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",

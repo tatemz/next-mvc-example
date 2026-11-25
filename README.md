@@ -15,7 +15,8 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Open `/star-wars` or `/ghibli`.
+Open `/star-wars` or `/ghibli`. `pnpm dev` builds the Next app, then serves it
+through the Effect HTTP server in `server.ts`.
 
 ## Routes
 
@@ -55,6 +56,10 @@ export const StarWarsFunnelPage = makeNextPage(
   The page views do not know which theme is active.
 - Each home page is a splash: a universe image with a visible credit and one
   CTA into that universe's funnel. It loads no character data.
+- `server.ts` is the process entrypoint. It serves the Effect `HttpApi` endpoint
+  at `/api/ui-events`, and an `HttpRouter` catch-all hands every other request
+  to the built Next app. Run `next build` before `pnpm start`; `pnpm dev` does
+  the build first.
 
 ## What it shows
 
@@ -120,8 +125,12 @@ new destination is one entry in the list. Connected `HomePage` supplies
 page-load and CTA events, `Funnel` supplies input, validation, and CTA events,
 and `Results` supplies page-load and CTA events.
 
-`app/api/ui-events/route.ts` reads the beacon body, logs it through the Effect
-logger with the `uiEvent` annotation, and returns `204`.
+`src/api/UiEventApi.ts` defines `POST /api/ui-events`; `src/api/UiEventApi.layer.ts`
+logs each payload through `UiEventLogger`. `server.ts` serves that API and the
+Next catch-all from one Effect HTTP server, so the endpoint is not a Next route.
+The default layer uses the Effect logger; `UI_EVENT_LOGGER=noop` swaps in a noop
+layer, and the integration harness sets it so event traffic does not fill the
+test output.
 
 ## Storybook
 
@@ -142,8 +151,9 @@ the app fixtures and view-model factories.
 ```text
 .oxlintrc.json               Effect Oxlint preset and boundary overrides
 .storybook/                  Storybook config and page fixtures
+server.ts                    Effect HTTP server: UI event API + Next catch-all
 app/                         route re-exports; html/body layout
-app/api/ui-events/           beacon route; logs payloads with the Effect logger
+src/api/                     UiEventApi definition and handler layer
 src/page-modules/            one Next page per route via makeNextPage
 src/platform/                Next adapter, redirect model, parsed params
 src/controllers/             page programs, state machines, view models
@@ -162,6 +172,7 @@ features/                    Gherkin plus inline step modules
 
 ```sh
 pnpm dev
+pnpm start
 pnpm test
 pnpm test:coverage
 pnpm typecheck
@@ -194,8 +205,9 @@ Six features and 16 scenarios cover both universes:
 - Ghibli funnel: Haku dossier without transport, a Colonel Muska vehicle dossier,
   no search matches.
 
-Each scenario starts its own `next start -p 0`, so the OS assigns a free port,
-and closes the server and browser when it ends. The steps are declared inline in
+Each scenario starts its own `tsx server.ts` on an OS-assigned port, so the
+Effect API and the Next catch-all share one server, and closes it and the
+browser when the scenario ends. The steps are declared inline in
 each feature's `.steps.ts`, top to bottom. Scenarios use the live SWAPI and
 Ghibli APIs, so they need a network connection. A failure writes a full-page
 screenshot under `artifacts/`; debug mode also needs ffmpeg.
@@ -217,8 +229,8 @@ pnpm lint:fix
 `typecheck` runs the Effect-patched TypeScript-Go compiler. `lint` runs
 type-aware Oxlint with the recommended Effect preset. `check` runs both, and
 the `prepare` script patches TypeScript and Oxlint after install. The
-`unstable-api-usage` warning is disabled only at the experimental
-`effect/http`, `effect/http-api`, and test/e2e boundaries.
+`unstable-api-usage` warning is disabled only at the experimental Effect
+HTTP/API/server and test/e2e boundaries.
 
 ## Requirements
 
@@ -229,4 +241,6 @@ the `prepare` script patches TypeScript and Oxlint after install. The
 
 Copy `.env.example` to `.env.local` to point either adapter at another host.
 The example values are `STAR_WARS_API_URL=https://swapi.dev/api` and
-`GHIBLI_API_URL=https://ghibliapi.vercel.app`.
+`GHIBLI_API_URL=https://ghibliapi.vercel.app`. `server.ts` reads `PORT`
+(default `3000`); `UI_EVENT_LOGGER=console` is the default and `noop` drops UI
+event logs.

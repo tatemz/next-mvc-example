@@ -26,12 +26,12 @@ class ScenarioAppError extends Schema.TaggedError<
 }) {}
 
 const repoRoot = resolve(import.meta.dirname, "../..");
-const nextBin = resolve(repoRoot, "node_modules/next/dist/bin/next");
+const serverEntry = resolve(repoRoot, "server.ts");
 
 const ansi = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
 const localLine = /^\s*(?:-\s*)?Local:\s+https?:\/\/\S+:(\d+)\s*$/;
 
-export const parseNextStartPort = (line: string): Option.Option<number> => {
+export const parseServerPort = (line: string): Option.Option<number> => {
   const match = localLine.exec(line.replace(ansi, ""));
   return match === null ? Option.none() : Option.some(Number(match[1]));
 };
@@ -39,6 +39,7 @@ export const parseNextStartPort = (line: string): Option.Option<number> => {
 const liveApiEnvironment = {
   STAR_WARS_API_URL: "https://swapi.dev/api",
   GHIBLI_API_URL: "https://ghibliapi.vercel.app",
+  UI_EVENT_LOGGER: "noop",
 } as const;
 
 const waitUntilReady = (url: string) =>
@@ -61,14 +62,14 @@ const waitUntilReady = (url: string) =>
     Effect.timeout("30 seconds"),
   );
 
-const startNext = (env: Record<string, string>) =>
+const startServer = (env: Record<string, string>) =>
   Effect.gen(function*() {
     const child = yield* ChildProcess.make(
       process.execPath,
-      [nextBin, "start", "-p", "0"],
+      ["--import", "tsx", serverEntry],
       {
         cwd: repoRoot,
-        env: { ...env, NODE_OPTIONS: undefined },
+        env: { ...env, PORT: "0", NODE_OPTIONS: undefined },
         extendEnv: true,
         stdout: "pipe",
         stderr: "inherit",
@@ -86,7 +87,7 @@ const startNext = (env: Record<string, string>) =>
       Stream.runForEach((line) =>
         Effect.gen(function*() {
           yield* Effect.sync(() => process.stdout.write(`${line}\n`));
-          const port = parseNextStartPort(line);
+          const port = parseServerPort(line);
           if (Option.isSome(port)) {
             yield* Deferred.succeed(found, port.value);
           }
@@ -99,7 +100,7 @@ const startNext = (env: Record<string, string>) =>
       Effect.mapError(
         () =>
           new ScenarioAppError({
-            message: "next start did not report its port within 30 seconds",
+            message: "the server did not report its port within 30 seconds",
           }),
       ),
     );
@@ -112,7 +113,7 @@ export const scenarioApp = (env: Record<string, string>) =>
   Layer.effect(
     ScenarioApp,
     Effect.gen(function*() {
-      const url = yield* startNext({ ...liveApiEnvironment, ...env });
+      const url = yield* startServer({ ...liveApiEnvironment, ...env });
       return ScenarioApp.of({ url });
     }),
   ).pipe(Layer.provide(NodeServices.layer));

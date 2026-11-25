@@ -23,8 +23,10 @@
     },
     {
       "files": [
+        "src/api/**",
+        "src/server/**",
         "src/services/**",
-        "src/server/**"
+        "server.ts"
       ],
       "rules": {
         "effecttsgo/unstable-api-usage": "off"
