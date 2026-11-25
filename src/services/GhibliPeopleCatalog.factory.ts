@@ -89,7 +89,13 @@ export const make = (ghibli: GhibliSource) => {
         const film = films.find((candidate) => candidate.url === url);
         return film === undefined
           ? []
-          : [Film.make({ title: film.title, order: index + 1 })];
+          : [
+              Film.make({
+                title: film.title,
+                order: index + 1,
+                imageUrl: film.image,
+              }),
+            ];
       });
 
       const matchedSpecies =

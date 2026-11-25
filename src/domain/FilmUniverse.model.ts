@@ -18,6 +18,7 @@ export type CharacterId = typeof CharacterId.Type;
 export const Film = Schema.TaggedStruct("Film", {
   title: Schema.NonEmptyString,
   order: Schema.Int,
+  imageUrl: Schema.optional(Schema.String),
 });
 export type Film = typeof Film.Type;
 

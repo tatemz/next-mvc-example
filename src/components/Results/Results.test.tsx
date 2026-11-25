@@ -33,6 +33,20 @@ describe("Results", () => {
     expect(html).toContain("Back home");
   });
 
+  it("renders a film poster when the film has one", () => {
+    const illustratedFilm = {
+      ...film,
+      imageUrl: "https://example.com/poster.jpg",
+    };
+    const html = renderToStaticMarkup(
+      <Results
+        {...makeResultsReadyViewModel(i18n, person, illustratedFilm, transport)}
+      />,
+    );
+
+    expect(html).toContain("poster.jpg");
+  });
+
   it("renders a dossier without a transport", () => {
     const model = makeResultsReadyViewModel(i18n, person, film, null);
     const html = renderToStaticMarkup(<Results {...model} />);

@@ -16,6 +16,7 @@ export type GhibliPersonResponse = typeof GhibliPersonResponse.Type;
 
 export const GhibliFilmResponse = Schema.Struct({
   title: Schema.NonEmptyString,
+  image: Schema.optional(Schema.String),
   url: Schema.String,
 });
 export type GhibliFilmResponse = typeof GhibliFilmResponse.Type;

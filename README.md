@@ -49,6 +49,10 @@ experiences; each home's CTA enters its own funnel.
 - `FilmUniverse.model.ts` uses universe-neutral terms: `Person`, `Film` with an
   `order`, `Origin`, `Species`, `Transport`. A film is a film in either
   universe; its order is an episode number or a list position.
+- `Film.imageUrl` is optional. The Ghibli adapter fills it from the film
+  API's `image` field; SWAPI has no image field, so Star Wars leaves it empty.
+  The shared film list, funnel choices, review, and results render the poster
+  only when it exists.
 - `makeNextPage` is the Next boundary adapter. It awaits `searchParams`, takes
   the first value of repeated query keys, and decodes the result with a schema.
   The page module receives `Option<Params>`; an invalid query renders its

@@ -18,6 +18,7 @@ const people = [
 const films = [
   {
     title: "Spirited Away",
+    image: "https://example.com/spirited-away.jpg",
     url: "https://ghibliapi.vercel.app/films/spirited-away",
   },
 ];
@@ -60,7 +61,12 @@ describe("GhibliPeopleCatalog layer", () => {
         species: { name: "Dragon" },
       });
       expect(person.films).toEqual([
-        { _tag: "Film", title: "Spirited Away", order: 1 },
+        {
+          _tag: "Film",
+          title: "Spirited Away",
+          order: 1,
+          imageUrl: "https://example.com/spirited-away.jpg",
+        },
       ]);
     }),
   );

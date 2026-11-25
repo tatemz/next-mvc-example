@@ -21,6 +21,13 @@ const i18n = makeEn();
 const person = makePersonViewModel(i18n, luke);
 const film = person.films[0];
 const transport = person.transports[0];
+const illustratedPerson = makePersonViewModel(i18n, {
+  ...luke,
+  films: [
+    { ...luke.films[0], imageUrl: "https://example.com/poster.jpg" },
+    luke.films[1],
+  ],
+});
 const choice = PersonChoiceViewModel.make({
   id: "1",
   name: "Luke Skywalker",
@@ -74,6 +81,14 @@ describe("Funnel", () => {
     expect(idle).toContain("Choose character");
   });
 
+  it("renders a film poster in the film choices", () => {
+    const html = render(
+      makeFunnelFilmViewModel(i18n, illustratedPerson),
+    );
+
+    expect(html).toContain("poster.jpg");
+  });
+
   it("renders the film choices", () => {
     const html = render(makeFunnelFilmViewModel(i18n, person));
 
@@ -115,6 +130,19 @@ describe("Funnel", () => {
 
     expect(html).toContain("No transport");
     expect(html).toContain('value="none"');
+  });
+
+  it("renders a film poster in the review", () => {
+    const html = render(
+      makeFunnelReviewViewModel(
+        i18n,
+        illustratedPerson,
+        illustratedPerson.films[0],
+        transport,
+      ),
+    );
+
+    expect(html).toContain("poster.jpg");
   });
 
   it("renders the review with a transport", () => {

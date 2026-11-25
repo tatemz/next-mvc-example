@@ -318,6 +318,14 @@ const FilmStep = ({
               className="radio radio-primary"
               required
             />
+            {film.imageUrl === undefined ? null : (
+              <img
+                src={film.imageUrl}
+                alt=""
+                className="h-16 w-12 rounded object-cover"
+                loading="lazy"
+              />
+            )}
             <span className="font-semibold">{film.text}</span>
           </label>
         ))}
@@ -386,6 +394,14 @@ const ReviewStep = ({ step }: { readonly step: FunnelReviewViewModel }) => (
         <dt className="text-xs uppercase tracking-wide opacity-60">
           {step.filmLabel}
         </dt>
+        {step.film.imageUrl === undefined ? null : (
+          <img
+            src={step.film.imageUrl}
+            alt=""
+            className="my-2 h-28 w-20 rounded object-cover"
+            loading="lazy"
+          />
+        )}
         <dd className="text-lg">{step.film.text}</dd>
       </div>
       <div>

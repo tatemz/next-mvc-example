@@ -81,6 +81,14 @@ const ReadyResults = ({ model }: { readonly model: ResultsReadyViewModel }) => (
       <section className="card bg-base-100 shadow-xl">
         <div className="card-body">
           <h2 className="card-title">{model.filmLabel}</h2>
+          {model.film.imageUrl === undefined ? null : (
+            <img
+              src={model.film.imageUrl}
+              alt=""
+              className="mb-3 h-40 w-28 rounded-box object-cover"
+              loading="lazy"
+            />
+          )}
           <p className="text-lg">{model.film.text}</p>
         </div>
       </section>

@@ -1,6 +1,11 @@
 import { it } from "@effect/vitest";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect } from "vitest";
-import { makeFilmListItemViewModel } from "./FilmListItem";
+import {
+  FilmListItem,
+  FilmListItemViewModel,
+  makeFilmListItemViewModel,
+} from "./FilmListItem";
 
 describe("makeFilmListItemViewModel", () => {
   it("formats a film for the list", () => {
@@ -14,5 +19,21 @@ describe("makeFilmListItemViewModel", () => {
       order: 4,
       text: "A New Hope",
     });
+  });
+});
+
+describe("FilmListItem", () => {
+  it("renders a poster when the film has one", () => {
+    const html = renderToStaticMarkup(
+      FilmListItem(
+        FilmListItemViewModel.make({
+          order: 4,
+          text: "A New Hope",
+          imageUrl: "https://example.com/poster.jpg",
+        }),
+      ),
+    );
+
+    expect(html).toContain("poster.jpg");
   });
 });
