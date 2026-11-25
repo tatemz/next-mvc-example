@@ -1,11 +1,12 @@
-import { Effect } from "effect";
+import { Effect, Function } from "effect";
 import { ConnectedHomeView } from "../../components/HomeView.connected";
 import { loadHome } from "../../controllers/Home.controller";
 import { makeNextPage } from "../../platform/NextPage";
 
-export const StarWarsHomePage = makeNextPage(
-  Effect.map(
-    loadHome("star-wars"),
-    (model) => <ConnectedHomeView model={model} universe="star-wars" />,
-  ),
+export const StarWarsHomePage = Function.pipe(
+  loadHome("star-wars"),
+  Effect.map((model) => (
+    <ConnectedHomeView model={model} universe="star-wars" />
+  )),
+  makeNextPage,
 );
