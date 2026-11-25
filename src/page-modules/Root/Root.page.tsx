@@ -1,4 +1,4 @@
 import { loadRootPage } from "../../controllers/Root.controller";
-import { makeRedirectNextPage } from "../../platform/NextPage";
+import { makeNextPage } from "../../platform/NextPage";
 
-export const RootPage = makeRedirectNextPage(loadRootPage);
+export const RootPage = makeNextPage(loadRootPage);

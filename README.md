@@ -151,7 +151,7 @@ export const StarWarsFunnelPage = makeNextPage(
 - The request context carries `I18n` and one `PeopleCatalog`. `boot/app.ts`
   mounts `/star-wars` with the SWAPI catalog and `/ghibli` with the Ghibli
   one, so a page never chooses its adapter.
-- The root page uses `makeRedirectNextPage` and needs no context.
+- The root page uses `makeNextPage` with a redirect program.
 - Every page view model carries its `AppShellViewModel`, so
   `app/layout.tsx` is only `<html>` and `<body>`. The shell owns the
   `data-theme` value: `night` for Star Wars, `autumn` for Ghibli.

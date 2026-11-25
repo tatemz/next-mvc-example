@@ -1,4 +1,4 @@
-import { Predicate, Schema } from "effect";
+import { Schema } from "effect";
 import { redirect as nextRedirect } from "next/navigation";
 
 const RedirectType = Schema.Literals(["push", "replace"]);
@@ -10,13 +10,10 @@ export const NextRedirect = Schema.TaggedStruct("NextRedirect", {
 });
 export type NextRedirect = typeof NextRedirect.Type;
 
-export const isNextRedirect = (value: unknown): value is NextRedirect =>
-  Predicate.isTagged("NextRedirect")(value);
-
 export const handleNextRedirect = <T>(
   result: T | NextRedirect,
 ): Exclude<T, NextRedirect> => {
-  if (isNextRedirect(result)) {
+  if (Schema.is(NextRedirect)(result)) {
     throw nextRedirect(result.url, result.type);
   }
 

@@ -1,13 +1,12 @@
-import { Effect } from "effect";
+import { Effect, Schema } from "effect";
 import type { ReactElement } from "react";
 import {
   type RenderServices,
   currentRenderContext,
 } from "../server/RenderContext";
 import {
-  type NextRedirect,
+  NextRedirect,
   handleNextRedirect,
-  isNextRedirect,
 } from "./NextRedirect";
 import {
   type ParsedSearchParams,
@@ -20,7 +19,9 @@ export type NextPageProps = {
 };
 
 const finish = (result: ReactElement | NextRedirect): ReactElement =>
-  isNextRedirect(result) ? handleNextRedirect(result) : result;
+  Schema.is(NextRedirect)(result)
+    ? handleNextRedirect(result)
+    : result;
 
 export const makeNextPage = <E>(
   load: Effect.Effect<
@@ -33,18 +34,6 @@ export const makeNextPage = <E>(
     const params = fromInput(await searchParams);
     return finish(
       await Effect.runPromiseWith(currentRenderContext())(
-        load.pipe(Effect.provideService(parsedSearchParamsTag, params)),
-      ),
-    );
-  };
-
-export const makeRedirectNextPage = <E>(
-  load: Effect.Effect<NextRedirect, E, ParsedSearchParams>,
-) =>
-  async ({ searchParams }: NextPageProps) => {
-    const params = fromInput(await searchParams);
-    return finish(
-      await Effect.runPromise(
         load.pipe(Effect.provideService(parsedSearchParamsTag, params)),
       ),
     );

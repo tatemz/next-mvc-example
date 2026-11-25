@@ -14,7 +14,7 @@ import { makeCharacterId, personNamed } from "../domain/FilmUniverse.fixture";
 import { I18n } from "../i18n/I18n.service";
 import { PeopleCatalog } from "../services/PeopleCatalog";
 import { catalogOf } from "../services/PeopleCatalog.fixture";
-import { makeNextPage, makeRedirectNextPage } from "./NextPage";
+import { makeNextPage } from "./NextPage";
 import { NextRedirect } from "./NextRedirect";
 import { type ParsedSearchParams, decodeOption } from "./ParsedSearchParams";
 import { renderContext } from "../server/RenderContext.fixture";
@@ -78,18 +78,21 @@ describe("makeNextPage", () => {
   );
 });
 
-const RedirectPage = makeRedirectNextPage(
+const RedirectPage = makeNextPage(
   Effect.succeed(
     NextRedirect.make({ url: "/star-wars", type: "replace" }),
   ),
 );
 
-describe("makeRedirectNextPage with a redirect outcome", () => {
+describe("makeNextPage with a redirect outcome", () => {
   it.effect("hands the redirect to Next", () =>
     Effect.gen(function*() {
       const exit = yield* Effect.exit(
         Effect.promise(() =>
-          RedirectPage({ searchParams: Promise.resolve({}) }),
+          runInRenderContext(
+            context,
+            () => RedirectPage({ searchParams: Promise.resolve({}) }),
+          ),
         ),
       );
 
