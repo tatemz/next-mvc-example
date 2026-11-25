@@ -30,7 +30,9 @@
     "test:e2e": "pnpm test:e2e:run --parallel=2",
     "pretest:e2e:debug": "next build",
     "test:e2e:debug": "E2E_DEBUG=1 pnpm test:e2e:run --parallel=1 --verbose",
-    "test:e2e:run": "NODE_OPTIONS=\"--import tsx\" effect-bdd --features \"features/**/*.feature\" --steps \"features/**/*.steps.ts\" --reporter text --strict --step-timeout \"60 seconds\""
+    "test:e2e:run": "NODE_OPTIONS=\"--import tsx\" effect-bdd --features \"features/**/*.feature\" --steps \"features/**/*.steps.ts\" --reporter text --strict --step-timeout \"60 seconds\"",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@formatjs/intl": "^3.1.8",
@@ -44,6 +46,7 @@
   "devDependencies": {
     "@effect/platform-node": "4.1.5",
     "@effect/vitest": "4.1.5",
+    "@storybook/nextjs-vite": "^10.6.8",
     "@tailwindcss/postcss": "^4.3.5",
     "@types/node": "26.6.6",
     "@types/react": "19.3.0",
@@ -52,9 +55,11 @@
     "@vitest/coverage-v8": "5.1.1",
     "daisyui": "^5.8.2",
     "effect-bdd": "0.12.0",
+    "storybook": "^10.6.8",
     "tailwindcss": "^4.3.5",
     "tsx": "4.23.13",
     "typescript": "7.0.2",
+    "vite": "^7.3.8",
     "vitest": "5.1.1"
   },
   "repository": {

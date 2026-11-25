@@ -7,7 +7,11 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["app/**/*.{ts,tsx}", "src/**/*.{ts,tsx}"],
-      exclude: ["**/*.test.{ts,tsx}", "**/*.fixture.ts"],
+      exclude: [
+        "**/*.test.{ts,tsx}",
+        "**/*.fixture.ts",
+        "**/*.stories.{ts,tsx}",
+      ],
       reporter: ["text", "html"],
       thresholds: {
         lines: 100,

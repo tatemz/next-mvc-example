@@ -82,9 +82,25 @@ export const StarWarsFunnelPage = makeNextPage(
   `submitGhibliFunnel` are server actions. `HomePage.connected.tsx` and
   `Funnel.connected.tsx` are the two `"use client"` boundaries.
 
+## Storybook
+
+```sh
+pnpm storybook
+```
+
+The stories in `src/components/*.stories.tsx` render the three top-level page
+views. Every tagged view-model variant is represented, including pending,
+validation-error, known-species, film-poster, transport/no-transport, and both
+`night` and `autumn` shells. `.storybook/pageFixtures.ts` builds the models from
+the app fixtures and view-model factories; `HomePageOptics` derives the form
+value and validation-error variants.
+
+`pnpm build-storybook` writes a static site to `storybook-static/`.
+
 ## Layout
 
 ```text
+.storybook/                  Storybook config and page fixtures
 app/                         route re-exports; html/body layout
 src/page-modules/            one Next page per route via makeNextPage
 src/platform/                Next adapter, redirect model, parsed params
@@ -109,6 +125,8 @@ pnpm typecheck
 pnpm build
 pnpm test:e2e
 pnpm test:e2e:debug
+pnpm storybook
+pnpm build-storybook
 ```
 
 `pnpm test:e2e` builds the app, then runs `test:e2e:run` with `--parallel=2`.
