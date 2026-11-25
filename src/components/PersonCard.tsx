@@ -64,12 +64,13 @@ const SpeciesInput = Schema.Struct({
   language: Schema.String,
 });
 
-const TransportInput = Schema.Struct({
+export const TransportInput = Schema.Struct({
   key: Schema.NonEmptyString,
   kind: TransportKind,
   name: Schema.NonEmptyString,
   model: Schema.NonEmptyString,
 });
+export type TransportInput = typeof TransportInput.Type;
 
 export const PersonCardInput = Schema.Struct({
   id: Schema.String,
@@ -94,6 +95,14 @@ const displayMeasurement = (i18n: I18n, value: string): string =>
     ),
     Match.orElse(Function.identity<string>),
   );
+
+export const makeTransportViewModel = (transport: TransportInput) =>
+  TransportViewModel.make({
+    key: transport.key,
+    kind: transport.kind,
+    name: transport.name,
+    model: transport.model,
+  });
 
 export const makePersonViewModel = (
   i18n: I18n,
@@ -131,14 +140,7 @@ export const makePersonViewModel = (
       person.films,
       Array.map(makeFilmListItemViewModel),
     ),
-    transports: Array.map(person.transports, (transport) =>
-      TransportViewModel.make({
-        key: transport.key,
-        kind: transport.kind,
-        name: transport.name,
-        model: transport.model,
-      }),
-    ),
+    transports: Array.map(person.transports, makeTransportViewModel),
   });
 
 const Stat = ({

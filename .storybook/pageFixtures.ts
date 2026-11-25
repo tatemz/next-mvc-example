@@ -24,12 +24,15 @@ import {
   type TransportViewModel,
 } from "../src/components/PersonCard";
 import {
-  makeResultsMissingViewModel,
-  makeResultsReadyViewModel,
+  makeResultsViewModel,
   type ResultsViewModel,
 } from "../src/components/ResultsView";
 import { luke, makeCharacterId } from "../src/domain/FilmUniverse.fixture";
-import type { Person, Universe } from "../src/domain/FilmUniverse.model";
+import type {
+  Person,
+  Transport,
+  Universe,
+} from "../src/domain/FilmUniverse.model";
 import { makeEn } from "../src/i18n/I18n.service";
 
 const i18n = makeEn();
@@ -123,8 +126,6 @@ export type PageDataset = {
   readonly view: PersonViewModel;
   readonly film: FilmListItemViewModel;
   readonly transport: TransportViewModel | null;
-  readonly funnelHref: string;
-  readonly homeHref: string;
   readonly query: string;
 };
 
@@ -144,8 +145,6 @@ const datasetFor = (
     view,
     film,
     transport,
-    funnelHref: `/${universe}/funnel`,
-    homeHref: `/${universe}`,
     query,
   };
 };
@@ -229,21 +228,25 @@ export const funnelFailedInvalidChoice = (
 
 export const resultsReady = (
   dataset: PageDataset,
-  transport: TransportViewModel | null,
+  transport: Transport | null = Option.getOrNull(
+    Array.head(dataset.person.transports),
+  ),
 ): ResultsViewModel =>
-  makeResultsReadyViewModel(
+  makeResultsViewModel(
     i18n,
     dataset.shell,
-    dataset.view,
-    dataset.film,
-    transport,
-    dataset.funnelHref,
-    dataset.homeHref,
+    dataset.universe,
+    Option.some(dataset.person),
+    Option.getOrThrow(Array.head(dataset.person.films)).order,
+    transport?.key ?? "none",
   );
 
 export const resultsMissing = (dataset: PageDataset): ResultsViewModel =>
-  makeResultsMissingViewModel(
+  makeResultsViewModel(
     i18n,
     dataset.shell,
-    dataset.funnelHref,
+    dataset.universe,
+    Option.none(),
+    0,
+    "none",
   );

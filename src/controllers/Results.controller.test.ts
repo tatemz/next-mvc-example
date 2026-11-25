@@ -18,7 +18,7 @@ const run = (
   params: ResultsParams,
   getPerson: PeopleCatalog["getPerson"] = () => Effect.succeed(luke),
 ) =>
-  loadResults(params, "/star-wars", shell).pipe(
+  loadResults("star-wars", params, shell).pipe(
     Effect.provide(layerStub(getPerson)),
     Effect.provideService(I18n, i18n),
   );

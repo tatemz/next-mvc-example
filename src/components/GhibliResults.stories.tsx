@@ -19,7 +19,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Ready: Story = {
-  args: { model: resultsReady(ghibliPilot, ghibliPilot.transport) },
+  args: { model: resultsReady(ghibliPilot) },
 };
 
 export const ReadyWithoutTransport: Story = {

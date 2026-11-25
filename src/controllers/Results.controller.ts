@@ -1,10 +1,9 @@
-import { Array, Effect, Option, Schema } from "effect";
+import { Effect, Option, Schema } from "effect";
 import type { AppShellViewModel } from "../components/AppShell";
 import {
   makeResultsMissingViewModel,
-  makeResultsReadyViewModel,
+  makeResultsViewModel,
 } from "../components/ResultsView";
-import { makePersonViewModel } from "../components/PersonCard";
 import { CharacterId, type Universe } from "../domain/FilmUniverse.model";
 import { I18n } from "../i18n/I18n.service";
 import { decodeOption } from "../platform/ParsedSearchParams";
@@ -19,51 +18,22 @@ export const ResultsParams = Schema.Struct({
 export type ResultsParams = typeof ResultsParams.Type;
 
 export const loadResults = (
+  universe: Universe,
   params: ResultsParams,
-  basePath: string,
   shell: AppShellViewModel,
 ) =>
   Effect.gen(function*() {
     const i18n = yield* I18n;
     const client = yield* PeopleCatalog;
     const person = yield* Effect.option(client.getPerson(params.character));
-    const startOverHref = `${basePath}/funnel`;
 
-    if (Option.isNone(person)) {
-      return makeResultsMissingViewModel(i18n, shell, startOverHref);
-    }
-
-    const personViewModel = makePersonViewModel(i18n, person.value);
-    const film = Array.findFirst(
-      personViewModel.films,
-      (candidate) => candidate.order === params.film,
-    );
-
-    if (Option.isNone(film)) {
-      return makeResultsMissingViewModel(i18n, shell, startOverHref);
-    }
-
-    const transport = params.transport === "none"
-      ? null
-      : Option.getOrNull(
-        Array.findFirst(
-          personViewModel.transports,
-          (candidate) => candidate.key === params.transport,
-        ),
-      );
-
-    if (params.transport !== "none" && transport === null) {
-      return makeResultsMissingViewModel(i18n, shell, startOverHref);
-    }
-
-    return makeResultsReadyViewModel(
+    return makeResultsViewModel(
       i18n,
       shell,
-      personViewModel,
-      film.value,
-      transport,
-      startOverHref,
-      basePath,
+      universe,
+      person,
+      params.film,
+      params.transport,
     );
   });
 
@@ -72,15 +42,10 @@ export const loadResultsPage = (universe: Universe) =>
     const i18n = yield* I18n;
     const shell = yield* loadAppShell(universe);
     const params = yield* decodeOption(ResultsParams);
-    const basePath = `/${universe}`;
 
     if (Option.isNone(params)) {
-      return makeResultsMissingViewModel(
-        i18n,
-        shell,
-        `${basePath}/funnel`,
-      );
+      return makeResultsMissingViewModel(i18n, shell, universe);
     }
 
-    return yield* loadResults(params.value, basePath, shell);
+    return yield* loadResults(universe, params.value, shell);
   });

@@ -29,7 +29,7 @@ const preventNavigation = (element: HTMLElement) =>
 describe("ConnectedResultsView events", () => {
   it("emits page load and result CTAs", async () => {
     const events = renderResults(
-      resultsReady(starWars, starWars.transport),
+      resultsReady(starWars),
     );
     const startOver = screen.getByRole("link", {
       name: "Build another dossier",

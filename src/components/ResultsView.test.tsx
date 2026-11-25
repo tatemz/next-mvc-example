@@ -3,7 +3,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect } from "vitest";
 import { luke } from "../domain/FilmUniverse.fixture";
 import { makeEn } from "../i18n/I18n.service";
-import { makePersonViewModel } from "./PersonCard";
 import { makeAppShellViewModel } from "./AppShell";
 import {
   ResultsView,
@@ -13,11 +12,9 @@ import {
 
 const i18n = makeEn();
 const shell = makeAppShellViewModel(i18n, "star-wars");
-const person = makePersonViewModel(i18n, luke);
-const film = person.films[0];
-const transport = person.transports[0];
-const startOverHref = "/star-wars/funnel";
-const homeHref = "/star-wars";
+const person = luke;
+const film = luke.films[0];
+const transport = luke.transports[0];
 
 describe("ResultsView", () => {
   it("renders a complete dossier", () => {
@@ -27,8 +24,7 @@ describe("ResultsView", () => {
       person,
       film,
       transport,
-      startOverHref,
-      homeHref,
+      "star-wars",
     );
     const html = renderToStaticMarkup(<ResultsView model={model} onCtaClick={() => {}} />);
 
@@ -53,8 +49,7 @@ describe("ResultsView", () => {
           person,
           illustratedFilm,
           transport,
-          startOverHref,
-          homeHref,
+          "star-wars",
         )}
         onCtaClick={() => {}}
       />,
@@ -70,8 +65,7 @@ describe("ResultsView", () => {
       person,
       film,
       null,
-      startOverHref,
-      homeHref,
+      "star-wars",
     );
     const html = renderToStaticMarkup(<ResultsView model={model} onCtaClick={() => {}} />);
 
@@ -79,7 +73,7 @@ describe("ResultsView", () => {
   });
 
   it("renders a missing dossier", () => {
-    const model = makeResultsMissingViewModel(i18n, shell, startOverHref);
+    const model = makeResultsMissingViewModel(i18n, shell, "star-wars");
     const html = renderToStaticMarkup(<ResultsView model={model} onCtaClick={() => {}} />);
 
     expect(html).toContain("Dossier not found");

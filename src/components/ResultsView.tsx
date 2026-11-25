@@ -1,12 +1,21 @@
-import { Schema } from "effect";
+import { Array, Option, Schema } from "effect";
+import type { Universe } from "../domain/FilmUniverse.model";
 import type { I18n } from "../i18n/I18n.service";
 import type { ResultsCta } from "../ui-events/UiEvent";
 import { AppShell, AppShellViewModel } from "./AppShell";
-import { FilmListItemViewModel } from "./FilmListItem";
+import {
+  FilmListItemInput,
+  FilmListItemViewModel,
+  makeFilmListItemViewModel,
+} from "./FilmListItem";
 import {
   PersonCard,
+  PersonCardInput,
   PersonViewModel,
+  TransportInput,
   TransportViewModel,
+  makePersonViewModel,
+  makeTransportViewModel,
 } from "./PersonCard";
 
 export const ResultsViewModel = Schema.TaggedUnion({
@@ -41,40 +50,83 @@ type ResultsMissingViewModel = typeof ResultsViewModel.cases.Missing.Type;
 export const makeResultsReadyViewModel = (
   i18n: I18n,
   shell: AppShellViewModel,
-  person: PersonViewModel,
-  film: FilmListItemViewModel,
-  transport: TransportViewModel | null,
-  startOverHref: string,
-  homeHref: string,
+  person: PersonCardInput,
+  film: FilmListItemInput,
+  transport: TransportInput | null,
+  universe: Universe,
 ) =>
   ResultsViewModel.cases.Ready.make({
     shell,
     heading: i18n._({ id: "results.ready.heading" }),
     subtitle: i18n._({ id: "results.ready.subtitle" }),
-    person,
-    film,
-    transport,
+    person: makePersonViewModel(i18n, person),
+    film: makeFilmListItemViewModel(film),
+    transport: transport === null ? null : makeTransportViewModel(transport),
     filmLabel: i18n._({ id: "results.ready.filmLabel" }),
     transportLabel: i18n._({ id: "results.ready.transportLabel" }),
     noneLabel: i18n._({ id: "results.ready.noneTransport" }),
     startOverLabel: i18n._({ id: "results.ready.startOver" }),
     homeLabel: i18n._({ id: "results.ready.home" }),
-    startOverHref,
-    homeHref,
+    startOverHref: `/${universe}/funnel`,
+    homeHref: `/${universe}`,
   });
 
 export const makeResultsMissingViewModel = (
   i18n: I18n,
   shell: AppShellViewModel,
-  startOverHref: string,
+  universe: Universe,
 ) =>
   ResultsViewModel.cases.Missing.make({
     shell,
     heading: i18n._({ id: "results.missing.heading" }),
     message: i18n._({ id: "results.missing.message" }),
     startOverLabel: i18n._({ id: "results.missing.startOver" }),
-    startOverHref,
+    startOverHref: `/${universe}/funnel`,
   });
+
+export const makeResultsViewModel = (
+  i18n: I18n,
+  shell: AppShellViewModel,
+  universe: Universe,
+  person: Option.Option<PersonCardInput>,
+  filmOrder: number,
+  transportKey: string,
+): ResultsViewModel => {
+  if (Option.isNone(person)) {
+    return makeResultsMissingViewModel(i18n, shell, universe);
+  }
+
+  const film = Array.findFirst(
+    person.value.films,
+    (candidate) => candidate.order === filmOrder,
+  );
+
+  if (Option.isNone(film)) {
+    return makeResultsMissingViewModel(i18n, shell, universe);
+  }
+
+  const transport = transportKey === "none"
+    ? null
+    : Option.getOrNull(
+      Array.findFirst(
+        person.value.transports,
+        (candidate) => candidate.key === transportKey,
+      ),
+    );
+
+  if (transportKey !== "none" && transport === null) {
+    return makeResultsMissingViewModel(i18n, shell, universe);
+  }
+
+  return makeResultsReadyViewModel(
+    i18n,
+    shell,
+    person.value,
+    film.value,
+    transport,
+    universe,
+  );
+};
 
 export type ResultsViewProps = {
   readonly model: ResultsViewModel;
