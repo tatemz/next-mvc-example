@@ -1,4 +1,4 @@
-import { Function, Schema, SchemaGetter } from "effect";
+import { Schema, SchemaGetter } from "effect";
 
 export const Universe = Schema.Literals(["star-wars", "ghibli"]);
 export type Universe = typeof Universe.Type;
@@ -8,13 +8,10 @@ export const Universes = {
   Ghibli: "ghibli",
 } as const satisfies Record<string, Universe>;
 
-const CharacterNumber = Schema.NumberFromString.check(
+export const CharacterId = Schema.NumberFromString.check(
   Schema.isInt(),
   Schema.isGreaterThan(0),
-);
-
-export const CharacterId = Function.pipe(
-  CharacterNumber,
+).pipe(
   Schema.decodeTo(Schema.String, {
     decode: SchemaGetter.transform((value: number) => String(value)),
     encode: SchemaGetter.transform((value: string) => Number(value)),

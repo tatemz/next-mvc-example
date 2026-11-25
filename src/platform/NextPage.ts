@@ -4,37 +4,32 @@ import {
   type RenderServices,
   currentRenderContext,
 } from "../server/RenderContext";
-import {
-  NextRedirect,
-  handleNextRedirect,
-} from "./NextRedirect";
-import {
-  type ParsedSearchParams,
-  fromInput,
-  tag as parsedSearchParamsTag,
-} from "./ParsedSearchParams";
+import * as NextRedirect from "./NextRedirect";
+import * as ParsedSearchParams from "./ParsedSearchParams";
 
 export type NextPageProps = {
-  readonly searchParams: Promise<ParsedSearchParams>;
+  readonly searchParams: Promise<ParsedSearchParams.ParsedSearchParams>;
 };
 
-const finish = (result: ReactElement | NextRedirect): ReactElement =>
-  Schema.is(NextRedirect)(result)
-    ? handleNextRedirect(result)
+const finish = (
+  result: ReactElement | NextRedirect.NextRedirect,
+): ReactElement =>
+  Schema.is(NextRedirect.NextRedirect)(result)
+    ? NextRedirect.handleNextRedirect(result)
     : result;
 
 export const makeNextPage = <E>(
   load: Effect.Effect<
-    ReactElement | NextRedirect,
+    ReactElement | NextRedirect.NextRedirect,
     E,
-    ParsedSearchParams | RenderServices
+    ParsedSearchParams.ParsedSearchParams | RenderServices
   >,
 ) =>
   async ({ searchParams }: NextPageProps) => {
-    const params = fromInput(await searchParams);
+    const params = ParsedSearchParams.fromInput(await searchParams);
     return finish(
       await Effect.runPromiseWith(currentRenderContext())(
-        load.pipe(Effect.provideService(parsedSearchParamsTag, params)),
+        load.pipe(Effect.provideService(ParsedSearchParams.tag, params)),
       ),
     );
   };
