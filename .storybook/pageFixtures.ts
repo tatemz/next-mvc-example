@@ -33,8 +33,7 @@ import {
   type ResultsViewModel,
 } from "../src/components/Results";
 import { luke, makeCharacterId } from "../src/domain/FilmUniverse.fixture";
-import type { Universe } from "../src/ui-events/UiEvent";
-import type { Person } from "../src/domain/FilmUniverse.model";
+import type { Person, Universe } from "../src/domain/FilmUniverse.model";
 import { makeEn } from "../src/i18n/I18n.service";
 
 const i18n = makeEn();

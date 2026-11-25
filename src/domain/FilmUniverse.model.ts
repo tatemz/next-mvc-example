@@ -1,5 +1,8 @@
 import { Function, Schema, SchemaGetter } from "effect";
 
+export const Universe = Schema.Literals(["star-wars", "ghibli"]);
+export type Universe = typeof Universe.Type;
+
 const CharacterNumber = Schema.NumberFromString.check(
   Schema.isInt(),
   Schema.isGreaterThan(0),

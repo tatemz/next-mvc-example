@@ -8,9 +8,9 @@ import {
   makeTransportChoice,
   type ResultsContext,
   type ResultsCta,
-  type Universe,
 } from "../ui-events/UiEvent";
 import { useUiEventDispatch } from "../ui-events/UiEventContext";
+import type { Universe } from "../domain/FilmUniverse.model";
 import { Results, ResultsViewModel } from "./Results";
 
 export type ConnectedResultsProps = {

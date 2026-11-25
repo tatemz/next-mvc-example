@@ -13,7 +13,8 @@ import {
   ghibli,
   starWars,
 } from "../../.storybook/pageFixtures";
-import { type Universe, type UiEvent } from "../ui-events/UiEvent";
+import type { Universe } from "../domain/FilmUniverse.model";
+import { type UiEvent } from "../ui-events/UiEvent";
 import { UiEventProvider } from "../ui-events/UiEventContext";
 import type { FunnelViewModel } from "./FunnelView";
 import { ConnectedFunnelView } from "./FunnelView.connected";

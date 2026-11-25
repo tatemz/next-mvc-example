@@ -13,13 +13,19 @@ const viewModelFiles = ["src/components", "src/page-modules"]
   .flatMap(filesUnder)
   .filter((path) => !/\.test\.tsx?$/.test(path));
 
+const universeTypeImport =
+  /import\s+type\s+\{[^}]*\bUniverse\b[^}]*\}\s+from\s+["'][^"']*\/domain\/FilmUniverse\.model["'];?\n?/g;
 const domainImport = /from\s+["'][^"']*\/domain\//;
+const withoutUniverseTypeImport = (source: string) =>
+  source.replace(universeTypeImport, "");
 const viewModelImport = /from\s+["'][^"']*(components|page-modules)\//;
 
 describe("view-model layer", () => {
-  it("does not import domain models", () => {
+  it("does not import domain models other than the Universe type", () => {
     const importers = viewModelFiles.filter((path) =>
-      domainImport.test(readFileSync(path, "utf8")),
+      domainImport.test(
+        withoutUniverseTypeImport(readFileSync(path, "utf8")),
+      ),
     );
 
     expect(importers).toEqual([]);

@@ -10,9 +10,9 @@ import {
   makeTransportChoice,
   type FunnelContext,
   type FunnelCta,
-  type Universe,
 } from "../ui-events/UiEvent";
 import { useUiEventDispatch } from "../ui-events/UiEventContext";
+import type { Universe } from "../domain/FilmUniverse.model";
 import { FunnelView, FunnelViewModel } from "./FunnelView";
 
 type FunnelAction = (

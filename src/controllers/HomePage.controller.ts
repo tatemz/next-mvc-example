@@ -5,7 +5,7 @@ import {
   type HomeHeroImageViewModel,
 } from "../components/HomePage";
 import { I18n } from "../i18n/I18n.service";
-import type { Universe } from "../ui-events/UiEvent";
+import type { Universe } from "../domain/FilmUniverse.model";
 import { loadAppShell } from "./AppShell.controller";
 
 export const loadHomePage = (

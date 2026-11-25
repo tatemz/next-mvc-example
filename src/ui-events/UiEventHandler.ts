@@ -1,10 +1,10 @@
+import type { Universe } from "../domain/FilmUniverse.model";
 import {
   PageContext,
   TransportChoice,
   UiEvent,
   type CtaClicked,
   type Page,
-  type Universe,
 } from "./UiEvent";
 
 export type UiEventProperty = string | number | boolean;

@@ -1,7 +1,5 @@
 import { Schema } from "effect";
-
-export const Universe = Schema.Literals(["star-wars", "ghibli"]);
-export type Universe = typeof Universe.Type;
+import { Universe } from "../domain/FilmUniverse.model";
 
 export const Page = Schema.Literals(["home", "funnel", "results"]);
 export type Page = typeof Page.Type;

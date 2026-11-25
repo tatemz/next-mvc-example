@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import type { I18n } from "../i18n/I18n.service";
-import type { Universe } from "../ui-events/UiEvent";
+import type { Universe } from "../domain/FilmUniverse.model";
 import { AppShell, AppShellViewModel } from "./AppShell";
 
 export const HomeHeroImageViewModel = Schema.TaggedStruct(

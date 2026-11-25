@@ -5,9 +5,9 @@ import {
   CtaClicked,
   PageContext,
   PageLoaded,
-  type Universe,
 } from "../ui-events/UiEvent";
 import { useUiEventDispatch } from "../ui-events/UiEventContext";
+import type { Universe } from "../domain/FilmUniverse.model";
 import { HomePage, type HomePageViewModel } from "./HomePage";
 
 export type ConnectedHomePageProps = {
