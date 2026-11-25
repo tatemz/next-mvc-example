@@ -5,7 +5,7 @@ import type { FunnelViewModel } from "../components/FunnelView";
 import { advanceFunnel } from "../controllers/Funnel.controller";
 import { currentRenderContext } from "../server/RenderContext";
 
-export async function submitStarWarsFunnel(
+export async function submitFunnel(
   previous: FunnelViewModel,
   formData: FormData,
 ) {

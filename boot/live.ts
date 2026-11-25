@@ -6,10 +6,6 @@ import {
 import { layer as GhibliCatalogLayer } from "../src/services/GhibliPeopleCatalog.layer";
 import { PeopleCatalog } from "../src/services/PeopleCatalog";
 import { layer as SwapiCatalogLayer } from "../src/services/SwapiPeopleCatalog.layer";
-import {
-  UiEventLogger,
-  makeUiEventLogger,
-} from "../src/server/UiEventLogger";
 import { appWith } from "./app";
 import { nextLayer } from "./next";
 
@@ -33,5 +29,4 @@ export const liveApp = (
   appWith({
     next: nextLayer(dir),
     catalogs,
-    uiEventLogger: makeUiEventLogger(process.env.UI_EVENT_LOGGER),
   });

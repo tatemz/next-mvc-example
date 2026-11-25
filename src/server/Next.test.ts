@@ -17,7 +17,6 @@ import { catalogOf } from "../services/PeopleCatalog.fixture";
 import { PeopleCatalog } from "../services/PeopleCatalog";
 import type { RenderServices } from "./RenderContext";
 import { Next } from "./Next";
-import { noopUiEventLogger } from "./UiEventLogger";
 
 const catalogServing = (name: string) =>
   catalogOf([personNamed(makeCharacterId("1"), name)]);
@@ -48,7 +47,6 @@ const appWithFakes = appWith({
     "star-wars": catalogServing("Luke"),
     ghibli: catalogServing("Haku"),
   },
-  uiEventLogger: noopUiEventLogger,
 });
 
 const body = (url: string) =>

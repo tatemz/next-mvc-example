@@ -1,5 +1,5 @@
 import { Effect, Function } from "effect";
-import { submitStarWarsFunnel } from "../../actions/StarWarsFunnel.serverAction";
+import { submitFunnel } from "../../actions/Funnel.serverAction";
 import { ConnectedFunnelView } from "../../components/FunnelView.connected";
 import { startFunnel } from "../../controllers/Funnel.controller";
 import { makeNextPage } from "../../platform/NextPage";
@@ -9,7 +9,7 @@ export const StarWarsFunnelPage = Function.pipe(
   Effect.map((model) => (
     <ConnectedFunnelView
       model={model}
-      submitAction={submitStarWarsFunnel}
+      submitAction={submitFunnel}
     />
   )),
   makeNextPage,

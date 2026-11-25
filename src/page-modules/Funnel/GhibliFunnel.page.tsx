@@ -1,5 +1,5 @@
 import { Effect, Function } from "effect";
-import { submitGhibliFunnel } from "../../actions/GhibliFunnel.serverAction";
+import { submitFunnel } from "../../actions/Funnel.serverAction";
 import { ConnectedFunnelView } from "../../components/FunnelView.connected";
 import { startFunnel } from "../../controllers/Funnel.controller";
 import { makeNextPage } from "../../platform/NextPage";
@@ -9,7 +9,7 @@ export const GhibliFunnelPage = Function.pipe(
   Effect.map((model) => (
     <ConnectedFunnelView
       model={model}
-      submitAction={submitGhibliFunnel}
+      submitAction={submitFunnel}
     />
   )),
   makeNextPage,

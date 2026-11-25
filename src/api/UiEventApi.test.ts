@@ -3,10 +3,9 @@ import {
   NodeHttpServer,
   NodePath,
 } from "@effect/platform-node";
-import { Context, Effect, Layer } from "effect";
+import { Context, Layer, Logger } from "effect";
 import { HttpRouter } from "effect/http";
 import { describe, expect, it } from "vitest";
-import { UiEventLogger } from "../server/UiEventLogger";
 import { layer } from "./UiEventApi.layer";
 
 const payload = {
@@ -24,16 +23,13 @@ const requestFor = (body: string) =>
     body,
   });
 
-const collector = (payloads: Array<unknown>) => ({
-  log: (event: unknown) =>
-    Effect.sync(() => payloads.push(event)),
-});
-
-const handlerFor = (payloads: Array<unknown>) =>
+const handlerFor = (messages: Array<unknown>) =>
   HttpRouter.toWebHandler(
     layer.pipe(
       Layer.provide(
-        Layer.succeed(UiEventLogger, collector(payloads)),
+        Logger.layer([
+          Logger.make(({ message }) => messages.push(message)),
+        ]),
       ),
       Layer.provideMerge(NodeHttpServer.layerHttpServices),
       Layer.provideMerge(NodeFileSystem.layer),
@@ -44,34 +40,31 @@ const handlerFor = (payloads: Array<unknown>) =>
 
 describe("UiEventApi", () => {
   it("logs a valid event and returns no content", async () => {
-    const payloads: Array<unknown> = [];
-    const { handler, dispose } = handlerFor(payloads);
+    const messages: Array<unknown> = [];
+    const { handler, dispose } = handlerFor(messages);
 
     try {
       const response = await handler(
         requestFor(JSON.stringify(payload)),
-        Context.make(UiEventLogger, collector(payloads)),
+        Context.empty(),
       );
 
       expect(response.status).toBe(204);
-      expect(payloads).toEqual([payload]);
+      expect(messages).toEqual([["ui event"]]);
     } finally {
       await dispose();
     }
   });
 
   it("rejects an invalid payload", async () => {
-    const payloads: Array<unknown> = [];
-    const { handler, dispose } = handlerFor(payloads);
+    const messages: Array<unknown> = [];
+    const { handler, dispose } = handlerFor(messages);
 
     try {
-      const response = await handler(
-        requestFor("{}"),
-        Context.make(UiEventLogger, collector(payloads)),
-      );
+      const response = await handler(requestFor("{}"), Context.empty());
 
       expect(response.status).toBe(400);
-      expect(payloads).toEqual([]);
+      expect(messages).toEqual([]);
     } finally {
       await dispose();
     }

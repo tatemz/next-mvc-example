@@ -1,9 +1,8 @@
-import { Context, Effect, Layer, Ref } from "effect";
+import { Context, Effect, Layer, References, Ref } from "effect";
 import { resolve } from "node:path";
 import { appWith } from "../../boot/app";
 import { nextLayer } from "../../boot/next";
 import { serve } from "../../boot/serve";
-import { noopUiEventLogger } from "../../src/server/UiEventLogger";
 import {
   CatalogControl,
   type CatalogMode,
@@ -21,8 +20,11 @@ const appWithStubs = (mode: Ref.Ref<CatalogMode>) =>
   appWith({
     next: nextLayer(repoRoot),
     catalogs: catalogs(mode),
-    uiEventLogger: noopUiEventLogger,
-  });
+  }).pipe(
+    Layer.provideMerge(
+      Layer.succeed(References.MinimumLogLevel, "Warn"),
+    ),
+  );
 
 export const scenarioApp = Layer.unwrap(
   Effect.gen(function*() {

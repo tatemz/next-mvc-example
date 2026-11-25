@@ -84,7 +84,7 @@ discipline inside an existing Next codebase.
   choice, not a default.
 - The review link is relative (`results?...`); the results page's links use the
   selected universe's base path.
-- `submitStarWarsFunnel` and `submitGhibliFunnel` are the server actions.
+- `submitFunnel` is the server action.
   `HomeView.connected.tsx`, `FunnelView.connected.tsx`, and
   `ResultsView.connected.tsx` are the client event boundaries.
 
@@ -139,7 +139,7 @@ export const StarWarsFunnelPage = makeNextPage(
   Effect.map(startFunnel("star-wars"), (model) => (
     <ConnectedFunnelView
       model={model}
-      submitAction={submitStarWarsFunnel}
+      submitAction={submitFunnel}
       universe="star-wars"
     />
   )),
@@ -231,10 +231,10 @@ supplies input, validation, and CTA events, and `ResultsView` supplies
 page-load and CTA events.
 
 `src/api/UiEventApi.ts` defines `POST /api/ui-events`; `src/api/UiEventApi.layer.ts`
-logs each payload through `UiEventLogger`. `server.ts` serves that API and the
+logs each payload through the Effect logger. `server.ts` serves that API and the
 Next catch-all from one Effect HTTP server, so the endpoint is not a Next
-route. `UI_EVENT_LOGGER=console` is the default; `noop` drops the logs, and the
-browser suite uses it so event traffic does not fill the test output.
+route. The API logs through the Effect logger, and the browser suite raises
+the minimum log level so event traffic does not fill the test output.
 
 ## Project structure
 
@@ -349,7 +349,6 @@ Copy `.env.example` to `.env.local` for local development.
 | `STAR_WARS_API_URL` | `https://swapi.dev/api` | SWAPI base URL for the live adapter |
 | `GHIBLI_API_URL` | `https://ghibliapi.vercel.app` | Ghibli API base URL for the live adapter |
 | `PORT` | `3000` | Effect HTTP server port |
-| `UI_EVENT_LOGGER` | `console` | `console` logs UI events; `noop` drops them |
 | `CHROMIUM_PATH` | none | Chrome or Chromium executable for the browser suite |
 
 The browser suite ignores both API URLs; it provides stub catalogs.

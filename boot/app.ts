@@ -9,10 +9,6 @@ import {
 import { layer as I18nLayer } from "../src/i18n/I18n.service";
 import { PeopleCatalog } from "../src/services/PeopleCatalog";
 import { nextCatchAll, type Next } from "../src/server/Next";
-import {
-  UiEventLogger,
-  type UiEventLoggerService,
-} from "../src/server/UiEventLogger";
 
 const universeRoutes = (path: `/${string}`, catalog: PeopleCatalog) =>
   HttpRouter.provideRequest(
@@ -24,7 +20,6 @@ const universeRoutes = (path: `/${string}`, catalog: PeopleCatalog) =>
 export type AppServices<E = never> = {
   readonly next: Layer.Layer<Next, E>;
   readonly catalogs: Record<Universe, PeopleCatalog>;
-  readonly uiEventLogger: UiEventLoggerService;
 };
 
 export const appWith = <E>(services: AppServices<E>) =>
@@ -47,7 +42,6 @@ export const appWith = <E>(services: AppServices<E>) =>
       Layer.mergeAll(
         services.next,
         NodeHttpServer.layerHttpServices,
-        Layer.succeed(UiEventLogger, services.uiEventLogger),
       ),
     ),
   );
