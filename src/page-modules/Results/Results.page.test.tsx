@@ -8,10 +8,15 @@ import { ConnectedResultsView } from "../../components/ResultsView.connected";
 import { NotFoundView } from "../../components/NotFoundView";
 import { haku, luke } from "../../domain/FilmUniverse.fixture";
 import type { Person } from "../../domain/FilmUniverse.model";
-import { catalogOf } from "../../services/PeopleCatalog.fixture";
 import { runInRenderContext } from "../../server/RenderContext";
 import { renderContext } from "../../server/RenderContext.fixture";
 import { ResultsPage } from "./Results.page";
+
+const catalogsFor = (
+  universe: string,
+  people: ReadonlyArray<Person>,
+) =>
+  universe === Universes.Ghibli ? { ghibli: people } : { starWars: people };
 
 const render = (
   universe: string,
@@ -19,7 +24,7 @@ const render = (
   people: ReadonlyArray<Person>,
 ) =>
   Effect.promise(() =>
-    runInRenderContext(renderContext(catalogOf(people)), () =>
+    runInRenderContext(renderContext(catalogsFor(universe, people)), () =>
       ResultsPage({
         params: Promise.resolve({ universe }),
         searchParams: Promise.resolve(searchParams),

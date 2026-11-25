@@ -7,7 +7,6 @@ import { haku, luke } from "../domain/FilmUniverse.fixture";
 import { FunnelFields } from "../forms/FunnelForm";
 import type { Person, Universe } from "../domain/FilmUniverse.model";
 import { makeEn } from "../i18n/I18n.service";
-import { catalogOf } from "../services/PeopleCatalog.fixture";
 import { runInRenderContext } from "../server/RenderContext";
 import { renderContext } from "../server/RenderContext.fixture";
 import { submitFunnel } from "./Funnel.serverAction";
@@ -30,7 +29,11 @@ const run = (
 
     return yield* Effect.promise(() =>
       runInRenderContext(
-        renderContext(catalogOf(people)),
+        renderContext(
+          universe === Universes.Ghibli
+            ? { ghibli: people }
+            : { starWars: people },
+        ),
         () => submitFunnel(previous, formData),
       )
     );

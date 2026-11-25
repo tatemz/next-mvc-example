@@ -4,7 +4,7 @@ import {
   makeFunnelChooseResult,
   makeFunnelFilmResult,
   makeFunnelSearchResult,
-  makeFunnelPageViewModel,
+  makeFunnelSearchViewModel,
   makeFunnelTransportResult,
 } from "../components/FunnelView";
 import type { Person } from "../domain/FilmUniverse.model";
@@ -15,69 +15,69 @@ import {
   FunnelTransportForm,
 } from "../forms/FunnelForm";
 import { toRecord } from "../forms/FormData";
-import { I18n } from "../i18n/I18n.service";
-import { currentUniverse } from "./Universe.controller";
-import { PeopleCatalog } from "../services/PeopleCatalog";
+import type { UniverseServices } from "../page-modules/withUniverseServices";
 
-export const startFunnel = Effect.gen(function*() {
-  const i18n = yield* I18n;
-  const universe = yield* currentUniverse;
-  return makeFunnelPageViewModel(i18n, universe);
-});
+export const startFunnel = ({ i18n, universe }: UniverseServices) =>
+  makeFunnelSearchViewModel(i18n, universe, "", undefined);
 
 export const advanceFunnel = (
+  services: UniverseServices,
   previous: FunnelViewModel,
   formData: FormData,
 ) =>
   FunnelViewModel.match(previous, {
     Search: (step) =>
       Effect.gen(function*() {
-        const i18n = yield* I18n;
         const form = Schema.decodeUnknownOption(FunnelSearchForm)(
           toRecord(formData),
         );
 
         if (Option.isNone(form)) {
-          return makeFunnelSearchResult(i18n, step)({
+          return makeFunnelSearchResult(services.i18n, step)({
             form,
             results: Option.none(),
           });
         }
 
-        const client = yield* PeopleCatalog;
         const results = yield* Effect.option(
-          client.searchPeople(form.value.query),
+          services.catalog.searchPeople(form.value.query),
         );
-        return makeFunnelSearchResult(i18n, step)({ form, results });
+        return makeFunnelSearchResult(services.i18n, step)({
+          form,
+          results,
+        });
       }),
     Choose: (step) =>
       Effect.gen(function*() {
-        const i18n = yield* I18n;
         const form = Schema.decodeUnknownOption(FunnelChooseForm)(
           toRecord(formData),
         );
-        const client = yield* PeopleCatalog;
         const person: Option.Option<Person> = Option.isSome(form)
-          ? yield* Effect.option(client.getPerson(form.value.characterId))
+          ? yield* Effect.option(
+            services.catalog.getPerson(form.value.characterId),
+          )
           : Option.none();
-        return makeFunnelChooseResult(i18n, step)({ form, person });
+        return makeFunnelChooseResult(services.i18n, step)({
+          form,
+          person,
+        });
       }),
     Film: (step) =>
-      Effect.gen(function*() {
-        const i18n = yield* I18n;
-        const form = Schema.decodeUnknownOption(FunnelFilmForm)(
-          toRecord(formData),
-        );
-        return makeFunnelFilmResult(i18n, step)({ form });
-      }),
+      Effect.succeed(
+        makeFunnelFilmResult(services.i18n, step)({
+          form: Schema.decodeUnknownOption(FunnelFilmForm)(
+            toRecord(formData),
+          ),
+        }),
+      ),
     Transport: (step) =>
-      Effect.gen(function*() {
-        const i18n = yield* I18n;
-        const form = Schema.decodeUnknownOption(FunnelTransportForm)(
-          toRecord(formData),
-        );
-        return makeFunnelTransportResult(i18n, step)({ form });
-      }),
+      Effect.succeed(
+        makeFunnelTransportResult(services.i18n, step)({
+          form: Schema.decodeUnknownOption(FunnelTransportForm)(
+            toRecord(formData),
+          ),
+        }),
+      ),
     Review: (step) => Effect.succeed<FunnelViewModel>(step),
     Failed: (step) => Effect.succeed<FunnelViewModel>(step),
   });

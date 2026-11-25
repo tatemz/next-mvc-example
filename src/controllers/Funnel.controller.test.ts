@@ -1,9 +1,5 @@
-import { FunnelFailures } from "../components/FunnelView";
-import { Universes, NoTransportKey } from "../domain/FilmUniverse.model";
-import { it } from "@effect/vitest";
-import { Effect } from "effect";
-import { describe, expect } from "vitest";
 import {
+  FunnelFailures,
   makeFunnelChooseViewModel,
   makeFunnelFailedViewModel,
   makeFunnelFilmViewModel,
@@ -11,13 +7,17 @@ import {
   makeFunnelSearchViewModel,
   makeFunnelTransportViewModel,
 } from "../components/FunnelView";
+import { Universes, NoTransportKey } from "../domain/FilmUniverse.model";
+import { it } from "@effect/vitest";
+import { Effect } from "effect";
+import { describe, expect } from "vitest";
 import { makePersonViewModel } from "../components/PersonCard";
 import { makeAppShellViewModel } from "../components/AppShell";
 import { luke, makeCharacterId } from "../domain/FilmUniverse.fixture";
-import { I18n, makeEn } from "../i18n/I18n.service";
+import { makeEn } from "../i18n/I18n.service";
+import type { UniverseServices } from "../page-modules/withUniverseServices";
 import { PeopleCatalog, PeopleCatalogError } from "../services/PeopleCatalog";
-import { layerStub } from "../services/SwapiPeopleCatalog.layer";
-import { tag as pathParamsTag } from "../platform/ParsedPathParams";
+import { unusedCatalog } from "../services/PeopleCatalog.fixture";
 import { advanceFunnel, startFunnel } from "./Funnel.controller";
 
 const i18n = makeEn();
@@ -31,16 +31,21 @@ const form = (values: Record<string, string>) => {
   return data;
 };
 
+const services = (
+  searchPeople: PeopleCatalog["searchPeople"] = () => Effect.succeed([]),
+  getPerson: PeopleCatalog["getPerson"] = () => Effect.succeed(luke),
+): UniverseServices => ({
+  universe: Universes.StarWars,
+  catalog: { searchPeople, getPerson },
+  i18n,
+});
+
 const run = (
-  previous: Parameters<typeof advanceFunnel>[0],
+  previous: Parameters<typeof advanceFunnel>[1],
   data: FormData,
   searchPeople: PeopleCatalog["searchPeople"] = () => Effect.succeed([]),
   getPerson: PeopleCatalog["getPerson"] = () => Effect.succeed(luke),
-) =>
-  advanceFunnel(previous, data).pipe(
-    Effect.provide(layerStub(getPerson, searchPeople)),
-    Effect.provideService(I18n, i18n),
-  );
+) => advanceFunnel(services(searchPeople, getPerson), previous, data);
 
 const search = makeFunnelSearchViewModel(i18n, Universes.StarWars, "", undefined);
 const person = makePersonViewModel(i18n, luke);
@@ -54,22 +59,13 @@ const review = makeFunnelReviewViewModel(i18n, shell, person, film, transport);
 const failed = makeFunnelFailedViewModel(i18n, shell, FunnelFailures.Unavailable);
 
 describe("startFunnel", () => {
-  it.effect("returns not found for an unknown universe", () =>
-    Effect.gen(function*() {
-      const model = yield* startFunnel.pipe(
-        Effect.provideService(I18n, i18n),
-        Effect.provideService(pathParamsTag, { universe: "unknown" }),
-      );
-
-      expect(model).toMatchObject({ _tag: "NotFoundViewModel" });
-    }));
-
   it.effect("starts on the search step", () =>
     Effect.gen(function*() {
-      const model = yield* startFunnel.pipe(
-        Effect.provideService(I18n, i18n),
-        Effect.provideService(pathParamsTag, {
+      const model = yield* Effect.succeed(
+        startFunnel({
           universe: Universes.StarWars,
+          catalog: unusedCatalog,
+          i18n,
         }),
       );
 

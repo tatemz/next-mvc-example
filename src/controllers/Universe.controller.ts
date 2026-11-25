@@ -1,13 +1,13 @@
-import { Effect, Option, Schema } from "effect";
+import { Option, Schema } from "effect";
 import { Universe } from "../domain/FilmUniverse.model";
-import { tag } from "../platform/ParsedPathParams";
+import type { ParsedPathParams } from "../platform/ParsedPathParams";
 
-const UniverseParams = Schema.Struct({ universe: Universe });
+export const UniverseParams = Schema.Struct({ universe: Universe });
 
-export const currentUniverse = Effect.gen(function*() {
-  const params = yield* tag;
-  return Option.map(
+export const decodeUniverse = (
+  params: ParsedPathParams,
+): Option.Option<Universe> =>
+  Option.map(
     Schema.decodeUnknownOption(UniverseParams)(params),
     (decoded) => decoded.universe,
   );
-});

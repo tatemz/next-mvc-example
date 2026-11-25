@@ -1,5 +1,5 @@
 import { ExperienceThemes } from "../components/AppShell";
-import { Universes } from "../domain/FilmUniverse.model";
+import { Universes, type Universe } from "../domain/FilmUniverse.model";
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
@@ -7,14 +7,13 @@ import {
   ghibliSplashImage,
   starWarsSplashImage,
 } from "../components/HomeHero";
-import { I18n, makeEn } from "../i18n/I18n.service";
-import { tag as pathParamsTag } from "../platform/ParsedPathParams";
+import { makeEn } from "../i18n/I18n.service";
+import { unusedCatalog } from "../services/PeopleCatalog.fixture";
 import { loadHome } from "./Home.controller";
 
-const run = (universe: string) =>
-  loadHome.pipe(
-    Effect.provideService(I18n, makeEn()),
-    Effect.provideService(pathParamsTag, { universe }),
+const run = (universe: Universe) =>
+  Effect.succeed(
+    loadHome({ universe, i18n: makeEn(), catalog: unusedCatalog }),
   );
 
 describe("loadHome", () => {
@@ -34,13 +33,6 @@ describe("loadHome", () => {
       });
     }),
   );
-
-  it.effect("returns not found for an unknown universe", () =>
-    Effect.gen(function*() {
-      const model = yield* run("unknown");
-
-      expect(model).toMatchObject({ _tag: "NotFoundViewModel" });
-    }));
 
   it.effect("builds the Ghibli splash", () =>
     Effect.gen(function*() {

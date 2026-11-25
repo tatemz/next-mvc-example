@@ -15,6 +15,7 @@ import {
 } from "../domain/FilmUniverse.fixture";
 import { catalogOf } from "../services/PeopleCatalog.fixture";
 import { Universes } from "../domain/FilmUniverse.model";
+import { Catalogs } from "../services/Catalogs";
 import { PeopleCatalog } from "../services/PeopleCatalog";
 import type { RenderServices } from "./RenderContext";
 import { Next } from "./Next";
@@ -27,17 +28,19 @@ const fakeNext = Layer.succeed(
   Next.of({
     render: (_request, context) =>
       Effect.gen(function*() {
-        const catalog = Context.getOption(
-          context as Context.Context<RenderServices>,
-          PeopleCatalog,
-        );
-        if (Option.isNone(catalog)) {
-          return HttpServerResponse.text("no catalog");
+        const services = context as Context.Context<RenderServices>;
+        const catalogs = Context.getOption(services, Catalogs);
+        const selected = Context.getOption(services, PeopleCatalog);
+        if (Option.isNone(catalogs) || Option.isSome(selected)) {
+          return HttpServerResponse.text("unexpected context");
         }
-        const people = yield* catalog.value.searchPeople("").pipe(
-          Effect.orDie,
+        const [starWars, ghibli] = yield* Effect.all([
+          catalogs.value[Universes.StarWars].searchPeople(""),
+          catalogs.value[Universes.Ghibli].searchPeople(""),
+        ]).pipe(Effect.orDie);
+        return HttpServerResponse.text(
+          `${starWars[0]?.name}/${ghibli[0]?.name}`,
         );
-        return HttpServerResponse.text(people[0]?.name ?? "empty");
       }),
   }),
 );
@@ -57,20 +60,14 @@ const body = (url: string) =>
   );
 
 describe("app routes", () => {
-  it.effect(
-    "gives each universe route its catalog and other routes none",
-    () =>
-      Effect.gen(function*() {
-        const url = yield* serve(0)(appWithFakes);
+  it.effect("gives the single catch-all the catalog registry", () =>
+    Effect.gen(function*() {
+      const url = yield* serve(0)(appWithFakes);
 
-        expect(yield* body(`${url}/star-wars`)).toBe("Luke");
-        expect(yield* body(`${url}/star-wars/funnel`)).toBe("Luke");
-        expect(yield* body(`${url}/ghibli`)).toBe("Haku");
-        expect(yield* body(`${url}/ghibli/results`)).toBe("Haku");
-        expect(yield* body(`${url}/`)).toBe("no catalog");
-        expect(yield* body(`${url}/_next/static/chunk.js`)).toBe(
-          "no catalog",
-        );
-      }).pipe(Effect.scoped, Effect.provide(FetchHttpClient.layer)),
+      expect(yield* body(`${url}/star-wars`)).toBe("Luke/Haku");
+      expect(yield* body(`${url}/ghibli/funnel`)).toBe("Luke/Haku");
+      expect(yield* body(`${url}/`)).toBe("Luke/Haku");
+      expect(yield* body(`${url}/_next/static/chunk.js`)).toBe("Luke/Haku");
+    }).pipe(Effect.scoped, Effect.provide(FetchHttpClient.layer)),
   );
 });

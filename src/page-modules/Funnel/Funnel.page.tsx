@@ -4,9 +4,10 @@ import { ConnectedFunnelView } from "../../components/FunnelView.connected";
 import { NotFoundView } from "../../components/NotFoundView";
 import { startFunnel } from "../../controllers/Funnel.controller";
 import { makeNextPage } from "../../platform/NextPage";
+import { withUniverseServices } from "../withUniverseServices";
 
 export const FunnelPage = Function.pipe(
-  startFunnel,
+  withUniverseServices((services) => Effect.succeed(startFunnel(services))),
   Effect.map((model) =>
     model._tag === "NotFoundViewModel"
       ? <NotFoundView model={model} />

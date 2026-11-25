@@ -1,10 +1,6 @@
-import { Option, Schema } from "effect";
+import { Schema } from "effect";
 import type { I18n } from "../i18n/I18n.service";
 import type { Universe } from "../domain/FilmUniverse.model";
-import {
-  NotFoundViewModel,
-  makeNotFoundViewModel,
-} from "./NotFoundView";
 import {
   AppShell,
   AppShellViewModel,
@@ -29,18 +25,6 @@ export const makeHomeViewModel = (
   HomeViewModel.make({
     shell: makeAppShellViewModel(i18n, universe),
     hero: makeHomeHeroViewModel(i18n, universe),
-  });
-
-export const HomePageViewModel = Schema.Union([NotFoundViewModel, HomeViewModel]);
-export type HomePageViewModel = typeof HomePageViewModel.Type;
-
-export const makeHomePageViewModel = (
-  i18n: I18n,
-  universe: Option.Option<Universe>,
-): HomePageViewModel =>
-  Option.match(universe, {
-    onNone: () => makeNotFoundViewModel(i18n),
-    onSome: (value) => makeHomeViewModel(i18n, value),
   });
 
 export type HomeViewProps = {

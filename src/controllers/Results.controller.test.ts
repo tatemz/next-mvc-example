@@ -3,46 +3,36 @@ import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
 import { luke } from "../domain/FilmUniverse.fixture";
-import { I18n, makeEn } from "../i18n/I18n.service";
+import { makeEn } from "../i18n/I18n.service";
 import {
   PeopleCatalogError,
   type PeopleCatalog,
 } from "../services/PeopleCatalog";
-import { layerStub } from "../services/SwapiPeopleCatalog.layer";
-import { tag as pathParamsTag } from "../platform/ParsedPathParams";
 import { tag as parsedSearchParamsTag } from "../platform/ParsedSearchParams";
 import { loadResults } from "./Results.controller";
 
 const i18n = makeEn();
 
+const services = (
+  getPerson: PeopleCatalog["getPerson"],
+): Parameters<typeof loadResults>[0] => ({
+  universe: Universes.StarWars,
+  i18n,
+  catalog: {
+    getPerson,
+    searchPeople: () => Effect.succeed([]),
+  },
+});
+
 const run = (
   params: Readonly<Record<string, string>>,
   getPerson: PeopleCatalog["getPerson"] = () => Effect.succeed(luke),
 ) =>
-  loadResults.pipe(
-    Effect.provide(layerStub(getPerson)),
-    Effect.provideService(I18n, i18n),
-    Effect.provideService(pathParamsTag, { universe: Universes.StarWars }),
+  loadResults(services(getPerson)).pipe(
     Effect.provideService(parsedSearchParamsTag, params),
   );
 
 describe("loadResults", () => {
-  it.effect("returns not found for an unknown universe", () =>
-    Effect.gen(function*() {
-      const model = yield* loadResults.pipe(
-        Effect.provide(layerStub(() => Effect.succeed(luke))),
-        Effect.provideService(I18n, i18n),
-        Effect.provideService(pathParamsTag, { universe: "unknown" }),
-        Effect.provideService(parsedSearchParamsTag, {
-          character: "1",
-          film: "4",
-          transport: NoTransportKey,
-        }),
-      );
-
-      expect(model).toMatchObject({ _tag: "NotFoundViewModel" });
-    }));
-
   it.effect("loads a complete dossier", () =>
     Effect.gen(function*() {
       const model = yield* run({

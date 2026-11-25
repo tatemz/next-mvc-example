@@ -6,14 +6,13 @@ import { isValidElement } from "react";
 import { describe, expect } from "vitest";
 import { ConnectedFunnelView } from "../../components/FunnelView.connected";
 import { NotFoundView } from "../../components/NotFoundView";
-import { unusedCatalog } from "../../services/PeopleCatalog.fixture";
 import { runInRenderContext } from "../../server/RenderContext";
 import { renderContext } from "../../server/RenderContext.fixture";
 import { FunnelPage } from "./Funnel.page";
 
 const render = (universe: string) =>
   Effect.promise(() =>
-    runInRenderContext(renderContext(unusedCatalog), () =>
+    runInRenderContext(renderContext(), () =>
       FunnelPage({
         params: Promise.resolve({ universe }),
         searchParams: Promise.resolve({}),

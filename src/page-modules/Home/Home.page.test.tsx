@@ -6,14 +6,13 @@ import { isValidElement } from "react";
 import { describe, expect } from "vitest";
 import { ConnectedHomeView } from "../../components/HomeView.connected";
 import { NotFoundView } from "../../components/NotFoundView";
-import { unusedCatalog } from "../../services/PeopleCatalog.fixture";
 import { runInRenderContext } from "../../server/RenderContext";
 import { renderContext } from "../../server/RenderContext.fixture";
 import { HomePage } from "./Home.page";
 
 const render = (universe: string) =>
   Effect.promise(() =>
-    runInRenderContext(renderContext(unusedCatalog), () =>
+    runInRenderContext(renderContext(), () =>
       HomePage({
         params: Promise.resolve({ universe }),
         searchParams: Promise.resolve({}),

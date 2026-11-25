@@ -10,10 +10,13 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { redirect } from "next/navigation";
-import { makeCharacterId, personNamed } from "../domain/FilmUniverse.fixture";
+import {
+  makeCharacterId,
+  personNamed,
+} from "../domain/FilmUniverse.fixture";
+import { Universes } from "../domain/FilmUniverse.model";
 import { I18n } from "../i18n/I18n.service";
-import { PeopleCatalog } from "../services/PeopleCatalog";
-import { catalogOf } from "../services/PeopleCatalog.fixture";
+import { Catalogs } from "../services/Catalogs";
 import { makeNextPage } from "./NextPage";
 import { NextRedirect, RedirectTypes } from "./NextRedirect";
 import { type ParsedSearchParams, decodeOption } from "./ParsedSearchParams";
@@ -24,15 +27,15 @@ const Params = Schema.Struct({
   id: Schema.NumberFromString.check(Schema.isInt()),
 });
 
-const context = renderContext(
-  catalogOf([personNamed(makeCharacterId("2"), "Ghibli")]),
-);
+const context = renderContext({
+  ghibli: [personNamed(makeCharacterId("2"), "Ghibli")],
+});
 
 const Page = makeNextPage(
   Effect.gen(function*() {
     const i18n = yield* I18n;
-    const catalog = yield* PeopleCatalog;
-    const people = yield* catalog.searchPeople("");
+    const catalogs = yield* Catalogs;
+    const people = yield* catalogs[Universes.Ghibli].searchPeople("");
     const params = yield* decodeOption(Params);
     return (
       <p>
