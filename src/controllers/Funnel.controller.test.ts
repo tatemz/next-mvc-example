@@ -48,7 +48,7 @@ const choose = makeFunnelChooseViewModel(i18n, shell, "Luke", [choice]);
 const filmStep = makeFunnelFilmViewModel(i18n, shell, luke);
 const transportStep = makeFunnelTransportViewModel(i18n, shell, person, film);
 const review = makeFunnelReviewViewModel(i18n, shell, person, film, transport);
-const failed = makeFunnelFailedViewModel(i18n, shell, "Nope");
+const failed = makeFunnelFailedViewModel(i18n, shell, "unavailable");
 
 describe("startFunnel", () => {
   it.effect("starts on the search step", () =>
@@ -220,6 +220,17 @@ describe("advanceFunnel", () => {
         transportStep,
         form({ transportKey: "starship-99" }),
       );
+
+      expect(model).toMatchObject({
+        _tag: "Failed",
+        message: "That choice is no longer available.",
+      });
+    }),
+  );
+
+  it.effect("rejects a missing transport choice", () =>
+    Effect.gen(function*() {
+      const model = yield* run(transportStep, form({}));
 
       expect(model).toMatchObject({
         _tag: "Failed",

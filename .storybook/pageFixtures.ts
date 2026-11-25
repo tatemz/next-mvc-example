@@ -207,20 +207,12 @@ export const funnelReview = (
   );
 
 export const funnelFailed = (dataset: PageDataset): FunnelViewModel =>
-  makeFunnelFailedViewModel(
-    i18n,
-    dataset.shell,
-    i18n._({ id: "funnel.failed.message" }),
-  );
+  makeFunnelFailedViewModel(i18n, dataset.shell, "unavailable");
 
 export const funnelFailedInvalidChoice = (
   dataset: PageDataset,
 ): FunnelViewModel =>
-  makeFunnelFailedViewModel(
-    i18n,
-    dataset.shell,
-    i18n._({ id: "funnel.failed.invalidChoice" }),
-  );
+  makeFunnelFailedViewModel(i18n, dataset.shell, "invalidChoice");
 
 export const resultsReady = (
   dataset: PageDataset,

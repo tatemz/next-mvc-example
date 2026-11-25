@@ -209,16 +209,12 @@ describe("Funnel", () => {
 
   it("renders the failure", () => {
     const html = render(
-      makeFunnelFailedViewModel(
-        i18n,
-        shell,
-        "The Star Wars API could not answer.",
-      ),
+      makeFunnelFailedViewModel(i18n, shell, "unavailable"),
     );
 
     expect(html).toContain('role="alert"');
     expect(html).toContain("The dossier could not be built");
-    expect(html).toContain("The Star Wars API could not answer.");
+    expect(html).toContain("The character API could not answer.");
     expect(html).toContain("Start over");
   });
 

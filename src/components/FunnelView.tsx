@@ -2,6 +2,12 @@ import { Array, Option, Schema } from "effect";
 import type { ReactNode } from "react";
 import type { I18n } from "../i18n/I18n.service";
 import type { FunnelCta } from "../ui-events/UiEvent";
+import type {
+  FunnelChooseForm,
+  FunnelFilmForm,
+  FunnelSearchForm,
+  FunnelTransportForm,
+} from "../forms/FunnelForm";
 import { AppShell, AppShellViewModel } from "./AppShell";
 import { FilmListItemViewModel } from "./FilmListItem";
 import {
@@ -218,33 +224,42 @@ export const makeFunnelReviewViewModel = (
   });
 };
 
+export type FunnelFailure = "unavailable" | "invalidChoice";
+
+const failureMessage = (i18n: I18n, failure: FunnelFailure): string =>
+  failure === "unavailable"
+    ? i18n._({ id: "funnel.failed.message" })
+    : i18n._({ id: "funnel.failed.invalidChoice" });
+
 export const makeFunnelFailedViewModel = (
   i18n: I18n,
   shell: AppShellViewModel,
-  message: string,
+  failure: FunnelFailure,
 ) =>
   FunnelViewModel.cases.Failed.make({
     shell,
     stepLabel: i18n._({ id: "funnel.step.failed" }),
     heading: i18n._({ id: "funnel.failed.heading" }),
     subtitle: i18n._({ id: "funnel.failed.subtitle" }),
-    message,
+    message: failureMessage(i18n, failure),
     startOverLabel: i18n._({ id: "funnel.failed.startOver" }),
     startOverHref: "funnel",
   });
 
+const isAvailableChoice = (
+  step: FunnelChooseViewModel,
+  characterId: string,
+): boolean =>
+  Array.some(step.results, (result) => result.id === characterId);
+
 export const makeFunnelSearchResult = (
   i18n: I18n,
   step: FunnelSearchViewModel,
-  query: string,
+  form: FunnelSearchForm,
   results: Option.Option<readonly PersonChoiceInput[]>,
 ): FunnelViewModel => {
   if (Option.isNone(results)) {
-    return makeFunnelFailedViewModel(
-      i18n,
-      step.shell,
-      i18n._({ id: "funnel.failed.message" }),
-    );
+    return makeFunnelFailedViewModel(i18n, step.shell, "unavailable");
   }
 
   return Array.matchLeft(results.value, {
@@ -252,14 +267,14 @@ export const makeFunnelSearchResult = (
       makeFunnelSearchViewModel(
         i18n,
         step.shell,
-        query,
+        form.query,
         i18n._({ id: "funnel.search.noResults" }),
       ),
     onNonEmpty: (first, rest) =>
       makeFunnelChooseViewModel(
         i18n,
         step.shell,
-        query,
+        form.query,
         [first, ...rest],
       ),
   });
@@ -268,29 +283,18 @@ export const makeFunnelSearchResult = (
 export const makeFunnelChooseResult = (
   i18n: I18n,
   step: FunnelChooseViewModel,
-  characterId: Option.Option<string>,
+  form: Option.Option<FunnelChooseForm>,
   person: Option.Option<PersonCardInput>,
 ): FunnelViewModel => {
   if (
-    Option.isNone(characterId) ||
-    !Array.some(
-      step.results,
-      (result) => result.id === characterId.value,
-    )
+    Option.isNone(form) ||
+    !isAvailableChoice(step, form.value.characterId)
   ) {
-    return makeFunnelFailedViewModel(
-      i18n,
-      step.shell,
-      i18n._({ id: "funnel.failed.invalidChoice" }),
-    );
+    return makeFunnelFailedViewModel(i18n, step.shell, "invalidChoice");
   }
 
   if (Option.isNone(person)) {
-    return makeFunnelFailedViewModel(
-      i18n,
-      step.shell,
-      i18n._({ id: "funnel.failed.message" }),
-    );
+    return makeFunnelFailedViewModel(i18n, step.shell, "unavailable");
   }
 
   return makeFunnelFilmViewModel(i18n, step.shell, person.value);
@@ -299,21 +303,17 @@ export const makeFunnelChooseResult = (
 export const makeFunnelFilmResult = (
   i18n: I18n,
   step: FunnelFilmViewModel,
-  order: Option.Option<number>,
+  form: Option.Option<FunnelFilmForm>,
 ): FunnelViewModel => {
-  const film = Option.flatMap(order, (value) =>
+  const film = Option.flatMap(form, ({ order }) =>
     Array.findFirst(
       step.person.films,
-      (candidate) => candidate.order === value,
+      (candidate) => candidate.order === order,
     )
   );
 
   if (Option.isNone(film)) {
-    return makeFunnelFailedViewModel(
-      i18n,
-      step.shell,
-      i18n._({ id: "funnel.failed.invalidChoice" }),
-    );
+    return makeFunnelFailedViewModel(i18n, step.shell, "invalidChoice");
   }
 
   return makeFunnelTransportViewModel(
@@ -327,8 +327,13 @@ export const makeFunnelFilmResult = (
 export const makeFunnelTransportResult = (
   i18n: I18n,
   step: FunnelTransportViewModel,
-  transportKey: string,
+  form: Option.Option<FunnelTransportForm>,
 ): FunnelViewModel => {
+  if (Option.isNone(form)) {
+    return makeFunnelFailedViewModel(i18n, step.shell, "invalidChoice");
+  }
+
+  const { transportKey } = form.value;
   const transport = transportKey === "none"
     ? Option.none<TransportViewModel>()
     : Array.findFirst(
@@ -337,11 +342,7 @@ export const makeFunnelTransportResult = (
     );
 
   if (transportKey !== "none" && Option.isNone(transport)) {
-    return makeFunnelFailedViewModel(
-      i18n,
-      step.shell,
-      i18n._({ id: "funnel.failed.invalidChoice" }),
-    );
+    return makeFunnelFailedViewModel(i18n, step.shell, "invalidChoice");
   }
 
   return makeFunnelReviewViewModel(
