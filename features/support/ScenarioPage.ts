@@ -13,23 +13,29 @@ const ChromiumLive = Chromium.layerConfig({
   executablePath: Config.String("CHROMIUM_PATH"),
 });
 
+let nextRecordingIndex = 0;
+
 export const scenarioPage = (recording: ScenarioRecording) =>
   Layer.effect(
     ScenarioPage,
     Effect.gen(function*() {
       const fs = yield* FileSystem.FileSystem;
       yield* fs.makeDirectory("artifacts", { recursive: true });
+      const index = yield* Effect.sync(() => nextRecordingIndex++);
       const page = yield* Browser.newPage({
         emulation: { viewport: { width: 1280, height: 720 } },
       });
       if (debugMode) {
-        yield* recordVideo(page, recording);
+        yield* recordVideo(page, { ...recording, index });
       }
       yield* Effect.addFinalizer((exit) =>
         Exit.isFailure(exit)
           ? page.screenshot({ area: "fullPage" }).pipe(
               Effect.flatMap((png) =>
-                fs.writeFile(`artifacts/${recording.scenario}.png`, png),
+                fs.writeFile(
+                  `artifacts/${String(index).padStart(2, "0")}-${recording.scenario}.png`,
+                  png,
+                ),
               ),
               Effect.ignore,
             )
