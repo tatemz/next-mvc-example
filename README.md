@@ -170,6 +170,8 @@ src/ui-events/               event model, payload, handler, sinks, and React pro
 src/server/                  Next service, render context, and UI event logger
 src/actions/                 "use server" boundaries
 src/domain/                  universe-neutral models
+src/i18n/                    messages and the i18n service
+src/forms/                   form-data helpers
 src/services/                PeopleCatalog port and both adapters
 features/                    Gherkin, shared steps, and the stubbed scenario app
 ```
@@ -256,6 +258,6 @@ HTTP/API/server and test/e2e boundaries.
 
 Copy `.env.example` to `.env.local` to point either adapter at another host.
 The example values are `STAR_WARS_API_URL=https://swapi.dev/api` and
-`GHIBLI_API_URL=https://ghibliapi.vercel.app`. `server.ts` reads `PORT`
-(default `3000`); `UI_EVENT_LOGGER=console` is the default and `noop` drops UI
-event logs.
+`GHIBLI_API_URL=https://ghibliapi.vercel.app`. The browser suite ignores both;
+it provides stub catalogs. `server.ts` reads `PORT` (default `3000`);
+`UI_EVENT_LOGGER=console` is the default and `noop` drops UI event logs.
