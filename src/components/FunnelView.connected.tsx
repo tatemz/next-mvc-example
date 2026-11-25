@@ -164,7 +164,7 @@ export const ConnectedFunnelView = ({
   const onCtaClick = (cta: FunnelCta) =>
     emit(ctaEventFor(state, universe, cta));
 
-  const onQueryChange = (value: string) =>
+  const onQueryBlur = (value: string) =>
     emit(
       InputFilled.make({
         universe,
@@ -179,7 +179,7 @@ export const ConnectedFunnelView = ({
       dispatch={dispatch}
       isPending={isPending}
       onCtaClick={onCtaClick}
-      onQueryChange={onQueryChange}
+      onQueryBlur={onQueryBlur}
     />
   );
 };

@@ -20,7 +20,7 @@ const meta = {
     dispatch: () => {},
     isPending: false,
     onCtaClick: () => {},
-    onQueryChange: () => {},
+    onQueryBlur: () => {},
   },
 } satisfies Meta<typeof FunnelView>;
 

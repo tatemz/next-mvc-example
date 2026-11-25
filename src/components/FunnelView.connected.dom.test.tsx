@@ -40,9 +40,27 @@ describe("ConnectedFunnelView events", () => {
   it("emits page load, input, and search CTA events", async () => {
     const events = renderFunnel(funnelSearch(starWars));
 
-    fireEvent.change(screen.getByLabelText("Character name"), {
-      target: { value: "Leia" },
-    });
+    const input = screen.getByLabelText("Character name");
+    fireEvent.change(input, { target: { value: "Leia" } });
+    fireEvent.change(input, { target: { value: "Leia Organa" } });
+
+    expect(
+      events.filter((event) => event._tag === "InputFilled"),
+    ).toEqual([]);
+
+    fireEvent.blur(input);
+
+    expect(
+      events.filter((event) => event._tag === "InputFilled"),
+    ).toEqual([
+      expect.objectContaining({
+        _tag: "InputFilled",
+        universe: Universes.StarWars,
+        field: "funnel_query",
+        value: "Leia Organa",
+      }),
+    ]);
+
     fireEvent.click(screen.getByRole("button", { name: "Search" }));
 
     await waitFor(() =>
@@ -55,14 +73,6 @@ describe("ConnectedFunnelView events", () => {
           },
         }),
       ),
-    );
-    expect(events).toContainEqual(
-      expect.objectContaining({
-        _tag: "InputFilled",
-        universe: Universes.StarWars,
-        field: "funnel_query",
-        value: "Leia",
-      }),
     );
     expect(events).toContainEqual(
       expect.objectContaining({

@@ -437,7 +437,7 @@ type FunnelExtras = {
   readonly dispatch: (formData: FormData) => void;
   readonly isPending: boolean;
   readonly onCtaClick: (cta: FunnelCta) => void;
-  readonly onQueryChange: (value: string) => void;
+  readonly onQueryBlur: (value: string) => void;
 };
 
 export type FunnelViewProps = FunnelExtras & {
@@ -449,7 +449,7 @@ export const FunnelView = ({
   isPending,
   model,
   onCtaClick,
-  onQueryChange,
+  onQueryBlur,
 }: FunnelViewProps) => (
   <AppShell {...model.shell}>
     {FunnelViewModel.match(model, {
@@ -459,7 +459,7 @@ export const FunnelView = ({
           dispatch={dispatch}
           isPending={isPending}
           onCtaClick={onCtaClick}
-          onQueryChange={onQueryChange}
+          onQueryBlur={onQueryBlur}
         />
       ),
       Choose: (step) => (

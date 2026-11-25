@@ -45,7 +45,7 @@ const render = (model: FunnelViewModel, isPending = false) =>
       dispatch={() => {}}
       isPending={isPending}
       onCtaClick={() => {}}
-      onQueryChange={() => {}}
+      onQueryBlur={() => {}}
     />,
   );
 

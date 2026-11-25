@@ -7,7 +7,7 @@ type SearchStepProps = FunnelStepProps<
   typeof FunnelViewModel.cases.Search.Type,
   typeof FunnelCtas.Search
 > & {
-  readonly onQueryChange: (value: string) => void;
+  readonly onQueryBlur: (value: string) => void;
 };
 
 export const FunnelSearchStep = ({
@@ -15,7 +15,7 @@ export const FunnelSearchStep = ({
   dispatch,
   isPending,
   onCtaClick,
-  onQueryChange,
+  onQueryBlur,
 }: SearchStepProps) => (
   <FunnelStepShell step={step}>
     <form
@@ -30,7 +30,7 @@ export const FunnelSearchStep = ({
         id="funnel-query"
         name={FunnelFields.Query}
         defaultValue={step.query}
-        onChange={(event) => onQueryChange(event.currentTarget.value)}
+        onBlur={(event) => onQueryBlur(event.currentTarget.value)}
         placeholder={step.placeholder}
         className={`input input-bordered w-full${
           step.error === undefined ? "" : " input-error"
