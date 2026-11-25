@@ -1,9 +1,9 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { Context } from "effect";
-import type { I18n } from "../i18n/I18n.service";
+import type { I18nCatalog } from "../i18n/I18n.service";
 import type { Catalogs } from "../services/Catalogs";
 
-export type RenderServices = I18n | Catalogs;
+export type RenderServices = I18nCatalog | Catalogs;
 
 declare global {
   var __renderContextStore: AsyncLocalStorage<Context.Context<never>> | undefined;

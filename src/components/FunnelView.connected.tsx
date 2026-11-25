@@ -1,5 +1,6 @@
 "use client";
 
+import { Match } from "effect";
 import { useEffect, useActionState } from "react";
 import {
   CtaClicked,
@@ -136,13 +137,25 @@ export const ConnectedFunnelView = ({
   }, [emit, model, universe]);
 
   useEffect(() => {
-    if (state._tag === "Search" && state.error !== undefined) {
+    const validation = Match.valueTags(state, {
+      Search: (search) =>
+        search.error === undefined
+          ? undefined
+          : { query: search.query, message: search.error },
+      Choose: () => undefined,
+      Film: () => undefined,
+      Transport: () => undefined,
+      Review: () => undefined,
+      Failed: () => undefined,
+    });
+
+    if (validation !== undefined) {
       emit(
         FormValidationError.make({
           universe,
           form: "funnel_search",
-          query: state.query,
-          message: state.error,
+          query: validation.query,
+          message: validation.message,
         }),
       );
     }

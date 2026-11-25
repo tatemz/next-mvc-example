@@ -9,12 +9,13 @@ import {
 } from "../components/FunnelView";
 import { Universes, NoTransportKey } from "../domain/FilmUniverse.model";
 import { it } from "@effect/vitest";
-import { Effect } from "effect";
+import { Effect, Match } from "effect";
 import { describe, expect } from "vitest";
 import { makePersonViewModel } from "../components/PersonCard";
 import { makeAppShellViewModel } from "../components/AppShell";
 import { luke, makeCharacterId } from "../domain/FilmUniverse.fixture";
-import { makeEn } from "../i18n/I18n.service";
+import { makeEn, makeEs } from "../i18n/I18n.service";
+import { Locales } from "../i18n/Locale";
 import type { UniverseServices } from "../page-modules/withUniverseServices";
 import { PeopleCatalog, PeopleCatalogError } from "../services/PeopleCatalog";
 import { unusedCatalog } from "../services/PeopleCatalog.fixture";
@@ -59,6 +60,24 @@ const review = makeFunnelReviewViewModel(i18n, shell, person, film, transport);
 const failed = makeFunnelFailedViewModel(i18n, shell, FunnelFailures.Unavailable);
 
 describe("startFunnel", () => {
+  it.effect("starts in Spanish", () =>
+    Effect.gen(function*() {
+      const model = yield* Effect.succeed(
+        startFunnel({
+          universe: Universes.StarWars,
+          catalog: unusedCatalog,
+          i18n: makeEs(),
+        }),
+      );
+
+      expect(model).toMatchObject({
+        _tag: "Search",
+        stepLabel: "Paso 1 de 4",
+        shell: { locale: Locales.EsMX },
+      });
+    }),
+  );
+
   it.effect("starts on the search step", () =>
     Effect.gen(function*() {
       const model = yield* Effect.succeed(
@@ -221,8 +240,25 @@ describe("advanceFunnel", () => {
         _tag: "Review",
         transport: null,
       });
-      if (model._tag !== "Review") throw new Error("expected Review");
-      expect(model.resultsHref).toContain("transport=none");
+      const review = Match.valueTags(model, {
+        Search: () => {
+          throw new Error("expected Review");
+        },
+        Choose: () => {
+          throw new Error("expected Review");
+        },
+        Film: () => {
+          throw new Error("expected Review");
+        },
+        Transport: () => {
+          throw new Error("expected Review");
+        },
+        Review: (review) => review,
+        Failed: () => {
+          throw new Error("expected Review");
+        },
+      });
+      expect(review.resultsHref).toContain("transport=none");
     }),
   );
 

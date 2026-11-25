@@ -5,6 +5,13 @@ import {
   Universe,
   Universes,
 } from "../../src/domain/FilmUniverse.model";
+import {
+  DefaultLocale,
+  type Locale,
+  LocaleLabels,
+  localeHref,
+} from "../../src/i18n/Locale";
+import { LocaleSchema } from "../../src/i18n/Locale.schema";
 import { interactionPause } from "./Debug";
 import {
   type CatalogMode,
@@ -17,9 +24,11 @@ import { ScenarioPage, scenarioPage } from "./ScenarioPage";
 export type Session = {
   readonly page: Page.Page;
   readonly universe: Universe;
+  readonly locale: Locale;
 };
 
 const universe = Bdd.capture("universe", Universe);
+const locale = Bdd.capture("locale", LocaleSchema);
 const text = Bdd.capture("text", Schema.String);
 const theme = Bdd.capture("theme", Schema.String);
 const query = Bdd.capture("query", Schema.String);
@@ -47,7 +56,14 @@ export const theUniverseIs = Bdd.given`the universe is ${universe}`(
   (
     { universe }: { readonly universe: Universe },
     page: Page.Page,
-  ) => Effect.succeed({ page, universe }),
+  ) => Effect.succeed({ page, universe, locale: DefaultLocale }),
+);
+
+export const theLocaleIs = Bdd.given`the locale is ${locale}`(
+  (
+    { locale }: { readonly locale: Locale },
+    session: Session,
+  ) => Effect.succeed({ ...session, locale }),
 );
 
 export const theCatalogueIs =
@@ -99,9 +115,10 @@ export const openRoot = Bdd.when`I open the app root`(
 export const openHome = Bdd.when`I open the home`(
   Effect.fn("openHome")(function*(session: Session) {
     const app = yield* ScenarioApp;
-    yield* session.page.goto(`${app.url}/${session.universe}`, {
-      waitUntil: "load",
-    });
+    yield* session.page.goto(
+      `${app.url}${localeHref(session.locale, `/${session.universe}`)}`,
+      { waitUntil: "load" },
+    );
     yield* interactionPause;
     return session;
   }),
@@ -111,7 +128,9 @@ export const openFunnel = Bdd.when`I open the funnel`(
   Effect.fn("openFunnel")(function*(session: Session) {
     const app = yield* ScenarioApp;
     yield* session.page.goto(
-      `${app.url}/${session.universe}/funnel`,
+      `${app.url}${
+        localeHref(session.locale, `/${session.universe}/funnel`)
+      }`,
       { waitUntil: "load" },
     );
     yield* interactionPause;
@@ -129,6 +148,19 @@ export const openFunnelFromHome =
       return session;
     }),
   );
+
+export const chooseLanguage = Bdd.when`I choose the language ${locale}`(
+  Effect.fn("chooseLanguage")(function*(
+    { locale }: { readonly locale: Locale },
+    session: Session,
+  ) {
+    yield* session.page
+      .getByRole("link", { name: LocaleLabels[locale] })
+      .click();
+    yield* interactionPause;
+    return { ...session, locale };
+  }),
+);
 
 export const chooseUniverse =
   Bdd.when`I choose the universe from the header`(
@@ -239,7 +271,12 @@ export const openResults =
         ? ""
         : `&transport=${transportKey}`;
       yield* session.page.goto(
-        `${app.url}/${session.universe}/results?character=${characterId}&film=${filmOrder}${transport}`,
+        `${app.url}${
+          localeHref(
+            session.locale,
+            `/${session.universe}/results?character=${characterId}&film=${filmOrder}${transport}`,
+          )
+        }`,
         { waitUntil: "load" },
       );
       yield* interactionPause;

@@ -1,5 +1,5 @@
 import { it } from "@effect/vitest";
-import { Effect, Option, Schema } from "effect";
+import { Effect, Match, Option, Schema } from "effect";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, vi } from "vitest";
 
@@ -15,7 +15,8 @@ import {
   personNamed,
 } from "../domain/FilmUniverse.fixture";
 import { Universes } from "../domain/FilmUniverse.model";
-import { I18n } from "../i18n/I18n.service";
+import { I18nCatalog } from "../i18n/I18n.service";
+import { Locales } from "../i18n/Locale";
 import { Catalogs } from "../services/Catalogs";
 import { makeNextPage } from "./NextPage";
 import { NextRedirect, RedirectTypes } from "./NextRedirect";
@@ -33,7 +34,7 @@ const context = renderContext({
 
 const Page = makeNextPage(
   Effect.gen(function*() {
-    const i18n = yield* I18n;
+    const i18n = (yield* I18nCatalog)[Locales.EnUS];
     const catalogs = yield* Catalogs;
     const people = yield* catalogs[Universes.Ghibli].searchPeople("");
     const params = yield* decodeOption(Params);
@@ -99,7 +100,12 @@ describe("makeNextPage with a redirect outcome", () => {
         ),
       );
 
-      expect(exit._tag).toBe("Failure");
+      expect(
+        Match.valueTags(exit, {
+          Success: () => false,
+          Failure: () => true,
+        }),
+      ).toBe(true);
       expect(redirect).toHaveBeenCalledWith("/star-wars", RedirectTypes.Replace);
     }),
   );

@@ -2,11 +2,8 @@ import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
 import * as I18n from "./I18n";
-import {
-  I18n as I18nService,
-  layer,
-  layerTest,
-} from "./I18n.service";
+import { I18nCatalog, layer, layerTest } from "./I18n.service";
+import { Locales } from "./Locale";
 
 describe("I18n.make", () => {
   it("formats a message with values", () => {
@@ -40,27 +37,34 @@ describe("I18n.make", () => {
 });
 
 describe("I18n.service", () => {
-  it.layer(layer)("en", (it) => {
-    it.effect("formats the app messages", () =>
+  it.layer(layer)("catalogs", (it) => {
+    it.effect("formats each locale's messages", () =>
       Effect.gen(function*() {
-        const i18n = yield* I18nService;
+        const catalogs = yield* I18nCatalog;
+        const en = catalogs[Locales.EnUS];
+        const es = catalogs[Locales.EsMX];
 
-        expect(i18n._({ id: "person.heightLabel" })).toBe("Height");
-        expect(i18n._({ id: "home.starWars.title" })).toBe(
+        expect(en._({ id: "person.heightLabel" })).toBe("Height");
+        expect(en._({ id: "home.starWars.title" })).toBe(
           "Star Wars character dossier",
         );
+        expect(es._({ id: "person.heightLabel" })).toBe("Altura");
+        expect(es._({ id: "home.starWars.title" })).toBe(
+          "Dossier de personaje de Star Wars",
+        );
         expect(
-          i18n._({
+          es._({
             id: "funnel.step.progress",
             values: { step: 2, total: 4 },
           }),
-        ).toBe("Step 2 of 4");
+        ).toBe("Paso 2 de 4");
         expect(
-          i18n._({
+          es._({
             id: "funnel.choose.subtitle",
             values: { count: 2 },
           }),
-        ).toContain("2 characters matched");
+        ).toContain("2 personajes coinciden");
+        expect(es.locale).toBe(Locales.EsMX);
       }),
     );
   });
@@ -68,7 +72,7 @@ describe("I18n.service", () => {
   it.layer(layerTest)("test", (it) => {
     it.effect("formats descriptors for assertions", () =>
       Effect.gen(function*() {
-        const i18n = yield* I18nService;
+        const i18n = (yield* I18nCatalog)[Locales.EnUS];
 
         expect(i18n._({ id: "person.heightLabel" })).toBe(
           '{"id":"person.heightLabel"}',

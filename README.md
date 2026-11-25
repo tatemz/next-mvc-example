@@ -125,22 +125,26 @@ server without exporting them in the shell.
 
 ## Routes
 
-| Experience | Home | Funnel | Results |
-| --- | --- | --- | --- |
-| Star Wars | `/star-wars` | `/star-wars/funnel` | `/star-wars/results` |
-| Studio Ghibli | `/ghibli` | `/ghibli/funnel` | `/ghibli/results` |
+| Locale | Experience | Home | Funnel | Results |
+| --- | --- | --- | --- | --- |
+| `en-US` | Star Wars | `/star-wars` | `/star-wars/funnel` | `/star-wars/results` |
+| `en-US` | Studio Ghibli | `/ghibli` | `/ghibli/funnel` | `/ghibli/results` |
+| `es-MX` | Star Wars | `/es-MX/star-wars` | `/es-MX/star-wars/funnel` | `/es-MX/star-wars/results` |
+| `es-MX` | Studio Ghibli | `/es-MX/ghibli` | `/es-MX/ghibli/funnel` | `/es-MX/ghibli/results` |
 
-The root page redirects to `/star-wars`. The AppShell header switches between
-the two experiences.
+US English is the default, so its URLs have no locale prefix. `proxy.ts`
+rewrites an unprefixed path to `en-US` without changing the browser URL, and
+the root redirects to `/star-wars`. The AppShell header switches between the
+two universes and between English and Spanish.
 
 ## Architecture
 
 ### Page modules and the request context
 
-The `app/[universe]` route segments re-export one page module per view.
-`makeNextPage` supplies the parsed search params and the raw path params,
-runs the program with the request's Effect context, and renders the result
-or hands a `NextRedirect` to Next.
+The `app/[locale]/[universe]` route segments re-export one page module per
+view. `makeNextPage` supplies the parsed search params and the raw path
+params, runs the program with the request's Effect context, and renders the
+result or hands a `NextRedirect` to Next.
 
 ```tsx
 export const FunnelPage = Function.pipe(
@@ -155,19 +159,20 @@ export const FunnelPage = Function.pipe(
 ```
 
 - `makeNextPage` provides `ParsedSearchParams` and the raw
-  `ParsedPathParams`. `withUniverseServices` decodes `params.universe` with
-  the `Universe` schema, selects the catalog from `Catalogs` and the request
-  `I18n`, then calls the controller with a `UniverseServices` value. An
-  unknown universe becomes a `NotFoundViewModel` that the page renders.
+  `ParsedPathParams`. `withUniverseServices` decodes `params.locale` and
+  `params.universe` with the `Locale` and `Universe` schemas, selects the
+  catalog from `Catalogs` and the i18n value from `I18nCatalog`, then calls
+  the controller with a `UniverseServices` value. An unknown universe
+  becomes a `NotFoundViewModel` in the selected language.
 - Subviews with their own view models live in their own files: `HomeHero`,
   the `Funnel*Step` components, and `ResultsReadyView`/`ResultsMissingView`.
-- The request context carries `I18n` and the `Catalogs` registry.
+- The request context carries `I18nCatalog` and the `Catalogs` registry.
   `boot/app.ts` mounts one Next catch-all, so service selection happens in
   page composition rather than in the HTTP route.
-- The root page uses `makeNextPage` with a redirect program.
+- The locale root page uses `makeNextPage` with a redirect program.
 - Every page view model carries its `AppShellViewModel`, so
-  `app/layout.tsx` is only `<html>` and `<body>`. The shell owns the
-  `data-theme` value: `night` for Star Wars, `autumn` for Ghibli.
+  `app/[locale]/layout.tsx` is only `<html lang>` and `<body>`. The shell
+  owns the `data-theme` value: `night` for Star Wars, `autumn` for Ghibli.
 - Each home page is a splash with a credited image and one funnel CTA.
 - `server.ts` is the process entrypoint. `boot/live.ts` builds the live
   catalogs, `boot/app.ts` mounts `/api/ui-events` and one Next catch-all,
@@ -254,7 +259,8 @@ the minimum log level so event traffic does not fill the test output.
 .storybook/                  Storybook config and page fixtures
 server.ts                    process entrypoint: the live app on the configured port
 boot/                        app composition, live wiring, socket, and Next bridge
-app/                         route re-exports; html/body layout
+proxy.ts                     default-locale rewrite and root redirect
+app/[locale]/                locale route tree; html/body layout
 src/api/                     UiEventApi definition and handler layer
 src/page-modules/            one page module per view; shared by both universes
 src/platform/                Next adapter, redirect model, parsed search and path params
@@ -264,7 +270,7 @@ src/ui-events/               event model, payload, handler, sinks, and React pro
 src/server/                  Next service, render context, and UI event logger
 src/actions/                 "use server" boundaries
 src/domain/                  universe-neutral models
-src/i18n/                    messages and the i18n service
+src/i18n/                    en-US and es-MX messages, locale paths, and i18n services
 src/forms/                   form-data helpers
 src/services/                PeopleCatalog port and both adapters
 features/                    Gherkin, shared steps, and the stubbed scenario app

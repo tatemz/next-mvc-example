@@ -3,7 +3,7 @@ import { Layer } from "effect";
 import { HttpRouter } from "effect/http";
 import { layer as UiEventApiLayer } from "../src/api/UiEventApi.layer";
 import type { Universe } from "../src/domain/FilmUniverse.model";
-import { layer as I18nLayer } from "../src/i18n/I18n.service";
+import { layer as I18nCatalogLayer } from "../src/i18n/I18n.service";
 import { Catalogs } from "../src/services/Catalogs";
 import type { PeopleCatalog } from "../src/services/PeopleCatalog";
 import { nextCatchAll, type Next } from "../src/server/Next";
@@ -24,7 +24,7 @@ export const appWith = <E>(services: AppServices<E>) =>
       Layer.mergeAll(
         services.next,
         Layer.succeed(Catalogs, services.catalogs),
-        I18nLayer,
+        I18nCatalogLayer,
         NodeHttpServer.layerHttpServices,
       ),
     ),

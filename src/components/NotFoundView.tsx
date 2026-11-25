@@ -1,5 +1,6 @@
 import { Schema } from "effect";
 import type { I18n } from "../i18n/I18n.service";
+import { localeHref } from "../i18n/Locale";
 
 export const NotFoundViewModel = Schema.TaggedStruct("NotFoundViewModel", {
   heading: Schema.NonEmptyString,
@@ -14,7 +15,7 @@ export const makeNotFoundViewModel = (i18n: I18n): NotFoundViewModel =>
     heading: i18n._({ id: "notFound.heading" }),
     message: i18n._({ id: "notFound.message" }),
     homeLabel: i18n._({ id: "notFound.home" }),
-    homeHref: "/",
+    homeHref: localeHref(i18n.locale, "/"),
   });
 
 export type NotFoundViewProps = {

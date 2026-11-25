@@ -3,9 +3,12 @@ import {
   makeNotFoundViewModel,
   type NotFoundViewModel,
 } from "../components/NotFoundView";
-import { decodeUniverse } from "../controllers/Universe.controller";
+import {
+  decodeLocale,
+  decodeUniverse,
+} from "../controllers/Universe.controller";
 import type { Universe } from "../domain/FilmUniverse.model";
-import { I18n } from "../i18n/I18n.service";
+import { type I18n, I18nCatalog } from "../i18n/I18n.service";
 import {
   tag as pathParamsTag,
   type ParsedPathParams,
@@ -27,36 +30,22 @@ export const withUniverseServices = <A, E>(
 ): Effect.Effect<
   A | NotFoundViewModel,
   E,
-  Catalogs | I18n | ParsedPathParams | ParsedSearchParams
+  Catalogs | I18nCatalog | ParsedPathParams | ParsedSearchParams
 > =>
   Effect.gen(function*() {
     const params = yield* pathParamsTag;
-    const catalogs = yield* Catalogs;
-    const i18n = yield* I18n;
+    const locale = decodeLocale(params);
+    const i18n = (yield* I18nCatalog)[locale];
+    const universe = decodeUniverse(params);
 
-    return yield* Option.match(decodeUniverse(params), {
-      onNone: () => Effect.succeed(makeNotFoundViewModel(i18n)),
-      onSome: (universe) =>
-        build({
-          universe,
-          catalog: catalogs[universe],
-          i18n,
-        }),
+    if (Option.isNone(universe)) {
+      return makeNotFoundViewModel(i18n);
+    }
+
+    const catalogs = yield* Catalogs;
+    return yield* build({
+      universe: universe.value,
+      catalog: catalogs[universe.value],
+      i18n,
     });
   });
-
-export const withUniverseFor =
-  (universe: Universe) =>
-  <A, E>(
-    build: (services: UniverseServices) => Effect.Effect<A, E>,
-  ): Effect.Effect<A, E, Catalogs | I18n> =>
-    Effect.gen(function*() {
-      const catalogs = yield* Catalogs;
-      const i18n = yield* I18n;
-
-      return yield* build({
-        universe,
-        catalog: catalogs[universe],
-        i18n,
-      });
-    });

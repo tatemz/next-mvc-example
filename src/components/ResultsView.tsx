@@ -4,6 +4,7 @@ import {
   type Universe,
 } from "../domain/FilmUniverse.model";
 import type { I18n } from "../i18n/I18n.service";
+import { localeHref } from "../i18n/Locale";
 import type { ResultsCta } from "../ui-events/UiEvent";
 import {
   AppShell,
@@ -72,8 +73,8 @@ export const makeResultsReadyViewModel = (
     noneLabel: i18n._({ id: "results.ready.noneTransport" }),
     startOverLabel: i18n._({ id: "results.ready.startOver" }),
     homeLabel: i18n._({ id: "results.ready.home" }),
-    startOverHref: `/${universe}/funnel`,
-    homeHref: `/${universe}`,
+    startOverHref: localeHref(i18n.locale, `/${universe}/funnel`),
+    homeHref: localeHref(i18n.locale, `/${universe}`),
   });
 
 const missingViewModel = (
@@ -86,7 +87,7 @@ const missingViewModel = (
     heading: i18n._({ id: "results.missing.heading" }),
     message: i18n._({ id: "results.missing.message" }),
     startOverLabel: i18n._({ id: "results.missing.startOver" }),
-    startOverHref: `/${universe}/funnel`,
+    startOverHref: localeHref(i18n.locale, `/${universe}/funnel`),
   });
 
 export const makeResultsMissingViewModel = (

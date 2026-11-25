@@ -3,7 +3,8 @@ import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
 import { luke } from "../domain/FilmUniverse.fixture";
-import { makeEn } from "../i18n/I18n.service";
+import { makeEn, makeEs } from "../i18n/I18n.service";
+import { Locales } from "../i18n/Locale";
 import {
   PeopleCatalogError,
   type PeopleCatalog,
@@ -15,9 +16,10 @@ const i18n = makeEn();
 
 const services = (
   getPerson: PeopleCatalog["getPerson"],
+  catalogI18n = i18n,
 ): Parameters<typeof loadResults>[0] => ({
   universe: Universes.StarWars,
-  i18n,
+  i18n: catalogI18n,
   catalog: {
     getPerson,
     searchPeople: () => Effect.succeed([]),
@@ -27,8 +29,9 @@ const services = (
 const run = (
   params: Readonly<Record<string, string>>,
   getPerson: PeopleCatalog["getPerson"] = () => Effect.succeed(luke),
+  catalogI18n = i18n,
 ) =>
-  loadResults(services(getPerson)).pipe(
+  loadResults(services(getPerson, catalogI18n)).pipe(
     Effect.provideService(parsedSearchParamsTag, params),
   );
 
@@ -48,6 +51,23 @@ describe("loadResults", () => {
         transport: { key: "starship-12", name: "X-wing" },
         startOverHref: "/star-wars/funnel",
         homeHref: "/star-wars",
+      });
+    }),
+  );
+
+  it.effect("builds a Spanish dossier", () =>
+    Effect.gen(function*() {
+      const model = yield* run(
+        { character: "1", film: "4", transport: NoTransportKey },
+        undefined,
+        makeEs(),
+      );
+
+      expect(model).toMatchObject({
+        _tag: "Ready",
+        shell: { locale: Locales.EsMX },
+        startOverHref: "/es-MX/star-wars/funnel",
+        homeHref: "/es-MX/star-wars",
       });
     }),
   );

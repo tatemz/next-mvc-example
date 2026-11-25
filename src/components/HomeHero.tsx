@@ -1,6 +1,7 @@
 import { Match, Schema } from "effect";
 import { Universes, type Universe } from "../domain/FilmUniverse.model";
 import type { I18n } from "../i18n/I18n.service";
+import { localeHref } from "../i18n/Locale";
 
 export const HomeHeroImageViewModel = Schema.TaggedStruct(
   "HomeHeroImageViewModel",
@@ -66,7 +67,7 @@ export const makeHomeHeroViewModel = (
   HomeHeroViewModel.make({
     ...copyFor(i18n, universe),
     funnelLabel: i18n._({ id: "home.hero.funnel" }),
-    funnelHref: `/${universe}/funnel`,
+    funnelHref: localeHref(i18n.locale, `/${universe}/funnel`),
     image: splashImageFor(universe),
   });
 

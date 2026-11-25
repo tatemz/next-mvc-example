@@ -2,6 +2,12 @@ import { Array, Function, Match, Schema } from "effect";
 import type { ReactNode } from "react";
 import { Universe, Universes } from "../domain/FilmUniverse.model";
 import type { I18n } from "../i18n/I18n.service";
+import {
+  LocaleLabels,
+  Locales,
+  localeHref,
+} from "../i18n/Locale";
+import { LocaleSchema } from "../i18n/Locale.schema";
 
 export const ExperienceThemes = {
   Night: "night",
@@ -24,9 +30,11 @@ const AppShellLinkViewModel = Schema.TaggedStruct(
 type AppShellLinkViewModel = typeof AppShellLinkViewModel.Type;
 
 export const AppShellViewModel = Schema.TaggedStruct("AppShellViewModel", {
+  locale: LocaleSchema,
   universe: Universe,
   theme: ExperienceTheme,
   brand: AppShellLinkViewModel,
+  localeSwitch: AppShellLinkViewModel,
   links: Schema.Array(AppShellLinkViewModel),
 });
 export type AppShellViewModel = typeof AppShellViewModel.Type;
@@ -34,8 +42,13 @@ export type AppShellViewModel = typeof AppShellViewModel.Type;
 export const makeAppShellViewModel = (
   i18n: I18n,
   universe: Universe,
-) =>
-  AppShellViewModel.make({
+) => {
+  const locale = i18n.locale;
+  const otherLocale =
+    locale === Locales.EsMX ? Locales.EnUS : Locales.EsMX;
+
+  return AppShellViewModel.make({
+    locale,
     universe,
     theme: Match.value(universe).pipe(
       Match.when(Universes.StarWars, () => ExperienceThemes.Night),
@@ -44,19 +57,24 @@ export const makeAppShellViewModel = (
     ),
     brand: AppShellLinkViewModel.make({
       label: i18n._({ id: "shell.brand" }),
-      href: "/",
+      href: localeHref(locale, "/"),
+    }),
+    localeSwitch: AppShellLinkViewModel.make({
+      label: LocaleLabels[otherLocale],
+      href: localeHref(otherLocale, `/${universe}`),
     }),
     links: [
       AppShellLinkViewModel.make({
         label: i18n._({ id: "shell.starWars" }),
-        href: "/star-wars",
+        href: localeHref(locale, `/${Universes.StarWars}`),
       }),
       AppShellLinkViewModel.make({
         label: i18n._({ id: "shell.ghibli" }),
-        href: "/ghibli",
+        href: localeHref(locale, `/${Universes.Ghibli}`),
       }),
     ],
   });
+};
 
 export type AppShellProps = AppShellViewModel & {
   readonly children: ReactNode;
@@ -74,6 +92,9 @@ export const AppShell = ({ children, ...model }: AppShellProps) => (
         </a>
       </div>
       <div className="flex-none flex gap-2">
+        <a href={model.localeSwitch.href} className="btn btn-ghost">
+          {model.localeSwitch.label}
+        </a>
         {Function.pipe(
           model.links,
           Array.map((link) => (

@@ -7,14 +7,13 @@ import {
   ghibliSplashImage,
   starWarsSplashImage,
 } from "../components/HomeHero";
-import { makeEn } from "../i18n/I18n.service";
+import { makeEn, makeEs } from "../i18n/I18n.service";
+import { Locales } from "../i18n/Locale";
 import { unusedCatalog } from "../services/PeopleCatalog.fixture";
 import { loadHome } from "./Home.controller";
 
-const run = (universe: Universe) =>
-  Effect.succeed(
-    loadHome({ universe, i18n: makeEn(), catalog: unusedCatalog }),
-  );
+const run = (universe: Universe, i18n = makeEn()) =>
+  Effect.succeed(loadHome({ universe, i18n, catalog: unusedCatalog }));
 
 describe("loadHome", () => {
   it.effect("builds the Star Wars splash", () =>
@@ -29,6 +28,24 @@ describe("loadHome", () => {
           title: "Star Wars character dossier",
           funnelHref: "/star-wars/funnel",
           image: starWarsSplashImage,
+        },
+      });
+    }),
+  );
+
+  it.effect("builds the Spanish splash", () =>
+    Effect.gen(function*() {
+      const model = yield* run(Universes.StarWars, makeEs());
+
+      expect(model).toMatchObject({
+        _tag: "HomeViewModel",
+        shell: {
+          locale: Locales.EsMX,
+          theme: ExperienceThemes.Night,
+        },
+        hero: {
+          title: "Dossier de personaje de Star Wars",
+          funnelHref: "/es-MX/star-wars/funnel",
         },
       });
     }),

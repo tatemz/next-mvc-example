@@ -6,7 +6,8 @@ import { makeFunnelSearchViewModel } from "../components/FunnelView";
 import { haku, luke } from "../domain/FilmUniverse.fixture";
 import { FunnelFields } from "../forms/FunnelForm";
 import type { Person, Universe } from "../domain/FilmUniverse.model";
-import { makeEn } from "../i18n/I18n.service";
+import { makeEn, makeEs } from "../i18n/I18n.service";
+import { Locales } from "../i18n/Locale";
 import { runInRenderContext } from "../server/RenderContext";
 import { renderContext } from "../server/RenderContext.fixture";
 import { submitFunnel } from "./Funnel.serverAction";
@@ -15,13 +16,14 @@ const run = (
   universe: Universe,
   query: string,
   people: ReadonlyArray<Person>,
+  i18n = makeEn(),
 ) =>
   Effect.gen(function*() {
     const formData = new FormData();
     formData.set(FunnelFields.Query, query);
 
     const previous = makeFunnelSearchViewModel(
-      makeEn(),
+      i18n,
       universe,
       "",
       undefined,
@@ -47,6 +49,22 @@ describe("submitFunnel server action", () => {
       expect(result).toMatchObject({
         _tag: "Choose",
         results: [{ name: "Luke Skywalker" }],
+      });
+    }));
+
+  it.effect("runs against the Ghibli catalog in Spanish", () =>
+    Effect.gen(function*() {
+      const result = yield* run(
+        Universes.Ghibli,
+        "Haku",
+        [haku],
+        makeEs(),
+      );
+
+      expect(result).toMatchObject({
+        _tag: "Choose",
+        shell: { locale: Locales.EsMX },
+        results: [{ name: "Haku" }],
       });
     }));
 
