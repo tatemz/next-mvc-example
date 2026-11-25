@@ -1,5 +1,5 @@
 import { it } from "@effect/vitest";
-import { Effect, Option, Schema } from "effect";
+import { Effect, Layer, ManagedRuntime, Option, Schema } from "effect";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, vi } from "vitest";
 
@@ -10,28 +10,28 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { redirect } from "next/navigation";
-import { makeNextPage, type NextSearchParams } from "./NextPage";
+import { makeNextPage } from "./NextPage";
 import { NextRedirect } from "./NextRedirect";
+import { type ParsedSearchParams, decodeOption } from "./ParsedSearchParams";
 
 const Params = Schema.Struct({
-  id: Schema.NumberFromString,
+  id: Schema.NumberFromString.check(Schema.isInt()),
 });
 
-const runtime = { runPromise: Effect.runPromise };
+const runtime = ManagedRuntime.make(Layer.empty);
 
-const Page = makeNextPage({
+const Page = makeNextPage(
   runtime,
-  searchParams: Params,
-  load: (params: Option.Option<{ id: number }>) =>
-    Effect.succeed(
-      Option.match(params, {
-        onNone: () => <p>none</p>,
-        onSome: (value) => <p>{value.id}</p>,
-      }),
-    ),
-});
+  Effect.gen(function*() {
+    const params = yield* decodeOption(Params);
+    return Option.match(params, {
+      onNone: () => <p>none</p>,
+      onSome: (value) => <p>{value.id}</p>,
+    });
+  }),
+);
 
-const render = (searchParams: NextSearchParams) =>
+const render = (searchParams: ParsedSearchParams) =>
   Effect.promise(() =>
     Page({ searchParams: Promise.resolve(searchParams) }),
   ).pipe(Effect.map(renderToStaticMarkup));
@@ -57,14 +57,12 @@ describe("makeNextPage", () => {
   );
 });
 
-const RedirectPage = makeNextPage({
+const RedirectPage = makeNextPage(
   runtime,
-  searchParams: Params,
-  load: () =>
-    Effect.succeed(
-      NextRedirect.make({ url: "/star-wars", type: "replace" }),
-    ),
-});
+  Effect.succeed(
+    NextRedirect.make({ url: "/star-wars", type: "replace" }),
+  ),
+);
 
 describe("makeNextPage with a redirect outcome", () => {
   it.effect("hands the redirect to Next", () =>

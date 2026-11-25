@@ -1,4 +1,10 @@
-import { Effect, Match, Option } from "effect";
+import {
+  Effect,
+  Match,
+  Option,
+  type Config,
+  type ManagedRuntime,
+} from "effect";
 import {
   Results,
   makeResultsMissingViewModel,
@@ -10,13 +16,13 @@ import {
 } from "../../controllers/Results.controller";
 import { I18n } from "../../i18n/I18n.service";
 import { makeNextPage } from "../../platform/NextPage";
+import { decodeOption } from "../../platform/ParsedSearchParams";
 import type { PeopleCatalog } from "../../services/PeopleCatalog";
 
-export type ResultsRuntime = {
-  readonly runPromise: <A, E>(
-    effect: Effect.Effect<A, E, I18n | PeopleCatalog>,
-  ) => Promise<A>;
-};
+export type ResultsRuntime = ManagedRuntime.ManagedRuntime<
+  I18n | PeopleCatalog,
+  Config.ConfigError
+>;
 
 const withDatasetLinks =
   (basePath: string) =>
@@ -34,27 +40,24 @@ const withDatasetLinks =
       Match.exhaustive,
     );
 
-const resultsPage =
-  (basePath: string) => (params: Option.Option<ResultsParams>) =>
-    Effect.gen(function*() {
-      const i18n = yield* I18n;
-      const model = yield* (Option.isNone(params)
-        ? Effect.succeed(makeResultsMissingViewModel(i18n))
-        : loadResults(params.value));
+const resultsPage = (basePath: string) =>
+  Effect.gen(function*() {
+    const i18n = yield* I18n;
+    const params = yield* decodeOption(ResultsParams);
+    const model = yield* (Option.isNone(params)
+      ? Effect.succeed(makeResultsMissingViewModel(i18n))
+      : loadResults(params.value));
 
-      return withDatasetLinks(basePath)(model);
-    });
+    return withDatasetLinks(basePath)(model);
+  });
 
 export const makeResultsPage = (
   runtime: ResultsRuntime,
   basePath: string,
 ) =>
-  makeNextPage({
+  makeNextPage(
     runtime,
-    searchParams: ResultsParams,
-    load: (params) =>
-      Effect.map(
-        resultsPage(basePath)(params),
-        (model) => <Results {...model} />,
-      ),
-  });
+    Effect.map(resultsPage(basePath), (model) => (
+      <Results {...model} />
+    )),
+  );

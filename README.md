@@ -54,12 +54,13 @@ two experiences; each home's CTA enters its own funnel.
   API's `image` field; SWAPI has no image field, so Star Wars leaves it empty.
   The shared film list, funnel choices, review, and results render the poster
   only when it exists.
-- `makeNextPage` is the Next boundary adapter. It awaits `searchParams`, takes
-  the first value of repeated query keys, decodes the result with a schema, and
-  runs the page program. A program returns a React tree or a `NextRedirect`;
-  `handleNextRedirect` is the only module that calls Next's `redirect`. An
-  invalid query renders its `Missing` state, while the controller receives
-  already-typed params. Route files only re-export page modules.
+- `makeNextPage` is the Next boundary adapter. It provides the raw Next
+  `searchParams` as the `ParsedSearchParams` service and runs the page program.
+  A program yields the service, decodes its own schema with
+  `ParsedSearchParams.decodeOption`, and returns a React tree or a
+  `NextRedirect`; `handleNextRedirect` is the only module that calls Next's
+  `redirect`. An invalid query renders its `Missing` state, while the controller
+  receives already-typed params. Route files only re-export page modules.
 - `Root.controller.ts` returns
   `NextRedirect.make({ url: "/star-wars", type: "replace" })`. Neither the route
   nor the controller imports `next/navigation`; the platform adapter does.
@@ -111,6 +112,7 @@ src/page-modules/Results/StarWarsResults.page.tsx SWAPI runtime + /star-wars
 src/page-modules/Results/GhibliResults.page.tsx   Ghibli runtime + /ghibli
 src/platform/NextPage.ts                     page program -> React tree or NextRedirect
 src/platform/NextRedirect.ts                 redirect model + the only Next redirect call
+src/platform/ParsedSearchParams.ts           raw query service + typed decode
 src/components/AppShell/                     AppShell.tsx
 src/components/HomePage/                     HomePage.tsx, HomePage.connected.tsx
 src/components/Funnel/                       Funnel.tsx, Funnel.connected.tsx

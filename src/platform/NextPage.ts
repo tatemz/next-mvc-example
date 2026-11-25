@@ -1,47 +1,32 @@
-import { Option, Schema, type Effect } from "effect";
+import { Effect, type ManagedRuntime } from "effect";
 import type { ReactNode } from "react";
 import {
   type NextRedirect,
   handleNextRedirect,
   isNextRedirect,
 } from "./NextRedirect";
-
-export type NextSearchParams = Readonly<
-  Record<string, string | ReadonlyArray<string> | undefined>
->;
+import {
+  type ParsedSearchParams,
+  fromInput,
+  tag as parsedSearchParamsTag,
+} from "./ParsedSearchParams";
 
 export type NextPageProps = {
-  readonly searchParams: Promise<NextSearchParams>;
+  readonly searchParams: Promise<ParsedSearchParams>;
 };
 
-type Runtime<R> = {
-  readonly runPromise: <A, E>(effect: Effect.Effect<A, E, R>) => Promise<A>;
-};
-
-export type NextPageConfig<Params, R> = {
-  readonly runtime: Runtime<R>;
-  readonly searchParams: Schema.ConstraintDecoder<Params>;
-  readonly load: (
-    params: Option.Option<Params>,
-  ) => Effect.Effect<ReactNode | NextRedirect, never, R>;
-};
-
-const firstValue = (value: string | ReadonlyArray<string> | undefined) =>
-  typeof value === "string" ? value : value?.[0];
-
-const normalizeSearchParams = (params: NextSearchParams) =>
-  Object.fromEntries(
-    Object.entries(params).map(([key, value]) => [key, firstValue(value)]),
-  );
-
-export const makeNextPage = <Params, R>(
-  config: NextPageConfig<Params, R>,
+export const makeNextPage = <R, E>(
+  runtime: ManagedRuntime.ManagedRuntime<R, E>,
+  load: Effect.Effect<
+    ReactNode | NextRedirect,
+    never,
+    R | ParsedSearchParams
+  >,
 ) =>
   async function NextPage({ searchParams }: NextPageProps) {
-    const raw = await searchParams;
-    const params = Schema.decodeUnknownOption(config.searchParams)(
-      normalizeSearchParams(raw),
+    const params = fromInput(await searchParams);
+    const result = await runtime.runPromise(
+      load.pipe(Effect.provideService(parsedSearchParamsTag, params)),
     );
-    const result = await config.runtime.runPromise(config.load(params));
     return isNextRedirect(result) ? handleNextRedirect(result) : result;
   };

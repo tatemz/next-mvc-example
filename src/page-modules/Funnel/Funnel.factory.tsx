@@ -1,4 +1,4 @@
-import type { Effect } from "effect";
+import type { Config, ManagedRuntime } from "effect";
 import {
   ConnectedFunnel,
   type FunnelAction,
@@ -7,11 +7,10 @@ import { startFunnel } from "../../controllers/Funnel.controller";
 import type { I18n } from "../../i18n/I18n.service";
 import type { PeopleCatalog } from "../../services/PeopleCatalog";
 
-export type FunnelRuntime = {
-  readonly runPromise: <A, E>(
-    effect: Effect.Effect<A, E, I18n | PeopleCatalog>,
-  ) => Promise<A>;
-};
+export type FunnelRuntime = ManagedRuntime.ManagedRuntime<
+  I18n | PeopleCatalog,
+  Config.ConfigError
+>;
 
 export const makeFunnelPage = (
   runtime: FunnelRuntime,

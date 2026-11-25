@@ -1,4 +1,4 @@
-import type { Effect } from "effect";
+import type { Config, ManagedRuntime } from "effect";
 import {
   ConnectedHomePage,
   type HomePageAction,
@@ -8,11 +8,10 @@ import { loadHomePage } from "../../controllers/HomePage.controller";
 import type { I18n } from "../../i18n/I18n.service";
 import type { PeopleCatalog } from "../../services/PeopleCatalog";
 
-export type HomePageRuntime = {
-  readonly runPromise: <A, E>(
-    effect: Effect.Effect<A, E, I18n | PeopleCatalog>,
-  ) => Promise<A>;
-};
+export type HomePageRuntime = ManagedRuntime.ManagedRuntime<
+  I18n | PeopleCatalog,
+  Config.ConfigError
+>;
 
 export const makeHomePage = (
   runtime: HomePageRuntime,
