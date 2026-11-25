@@ -1,9 +1,13 @@
+import { Effect } from "effect";
 import { searchGhibliPerson } from "../../actions/GhibliSearchPerson.serverAction";
+import { ConnectedHomePage } from "../../components/HomePage.connected";
+import { loadHomePage } from "../../controllers/HomePage.controller";
+import { makeNextPage } from "../../platform/NextPage";
 import { ghibliRuntime } from "../../server/Runtime";
-import { makeHomePage } from "./HomePage.factory";
 
-export const GhibliHome = makeHomePage(
+export const GhibliHomePage = makeNextPage(
   ghibliRuntime,
-  searchGhibliPerson,
-  "/ghibli/funnel",
+  Effect.map(loadHomePage("/ghibli/funnel", "autumn"), (model) => (
+    <ConnectedHomePage model={model} searchAction={searchGhibliPerson} />
+  )),
 );

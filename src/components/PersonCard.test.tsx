@@ -1,7 +1,7 @@
 import { it } from "@effect/vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect } from "vitest";
-import { makeEn } from "../../i18n/I18n.service";
+import { makeEn } from "../i18n/I18n.service";
 import {
   makePersonViewModel,
   PersonCard,
@@ -71,6 +71,23 @@ describe("makePersonViewModel", () => {
       height: "Unknown",
       mass: "Unknown",
     });
+  });
+
+  it("renders a known species", () => {
+    const model = makePersonViewModel(
+      i18n,
+      input({
+        species: {
+          name: "Human",
+          classification: "mammal",
+          language: "Galactic Basic",
+        },
+      }),
+    );
+
+    const html = renderToStaticMarkup(<PersonCard {...model} />);
+
+    expect(html).toContain("Human");
   });
 
   it("maps the species when one is present", () => {

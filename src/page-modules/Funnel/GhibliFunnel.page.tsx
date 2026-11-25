@@ -1,8 +1,13 @@
+import { Effect } from "effect";
 import { submitGhibliFunnel } from "../../actions/GhibliFunnel.serverAction";
+import { ConnectedFunnel } from "../../components/Funnel.connected";
+import { startFunnel } from "../../controllers/Funnel.controller";
+import { makeNextPage } from "../../platform/NextPage";
 import { ghibliRuntime } from "../../server/Runtime";
-import { makeFunnelPage } from "./Funnel.factory";
 
-export const GhibliFunnelPage = makeFunnelPage(
+export const GhibliFunnelPage = makeNextPage(
   ghibliRuntime,
-  submitGhibliFunnel,
+  Effect.map(startFunnel("autumn"), (model) => (
+    <ConnectedFunnel model={model} submitAction={submitGhibliFunnel} />
+  )),
 );

@@ -19,7 +19,7 @@ vi.mock("../../server/Runtime", async () => {
   return { swapiRuntime: runtime };
 });
 
-import { Results } from "../../components/Results/Results";
+import { Results } from "../../components/Results";
 import { StarWarsResultsPage } from "./StarWarsResults.page";
 
 describe("Results page", () => {
@@ -55,6 +55,7 @@ describe("Results page", () => {
           searchParams: Promise.resolve({
             character: ["1"],
             film: ["4"],
+            transport: ["none"],
           }),
         }),
       );
@@ -66,6 +67,23 @@ describe("Results page", () => {
         transport: null,
         startOverHref: "/star-wars/funnel",
         homeHref: "/star-wars",
+      });
+    }),
+  );
+
+  it.effect("renders a missing dossier when transport is absent", () =>
+    Effect.gen(function*() {
+      const element = yield* Effect.promise(() =>
+        StarWarsResultsPage({
+          searchParams: Promise.resolve({ character: "1", film: "4" }),
+        }),
+      );
+
+      expect(isValidElement(element)).toBe(true);
+      if (!isValidElement(element)) throw new Error("expected an element");
+      expect(element.props).toMatchObject({
+        _tag: "Missing",
+        startOverHref: "/star-wars/funnel",
       });
     }),
   );

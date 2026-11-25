@@ -2,9 +2,10 @@ import { Schema } from "effect";
 import { renderToStaticMarkup } from "react-dom/server";
 import { it } from "@effect/vitest";
 import { describe, expect } from "vitest";
-import { presentLoadedHomePage } from "../../controllers/HomePage.controller";
-import { luke } from "../../domain/FilmUniverse.fixture";
-import { makeEn } from "../../i18n/I18n.service";
+import { presentLoadedHomePage } from "../controllers/HomePage.controller";
+import { luke } from "../domain/FilmUniverse.fixture";
+import { makeEn } from "../i18n/I18n.service";
+import { makeAppShellViewModel } from "./AppShell";
 import {
   HomePage,
   HomePageOptics,
@@ -14,10 +15,11 @@ import {
 import { ConnectedHomePage } from "./HomePage.connected";
 
 const i18n = makeEn();
+const shell = makeAppShellViewModel(i18n, "night");
 
 describe("presentLoadedHomePage", () => {
   it("presents a domain person as a loaded view model", () => {
-    const model = presentLoadedHomePage(i18n, luke);
+    const model = presentLoadedHomePage(i18n, luke, "/star-wars/funnel", shell);
 
     expect(model).toMatchObject({
       _tag: "Loaded",
@@ -64,7 +66,7 @@ describe("presentLoadedHomePage", () => {
 
 describe("HomePageViewModel", () => {
   it("keeps films a non-empty array in the schema", () => {
-    const model = presentLoadedHomePage(i18n, luke);
+    const model = presentLoadedHomePage(i18n, luke, "/star-wars/funnel", shell);
     const invalid = {
       ...model,
       filmList: { ...model.filmList, films: [] },
@@ -78,7 +80,7 @@ describe("HomePageViewModel", () => {
 
 describe("HomePageOptics", () => {
   it("sets and reads the form error without mutating the model", () => {
-    const model = presentLoadedHomePage(makeEn(), luke);
+    const model = presentLoadedHomePage(makeEn(), luke, "/star-wars/funnel", shell);
     const updated = HomePageOptics.FormError.set("Bad id")(model);
 
     expect(HomePageOptics.FormError.get(updated)).toBe("Bad id");
@@ -90,7 +92,7 @@ describe("HomePage", () => {
   it("renders the loaded character and films", () => {
     const html = renderToStaticMarkup(
       <HomePage
-        {...presentLoadedHomePage(i18n, luke)}
+        {...presentLoadedHomePage(i18n, luke, "/star-wars/funnel", shell)}
         dispatch={() => {}}
         isPending={false}
       />,
@@ -106,7 +108,11 @@ describe("HomePage", () => {
   });
 
   it("renders a failure with the submitted form value", () => {
-    const model = makeFailedHomePageModel(i18n, { formValue: "abc" });
+    const model = makeFailedHomePageModel(i18n, {
+      formValue: "abc",
+      funnelHref: "/star-wars/funnel",
+      shell,
+    });
     expect(model).toMatchObject({
       form: {
         _tag: "SearchFormViewModel",
@@ -128,7 +134,7 @@ describe("HomePage", () => {
   it("renders the pending form state", () => {
     const html = renderToStaticMarkup(
       <HomePage
-        {...presentLoadedHomePage(i18n, luke)}
+        {...presentLoadedHomePage(i18n, luke, "/star-wars/funnel", shell)}
         dispatch={() => {}}
         isPending={true}
       />,
@@ -143,7 +149,7 @@ describe("ConnectedHomePage", () => {
   it("renders the initial model", () => {
     const html = renderToStaticMarkup(
       <ConnectedHomePage
-        model={presentLoadedHomePage(makeEn(), luke)}
+        model={presentLoadedHomePage(makeEn(), luke, "/star-wars/funnel", shell)}
         searchAction={async () => {
           throw new Error("not submitted");
         }}

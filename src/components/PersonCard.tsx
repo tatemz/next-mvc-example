@@ -1,10 +1,10 @@
-import { Array, Function, Match, Schema } from "effect";
-import type { I18n } from "../../i18n/I18n.service";
+import { Array, Function, Match, Option, Schema } from "effect";
+import type { I18n } from "../i18n/I18n.service";
 import {
   FilmListItemViewModel,
   FilmListItemInput,
   makeFilmListItemViewModel,
-} from "../FilmListItem/FilmListItem";
+} from "./FilmListItem";
 
 export const OriginViewModel = Schema.TaggedStruct("OriginViewModel", {
   name: Schema.NonEmptyString,
@@ -118,19 +118,20 @@ export const makePersonViewModel = (
       climate: person.origin.climate,
       terrain: person.origin.terrain,
     }),
-    species:
-      person.species === null
-        ? null
-        : SpeciesViewModel.make({
-            name: person.species.name,
-            classification: person.species.classification,
-            language: person.species.language,
-          }),
+    species: Option.match(Option.fromNullishOr(person.species), {
+      onNone: () => null,
+      onSome: (species) =>
+        SpeciesViewModel.make({
+          name: species.name,
+          classification: species.classification,
+          language: species.language,
+        }),
+    }),
     films: Function.pipe(
       person.films,
       Array.map(makeFilmListItemViewModel),
     ),
-    transports: person.transports.map((transport) =>
+    transports: Array.map(person.transports, (transport) =>
       TransportViewModel.make({
         key: transport.key,
         kind: transport.kind,
@@ -177,7 +178,10 @@ export const PersonCard = (model: PersonCardProps) => (
             {model.speciesLabel}
           </dt>
           <dd className="text-lg">
-            {model.species?.name ?? model.speciesUnknownLabel}
+            {Option.match(Option.fromNullishOr(model.species), {
+              onNone: () => model.speciesUnknownLabel,
+              onSome: (species) => species.name,
+            })}
           </dd>
         </div>
       </dl>

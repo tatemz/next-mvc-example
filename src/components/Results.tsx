@@ -1,13 +1,15 @@
 import { Match, Schema } from "effect";
-import type { I18n } from "../../i18n/I18n.service";
-import { FilmListItemViewModel } from "../FilmListItem/FilmListItem";
+import type { I18n } from "../i18n/I18n.service";
+import { AppShell, AppShellViewModel } from "./AppShell";
+import { FilmListItemViewModel } from "./FilmListItem";
 import {
   PersonCard,
   PersonViewModel,
   TransportViewModel,
-} from "../PersonCard/PersonCard";
+} from "./PersonCard";
 
 export const ResultsReadyViewModel = Schema.TaggedStruct("Ready", {
+  shell: AppShellViewModel,
   heading: Schema.NonEmptyString,
   subtitle: Schema.NonEmptyString,
   person: PersonViewModel,
@@ -24,6 +26,7 @@ export const ResultsReadyViewModel = Schema.TaggedStruct("Ready", {
 export type ResultsReadyViewModel = typeof ResultsReadyViewModel.Type;
 
 export const ResultsMissingViewModel = Schema.TaggedStruct("Missing", {
+  shell: AppShellViewModel,
   heading: Schema.NonEmptyString,
   message: Schema.NonEmptyString,
   startOverLabel: Schema.NonEmptyString,
@@ -39,11 +42,15 @@ export type ResultsViewModel = typeof ResultsViewModel.Type;
 
 export const makeResultsReadyViewModel = (
   i18n: I18n,
+  shell: AppShellViewModel,
   person: PersonViewModel,
   film: FilmListItemViewModel,
   transport: TransportViewModel | null,
+  startOverHref: string,
+  homeHref: string,
 ) =>
   ResultsReadyViewModel.make({
+    shell,
     heading: i18n._({ id: "results.ready.heading" }),
     subtitle: i18n._({ id: "results.ready.subtitle" }),
     person,
@@ -54,16 +61,21 @@ export const makeResultsReadyViewModel = (
     noneLabel: i18n._({ id: "results.ready.noneTransport" }),
     startOverLabel: i18n._({ id: "results.ready.startOver" }),
     homeLabel: i18n._({ id: "results.ready.home" }),
-    startOverHref: "/star-wars/funnel",
-    homeHref: "/star-wars",
+    startOverHref,
+    homeHref,
   });
 
-export const makeResultsMissingViewModel = (i18n: I18n) =>
+export const makeResultsMissingViewModel = (
+  i18n: I18n,
+  shell: AppShellViewModel,
+  startOverHref: string,
+) =>
   ResultsMissingViewModel.make({
+    shell,
     heading: i18n._({ id: "results.missing.heading" }),
     message: i18n._({ id: "results.missing.message" }),
     startOverLabel: i18n._({ id: "results.missing.startOver" }),
-    startOverHref: "/star-wars/funnel",
+    startOverHref,
   });
 
 const ReadyResults = ({ model }: { readonly model: ResultsReadyViewModel }) => (
@@ -130,9 +142,12 @@ const MissingResults = ({
   </div>
 );
 
-export const Results = (model: ResultsViewModel) =>
-  Match.value(model).pipe(
-    Match.tag("Ready", (ready) => <ReadyResults model={ready} />),
-    Match.tag("Missing", (missing) => <MissingResults model={missing} />),
-    Match.exhaustive,
-  );
+export const Results = (model: ResultsViewModel) => (
+  <AppShell {...model.shell}>
+    {Match.value(model).pipe(
+      Match.tag("Ready", (ready) => <ReadyResults model={ready} />),
+      Match.tag("Missing", (missing) => <MissingResults model={missing} />),
+      Match.exhaustive,
+    )}
+  </AppShell>
+);

@@ -1,10 +1,9 @@
 import { it } from "@effect/vitest";
 import { describe, expect } from "vitest";
-import { ghibliRuntime, shellRuntime, swapiRuntime } from "./Runtime";
+import { ghibliRuntime, swapiRuntime } from "./Runtime";
 
 describe("runtimes", () => {
-  it("creates the shell and both dataset runtimes", () => {
-    expect(shellRuntime).toBeDefined();
+  it("creates both dataset runtimes", () => {
     expect(swapiRuntime).toBeDefined();
     expect(ghibliRuntime).toBeDefined();
   });

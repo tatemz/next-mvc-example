@@ -1,6 +1,6 @@
 import { Array, Function, Schema } from "effect";
-import type { I18n } from "../../i18n/I18n.service";
-import { FilmListItem, FilmListItemViewModel } from "../FilmListItem/FilmListItem";
+import type { I18n } from "../i18n/I18n.service";
+import { FilmListItem, FilmListItemViewModel } from "./FilmListItem";
 
 export const FilmListViewModel = Schema.TaggedStruct("FilmListViewModel", {
   films: Schema.NonEmptyArray(FilmListItemViewModel),

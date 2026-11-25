@@ -1,7 +1,12 @@
+import { Effect } from "effect";
+import { Results } from "../../components/Results";
+import { loadResultsPage } from "../../controllers/Results.controller";
+import { makeNextPage } from "../../platform/NextPage";
 import { ghibliRuntime } from "../../server/Runtime";
-import { makeResultsPage } from "./Results.factory";
 
-export const GhibliResultsPage = makeResultsPage(
+export const GhibliResultsPage = makeNextPage(
   ghibliRuntime,
-  "/ghibli",
+  Effect.map(loadResultsPage("/ghibli", "autumn"), (model) => (
+    <Results {...model} />
+  )),
 );

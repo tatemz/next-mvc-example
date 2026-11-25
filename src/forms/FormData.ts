@@ -3,6 +3,8 @@ import {
   Data,
   Effect,
   Function,
+  Option,
+  Predicate,
   Record,
   Schema,
   type SchemaIssue,
@@ -18,15 +20,21 @@ export const toRecord = (formData: globalThis.FormData) => {
       ([key, value]) =>
         [
           key,
-          typeof value === "string" ? value : value.name,
+          Predicate.isString(value) ? value : value.name,
         ] as const,
     ),
   );
   return Record.fromEntries(entries);
 };
 
-export const getString = (record: FormDataRecord, key: string) =>
-  record[key] ?? "";
+export const getStringOrEmpty = (
+  record: FormDataRecord,
+  key: string,
+) =>
+  Option.getOrElse(
+    Option.fromNullishOr(record[key]),
+    () => "",
+  );
 
 export class FormValidationError<Errors> extends Data.TaggedError(
   "FormValidationError",

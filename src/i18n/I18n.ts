@@ -74,10 +74,10 @@ const customDateFormats = {
 
 export const make = <const Messages extends AnyMessages>(opts: {
   messages: Messages;
-  locale?: Locale;
+  locale: Locale;
   timezone?: string;
 }): I18n<Messages> => {
-  const locale = opts.locale ?? "en-US";
+  const locale = opts.locale;
   const config: IntlConfig<string> = {
     ...opts,
     locale,

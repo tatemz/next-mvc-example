@@ -1,4 +1,4 @@
-import { Array, Effect, Function, Schema } from "effect";
+import { Array, Effect, Function, Option, Schema } from "effect";
 import {
   CharacterId,
   Film,
@@ -75,9 +75,9 @@ export const make = (ghibli: GhibliSource) => {
         [loadPeople, loadFilms, loadSpecies],
         { concurrency: "unbounded" },
       );
-      const person = people[Number(id) - 1];
+      const personOption = Array.get(people, Number(id) - 1);
 
-      if (person === undefined) {
+      if (Option.isNone(personOption)) {
         return yield* Effect.fail(
           new PeopleCatalogError({
             message: `Character ${id} is not available.`,
@@ -85,23 +85,29 @@ export const make = (ghibli: GhibliSource) => {
         );
       }
 
-      const personFilms = person.films.flatMap((url, index) => {
-        const film = films.find((candidate) => candidate.url === url);
-        return film === undefined
-          ? []
-          : [
+      const person = personOption.value;
+      const personFilms = Array.flatMap(person.films, (url, index) =>
+        Option.match(
+          Array.findFirst(films, (candidate) => candidate.url === url),
+          {
+            onNone: () => [],
+            onSome: (film) => [
               Film.make({
                 title: film.title,
                 order: index + 1,
                 imageUrl: film.image,
               }),
-            ];
-      });
+            ],
+          },
+        ),
+      );
 
-      const matchedSpecies =
-        person.species === ""
-          ? undefined
-          : species.find((candidate) => candidate.url === person.species);
+      const matchedSpecies = person.species === ""
+        ? Option.none()
+        : Array.findFirst(
+          species,
+          (candidate) => candidate.url === person.species,
+        );
 
       return yield* Function.pipe(
         personFilms,
@@ -126,14 +132,15 @@ export const make = (ghibli: GhibliSource) => {
                   climate: "unknown",
                   terrain: "unknown",
                 }),
-                species:
-                  matchedSpecies === undefined
-                    ? null
-                    : Species.make({
-                        name: matchedSpecies.name,
-                        classification: "unknown",
-                        language: "unknown",
-                      }),
+                species: Option.match(matchedSpecies, {
+                  onNone: () => null,
+                  onSome: (matched) =>
+                    Species.make({
+                      name: matched.name,
+                      classification: "unknown",
+                      language: "unknown",
+                    }),
+                }),
                 films: [first, ...rest],
                 transports: [],
               }),

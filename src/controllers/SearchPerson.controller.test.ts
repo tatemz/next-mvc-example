@@ -6,6 +6,7 @@ import { searchPerson } from "./SearchPerson.controller";
 import { I18n, makeEn } from "../i18n/I18n.service";
 import { layerStub } from "../services/SwapiPeopleCatalog.layer";
 import { luke, personNamed } from "../domain/FilmUniverse.fixture";
+import { makeAppShellViewModel } from "../components/AppShell";
 
 const form = (characterId: string) => {
   const data = new FormData();
@@ -14,12 +15,18 @@ const form = (characterId: string) => {
 };
 
 const i18n = makeEn();
-const previous = presentLoadedHomePage(i18n, luke);
+const shell = makeAppShellViewModel(i18n, "night");
+const previous = presentLoadedHomePage(
+  i18n,
+  luke,
+  "/star-wars/funnel",
+  shell,
+);
 
 describe("searchPerson", () => {
   it.effect("sets a form error on the current model for a non-numeric id", () =>
     Effect.gen(function*() {
-      const model = yield* searchPerson(previous, form("abc"));
+      const model = yield* searchPerson(previous, form("abc"), "/star-wars/funnel", "night");
 
       expect(model).toMatchObject({
         _tag: "Loaded",
@@ -38,7 +45,7 @@ describe("searchPerson", () => {
 
   it.effect("sets a form error on the current model for a zero id", () =>
     Effect.gen(function*() {
-      const model = yield* searchPerson(previous, form("0"));
+      const model = yield* searchPerson(previous, form("0"), "/star-wars/funnel", "night");
 
       expect(model).toMatchObject({
         _tag: "Loaded",
@@ -55,7 +62,7 @@ describe("searchPerson", () => {
 
   it.effect("sets a form error on the current model for a missing id", () =>
     Effect.gen(function*() {
-      const model = yield* searchPerson(previous, new FormData());
+      const model = yield* searchPerson(previous, new FormData(), "/star-wars/funnel", "night");
 
       expect(model).toMatchObject({
         _tag: "Loaded",
@@ -72,7 +79,7 @@ describe("searchPerson", () => {
 
   it.effect("returns the updated loaded view model for a valid id", () =>
     Effect.gen(function*() {
-      const model = yield* searchPerson(previous, form("3"));
+      const model = yield* searchPerson(previous, form("3"), "/star-wars/funnel", "night");
 
       expect(model).toMatchObject({
         _tag: "Loaded",

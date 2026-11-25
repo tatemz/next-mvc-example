@@ -1,6 +1,6 @@
 "use server";
 
-import type { FunnelViewModel } from "../components/Funnel/Funnel";
+import type { FunnelViewModel } from "../components/Funnel";
 import { advanceFunnel } from "../controllers/Funnel.controller";
 import { swapiRuntime } from "../server/Runtime";
 

@@ -13,14 +13,15 @@ const env = (values: Record<string, string>) =>
 const i18n = makeEn();
 
 describe("loadHomePage", () => {
-  it.effect("reads the default character id from Config", () =>
+  it.effect("reads the character id from Config", () =>
     Effect.gen(function*() {
-      const model = yield* loadHomePage;
+      const model = yield* loadHomePage("/star-wars/funnel", "night");
 
       expect(model._tag).toBe("Loaded");
       if (model._tag !== "Loaded") throw new Error("expected Loaded");
       expect(model.form.value).toBe("2");
       expect(model.person.name).toBe("Leia Organa");
+      expect(model.hero.funnelHref).toBe("/star-wars/funnel");
     }).pipe(
       Effect.provide(
         layerStub((id) => Effect.succeed(personNamed(id, "Leia Organa"))),
@@ -33,13 +34,14 @@ describe("loadHomePage", () => {
     ),
   );
 
-  it.effect("falls back to character one", () =>
+  it.effect("renders a failed page when CHARACTER_ID is missing", () =>
     Effect.gen(function*() {
-      const model = yield* loadHomePage;
+      const model = yield* loadHomePage("/star-wars/funnel", "night");
 
-      expect(model._tag).toBe("Loaded");
-      if (model._tag !== "Loaded") throw new Error("expected Loaded");
-      expect(model.form.value).toBe("1");
+      expect(model).toMatchObject({
+        _tag: "Failed",
+        form: { value: "" },
+      });
     }).pipe(
       Effect.provide(layerStub(() => Effect.succeed(luke))),
       Effect.provideService(
@@ -52,7 +54,7 @@ describe("loadHomePage", () => {
 
   it.effect("turns a client failure into a failed view model", () =>
     Effect.gen(function*() {
-      const model = yield* loadHomePage;
+      const model = yield* loadHomePage("/star-wars/funnel", "night");
 
       expect(model).toMatchObject({
         _tag: "Failed",
@@ -67,7 +69,7 @@ describe("loadHomePage", () => {
       ),
       Effect.provideService(
         ConfigProvider.ConfigProvider,
-        env({}),
+        env({ CHARACTER_ID: "1" }),
       ),
       Effect.provideService(I18n, i18n),
     ),
@@ -75,7 +77,7 @@ describe("loadHomePage", () => {
 
   it.effect("turns an invalid configured id into a failed view model", () =>
     Effect.gen(function*() {
-      const model = yield* loadHomePage;
+      const model = yield* loadHomePage("/star-wars/funnel", "night");
 
       expect(model).toMatchObject({
         _tag: "Failed",

@@ -1,22 +1,23 @@
 import { Effect, Function } from "effect";
+import type { ExperienceTheme } from "../components/AppShell";
 import {
   type HomePageViewModel,
   HomePageOptics,
-} from "../components/HomePage/HomePage";
+} from "../components/HomePage";
+import { getStringOrEmpty } from "../forms/FormData";
+import { I18n } from "../i18n/I18n.service";
+import { loadHomePageFor } from "./HomePage.controller";
 import {
   type SearchFormValidationError,
   validateSearchForm,
 } from "./SearchPerson.schema";
-import { getString } from "../forms/FormData";
-import { I18n } from "../i18n/I18n.service";
-import { loadHomePageFor } from "./HomePage.controller";
 
 const handleValidationError =
   (previous: HomePageViewModel) =>
   (error: SearchFormValidationError) =>
     Effect.gen(function*() {
       const i18n = yield* I18n;
-      const formValue = getString(error.formData, "characterId");
+      const formValue = getStringOrEmpty(error.formData, "characterId");
       const message = i18n._({ id: error.errors.characterId });
 
       return Function.pipe(
@@ -27,17 +28,23 @@ const handleValidationError =
     });
 
 const searchPersonEffect = Effect.fn("searchPerson")(
-  function*(formData: FormData) {
+  function*(
+    formData: FormData,
+    funnelHref: string,
+    theme: ExperienceTheme,
+  ) {
     const data = yield* validateSearchForm(formData);
-    return yield* loadHomePageFor(data.characterId);
+    return yield* loadHomePageFor(data.characterId, funnelHref, theme);
   },
 );
 
 export const searchPerson = (
   previous: HomePageViewModel,
   formData: FormData,
+  funnelHref: string,
+  theme: ExperienceTheme,
 ) =>
   Function.pipe(
-    searchPersonEffect(formData),
+    searchPersonEffect(formData, funnelHref, theme),
     Effect.catchTag("FormValidationError", handleValidationError(previous)),
   );

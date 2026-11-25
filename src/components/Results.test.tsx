@@ -1,9 +1,10 @@
 import { it } from "@effect/vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect } from "vitest";
-import { luke } from "../../domain/FilmUniverse.fixture";
-import { makeEn } from "../../i18n/I18n.service";
-import { makePersonViewModel } from "../PersonCard/PersonCard";
+import { luke } from "../domain/FilmUniverse.fixture";
+import { makeEn } from "../i18n/I18n.service";
+import { makePersonViewModel } from "./PersonCard";
+import { makeAppShellViewModel } from "./AppShell";
 import {
   Results,
   makeResultsMissingViewModel,
@@ -11,17 +12,23 @@ import {
 } from "./Results";
 
 const i18n = makeEn();
+const shell = makeAppShellViewModel(i18n, "night");
 const person = makePersonViewModel(i18n, luke);
 const film = person.films[0];
 const transport = person.transports[0];
+const startOverHref = "/star-wars/funnel";
+const homeHref = "/star-wars";
 
 describe("Results", () => {
   it("renders a complete dossier", () => {
     const model = makeResultsReadyViewModel(
       i18n,
+      shell,
       person,
       film,
       transport,
+      startOverHref,
+      homeHref,
     );
     const html = renderToStaticMarkup(<Results {...model} />);
 
@@ -40,7 +47,15 @@ describe("Results", () => {
     };
     const html = renderToStaticMarkup(
       <Results
-        {...makeResultsReadyViewModel(i18n, person, illustratedFilm, transport)}
+        {...makeResultsReadyViewModel(
+          i18n,
+          shell,
+          person,
+          illustratedFilm,
+          transport,
+          startOverHref,
+          homeHref,
+        )}
       />,
     );
 
@@ -48,14 +63,22 @@ describe("Results", () => {
   });
 
   it("renders a dossier without a transport", () => {
-    const model = makeResultsReadyViewModel(i18n, person, film, null);
+    const model = makeResultsReadyViewModel(
+      i18n,
+      shell,
+      person,
+      film,
+      null,
+      startOverHref,
+      homeHref,
+    );
     const html = renderToStaticMarkup(<Results {...model} />);
 
     expect(html).toContain("No transport selected");
   });
 
   it("renders a missing dossier", () => {
-    const model = makeResultsMissingViewModel(i18n);
+    const model = makeResultsMissingViewModel(i18n, shell, startOverHref);
     const html = renderToStaticMarkup(<Results {...model} />);
 
     expect(html).toContain("Dossier not found");

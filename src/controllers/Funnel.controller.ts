@@ -1,4 +1,5 @@
 import { Array, Effect, Function, Match, Option, Schema } from "effect";
+import type { ExperienceTheme } from "../components/AppShell";
 import {
   type FunnelViewModel,
   PersonChoiceViewModel,
@@ -8,51 +9,51 @@ import {
   makeFunnelReviewViewModel,
   makeFunnelSearchViewModel,
   makeFunnelTransportViewModel,
-} from "../components/Funnel/Funnel";
-import { makePersonViewModel } from "../components/PersonCard/PersonCard";
+} from "../components/Funnel";
+import { makePersonViewModel } from "../components/PersonCard";
+import { loadAppShell } from "./AppShell.controller";
 import { CharacterId } from "../domain/FilmUniverse.model";
-import { getString, toRecord } from "../forms/FormData";
+import { getStringOrEmpty, toRecord } from "../forms/FormData";
 import { I18n } from "../i18n/I18n.service";
 import { PeopleCatalog } from "../services/PeopleCatalog";
 
-export const startFunnel = Effect.gen(function*() {
-  const i18n = yield* I18n;
-  return makeFunnelSearchViewModel(i18n);
-});
+export const startFunnel = (theme: ExperienceTheme) =>
+  Effect.gen(function*() {
+    const i18n = yield* I18n;
+    const shell = yield* loadAppShell(theme);
+    return makeFunnelSearchViewModel(i18n, shell, "", undefined);
+  });
 
 const searchStep = (
-  _step: Extract<FunnelViewModel, { _tag: "Search" }>,
+  step: Extract<FunnelViewModel, { _tag: "Search" }>,
   formData: FormData,
 ) =>
   Effect.gen(function*() {
     const i18n = yield* I18n;
     const data = toRecord(formData);
-    const query = getString(data, "query").trim();
+    const query = getStringOrEmpty(data, "query").trim();
 
     if (query === "") {
       return makeFunnelSearchViewModel(
         i18n,
+        step.shell,
         query,
         i18n._({ id: "funnel.search.required" }),
       );
     }
 
     const client = yield* PeopleCatalog;
-    const results = yield* client.searchPeople(query).pipe(
-      Effect.match({
-        onFailure: () => undefined,
-        onSuccess: (people) => people,
-      }),
-    );
+    const results = yield* Effect.option(client.searchPeople(query));
 
-    if (results === undefined) {
+    if (Option.isNone(results)) {
       return makeFunnelFailedViewModel(
         i18n,
+        step.shell,
         i18n._({ id: "funnel.failed.message" }),
       );
     }
 
-    const choices = Array.map(results, (person) =>
+    const choices = Array.map(results.value, (person) =>
       PersonChoiceViewModel.make({ id: person.id, name: person.name }),
     );
 
@@ -62,11 +63,12 @@ const searchStep = (
         onEmpty: () =>
           makeFunnelSearchViewModel(
             i18n,
+            step.shell,
             query,
             i18n._({ id: "funnel.search.noResults" }),
           ),
         onNonEmpty: (first, rest) =>
-          makeFunnelChooseViewModel(i18n, query, [first, ...rest]),
+          makeFunnelChooseViewModel(i18n, step.shell, query, [first, ...rest]),
       }),
     );
   });
@@ -79,35 +81,41 @@ const chooseStep = (
     const i18n = yield* I18n;
     const data = toRecord(formData);
     const characterId = Schema.decodeUnknownOption(CharacterId)(
-      getString(data, "characterId"),
+      getStringOrEmpty(data, "characterId"),
     );
 
     if (
       Option.isNone(characterId) ||
-      !step.results.some((result) => result.id === characterId.value)
+      !Array.some(
+        step.results,
+        (result) => result.id === characterId.value,
+      )
     ) {
       return makeFunnelFailedViewModel(
         i18n,
+        step.shell,
         i18n._({ id: "funnel.failed.invalidChoice" }),
       );
     }
 
     const client = yield* PeopleCatalog;
-    const person = yield* client.getPerson(characterId.value).pipe(
-      Effect.match({
-        onFailure: () => undefined,
-        onSuccess: (loaded) => loaded,
-      }),
+    const person = yield* Effect.option(
+      client.getPerson(characterId.value),
     );
 
-    if (person === undefined) {
+    if (Option.isNone(person)) {
       return makeFunnelFailedViewModel(
         i18n,
+        step.shell,
         i18n._({ id: "funnel.failed.message" }),
       );
     }
 
-    return makeFunnelFilmViewModel(i18n, makePersonViewModel(i18n, person));
+    return makeFunnelFilmViewModel(
+      i18n,
+      step.shell,
+      makePersonViewModel(i18n, person.value),
+    );
   });
 
 const filmStep = (
@@ -117,19 +125,31 @@ const filmStep = (
   Effect.gen(function*() {
     const i18n = yield* I18n;
     const data = toRecord(formData);
-    const order = Number(getString(data, "order"));
-    const film = step.person.films.find(
-      (candidate) => candidate.order === order,
+    const film = Option.flatMap(
+      Schema.decodeUnknownOption(
+        Schema.NumberFromString.check(Schema.isInt()),
+      )(getStringOrEmpty(data, "order")),
+      (order) =>
+        Array.findFirst(
+          step.person.films,
+          (candidate) => candidate.order === order,
+        ),
     );
 
-    if (film === undefined) {
+    if (Option.isNone(film)) {
       return makeFunnelFailedViewModel(
         i18n,
+        step.shell,
         i18n._({ id: "funnel.failed.invalidChoice" }),
       );
     }
 
-    return makeFunnelTransportViewModel(i18n, step.person, film);
+    return makeFunnelTransportViewModel(
+      i18n,
+      step.shell,
+      step.person,
+      film.value,
+    );
   });
 
 const transportStep = (
@@ -139,24 +159,28 @@ const transportStep = (
   Effect.gen(function*() {
     const i18n = yield* I18n;
     const data = toRecord(formData);
-    const key = getString(data, "transportKey");
-    const transport =
-      key === "none"
-        ? null
-        : step.person.transports.find((candidate) => candidate.key === key);
+    const key = getStringOrEmpty(data, "transportKey");
+    const transport = key === "none"
+      ? Option.none()
+      : Array.findFirst(
+        step.person.transports,
+        (candidate) => candidate.key === key,
+      );
 
-    if (key !== "none" && transport === undefined) {
+    if (key !== "none" && Option.isNone(transport)) {
       return makeFunnelFailedViewModel(
         i18n,
+        step.shell,
         i18n._({ id: "funnel.failed.invalidChoice" }),
       );
     }
 
     return makeFunnelReviewViewModel(
       i18n,
+      step.shell,
       step.person,
       step.film,
-      transport ?? null,
+      Option.getOrNull(transport),
     );
   });
 

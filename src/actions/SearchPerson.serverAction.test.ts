@@ -3,6 +3,7 @@ import { Effect } from "effect";
 import { describe, expect, vi } from "vitest";
 import { presentLoadedHomePage } from "../controllers/HomePage.controller";
 import { makeEn } from "../i18n/I18n.service";
+import { makeAppShellViewModel } from "../components/AppShell";
 import { luke } from "../domain/FilmUniverse.fixture";
 
 vi.mock("../server/Runtime", async () => {
@@ -26,7 +27,12 @@ import { searchPerson } from "./SearchPerson.serverAction";
 describe("searchPerson server action", () => {
   it.effect("runs the controller effect through the runtime", () =>
     Effect.gen(function*() {
-      const previous = presentLoadedHomePage(makeEn(), luke);
+      const previous = presentLoadedHomePage(
+        makeEn(),
+        luke,
+        "/star-wars/funnel",
+        makeAppShellViewModel(makeEn(), "night"),
+      );
       const formData = new FormData();
       formData.set("characterId", "3");
 

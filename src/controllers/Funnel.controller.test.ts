@@ -9,8 +9,9 @@ import {
   makeFunnelReviewViewModel,
   makeFunnelSearchViewModel,
   makeFunnelTransportViewModel,
-} from "../components/Funnel/Funnel";
-import { makePersonViewModel } from "../components/PersonCard/PersonCard";
+} from "../components/Funnel";
+import { makePersonViewModel } from "../components/PersonCard";
+import { makeAppShellViewModel } from "../components/AppShell";
 import { luke, makeCharacterId } from "../domain/FilmUniverse.fixture";
 import { I18n, makeEn } from "../i18n/I18n.service";
 import { PeopleCatalog, PeopleCatalogError } from "../services/PeopleCatalog";
@@ -18,6 +19,7 @@ import { layerStub } from "../services/SwapiPeopleCatalog.layer";
 import { advanceFunnel, startFunnel } from "./Funnel.controller";
 
 const i18n = makeEn();
+const shell = makeAppShellViewModel(i18n, "night");
 
 const form = (values: Record<string, string>) => {
   const data = new FormData();
@@ -38,7 +40,7 @@ const run = (
     Effect.provideService(I18n, i18n),
   );
 
-const search = makeFunnelSearchViewModel(i18n);
+const search = makeFunnelSearchViewModel(i18n, shell, "", undefined);
 const person = makePersonViewModel(i18n, luke);
 const film = person.films[0];
 const transport = person.transports[0];
@@ -46,16 +48,16 @@ const choice = PersonChoiceViewModel.make({
   id: "1",
   name: "Luke Skywalker",
 });
-const choose = makeFunnelChooseViewModel(i18n, "Luke", [choice]);
-const filmStep = makeFunnelFilmViewModel(i18n, person);
-const transportStep = makeFunnelTransportViewModel(i18n, person, film);
-const review = makeFunnelReviewViewModel(i18n, person, film, transport);
-const failed = makeFunnelFailedViewModel(i18n, "Nope");
+const choose = makeFunnelChooseViewModel(i18n, shell, "Luke", [choice]);
+const filmStep = makeFunnelFilmViewModel(i18n, shell, person);
+const transportStep = makeFunnelTransportViewModel(i18n, shell, person, film);
+const review = makeFunnelReviewViewModel(i18n, shell, person, film, transport);
+const failed = makeFunnelFailedViewModel(i18n, shell, "Nope");
 
 describe("startFunnel", () => {
   it.effect("starts on the search step", () =>
     Effect.gen(function*() {
-      const model = yield* startFunnel.pipe(
+      const model = yield* startFunnel("night").pipe(
         Effect.provideService(I18n, i18n),
       );
 

@@ -1,15 +1,16 @@
 import { Prism } from "@fuiste/optics";
 import { Schema } from "effect";
-import type { I18n } from "../../i18n/I18n.service";
-import { FilmList, FilmListViewModel } from "../FilmList/FilmList";
-import { PersonCard, PersonViewModel } from "../PersonCard/PersonCard";
+import type { I18n } from "../i18n/I18n.service";
+import { AppShell, AppShellViewModel } from "./AppShell";
+import { FilmList, FilmListViewModel } from "./FilmList";
+import { PersonCard, PersonViewModel } from "./PersonCard";
 import {
   makeInitialSearchFormViewModel,
   makeRetrySearchFormViewModel,
   SearchForm,
   SearchFormOptics,
   SearchFormViewModel,
-} from "../SearchForm/SearchForm";
+} from "./SearchForm";
 
 export const HomeHeroViewModel = Schema.TaggedStruct("HomeHeroViewModel", {
   title: Schema.NonEmptyString,
@@ -19,37 +20,24 @@ export const HomeHeroViewModel = Schema.TaggedStruct("HomeHeroViewModel", {
 });
 export type HomeHeroViewModel = typeof HomeHeroViewModel.Type;
 
-export const makeHomeHeroViewModel = (i18n: I18n) =>
+export const makeHomeHeroViewModel = (i18n: I18n, funnelHref: string) =>
   HomeHeroViewModel.make({
     title: i18n._({ id: "homePage.hero.title" }),
     subtitle: i18n._({ id: "homePage.hero.subtitle" }),
     funnelLabel: i18n._({ id: "homePage.hero.funnel" }),
-    funnelHref: "/star-wars/funnel",
-  });
-
-export const setHeroFunnelHref = (
-  model: HomePageViewModel,
-  funnelHref: string,
-): HomePageViewModel =>
-  HomePageViewModel.match(model, {
-    Loaded: (loaded) => ({
-      ...loaded,
-      hero: { ...loaded.hero, funnelHref },
-    }),
-    Failed: (failed) => ({
-      ...failed,
-      hero: { ...failed.hero, funnelHref },
-    }),
+    funnelHref,
   });
 
 export const HomePageViewModel = Schema.TaggedUnion({
   Loaded: {
+    shell: AppShellViewModel,
     hero: HomeHeroViewModel,
     form: SearchFormViewModel,
     person: PersonViewModel,
     filmList: FilmListViewModel,
   },
   Failed: {
+    shell: AppShellViewModel,
     hero: HomeHeroViewModel,
     form: SearchFormViewModel,
     message: Schema.NonEmptyString,
@@ -75,6 +63,8 @@ export const HomePageOptics = {
 
 export const LoadedHomePageInput = Schema.Struct({
   formValue: Schema.String,
+  funnelHref: Schema.NonEmptyString,
+  shell: AppShellViewModel,
   person: PersonViewModel,
   filmList: FilmListViewModel,
 });
@@ -82,6 +72,8 @@ export type LoadedHomePageInput = typeof LoadedHomePageInput.Type;
 
 export const FailedHomePageInput = Schema.Struct({
   formValue: Schema.String,
+  funnelHref: Schema.NonEmptyString,
+  shell: AppShellViewModel,
 });
 export type FailedHomePageInput = typeof FailedHomePageInput.Type;
 
@@ -90,7 +82,8 @@ export const makeLoadedHomePageModel = (
   input: LoadedHomePageInput,
 ) =>
   HomePageViewModel.cases.Loaded.make({
-    hero: makeHomeHeroViewModel(i18n),
+    shell: input.shell,
+    hero: makeHomeHeroViewModel(i18n, input.funnelHref),
     form: makeInitialSearchFormViewModel(i18n, input.formValue),
     person: input.person,
     filmList: input.filmList,
@@ -101,7 +94,8 @@ export const makeFailedHomePageModel = (
   input: FailedHomePageInput,
 ) =>
   HomePageViewModel.cases.Failed.make({
-    hero: makeHomeHeroViewModel(i18n),
+    shell: input.shell,
+    hero: makeHomeHeroViewModel(i18n, input.funnelHref),
     form: makeRetrySearchFormViewModel(i18n, input.formValue),
     message: i18n._({ id: "homePage.loadError" }),
   });
@@ -187,17 +181,21 @@ export const HomePage = ({
 }: HomePageProps) =>
   HomePageViewModel.match(model, {
     Loaded: (loaded) => (
-      <LoadedHomePage
-        {...loaded}
-        dispatch={dispatch}
-        isPending={isPending}
-      />
+      <AppShell {...loaded.shell}>
+        <LoadedHomePage
+          {...loaded}
+          dispatch={dispatch}
+          isPending={isPending}
+        />
+      </AppShell>
     ),
     Failed: (failed) => (
-      <FailedHomePage
-        {...failed}
-        dispatch={dispatch}
-        isPending={isPending}
-      />
+      <AppShell {...failed.shell}>
+        <FailedHomePage
+          {...failed}
+          dispatch={dispatch}
+          isPending={isPending}
+        />
+      </AppShell>
     ),
   });

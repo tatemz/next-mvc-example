@@ -30,8 +30,9 @@ vi.mock("../server/Runtime", async () => {
   return { ghibliRuntime: runtime };
 });
 
-import { makeFunnelSearchViewModel } from "../components/Funnel/Funnel";
+import { makeFunnelSearchViewModel } from "../components/Funnel";
 import { makeEn } from "../i18n/I18n.service";
+import { makeAppShellViewModel } from "../components/AppShell";
 import { submitGhibliFunnel } from "./GhibliFunnel.serverAction";
 
 describe("submitGhibliFunnel server action", () => {
@@ -41,7 +42,15 @@ describe("submitGhibliFunnel server action", () => {
       formData.set("query", "Haku");
 
       const result = yield* Effect.promise(() =>
-        submitGhibliFunnel(makeFunnelSearchViewModel(makeEn()), formData),
+        submitGhibliFunnel((() => {
+        const i18n = makeEn();
+        return makeFunnelSearchViewModel(
+          i18n,
+          makeAppShellViewModel(i18n, "autumn"),
+          "",
+          undefined,
+        );
+      })(), formData),
       );
 
       expect(result).toMatchObject({

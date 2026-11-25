@@ -25,12 +25,18 @@ vi.mock("../server/Runtime", async () => {
 import { presentLoadedHomePage } from "../controllers/HomePage.controller";
 import { luke } from "../domain/FilmUniverse.fixture";
 import { makeEn } from "../i18n/I18n.service";
+import { makeAppShellViewModel } from "../components/AppShell";
 import { searchGhibliPerson } from "./GhibliSearchPerson.serverAction";
 
 describe("searchGhibliPerson server action", () => {
   it.effect("runs the shared search controller through the Ghibli runtime", () =>
     Effect.gen(function*() {
-      const previous = presentLoadedHomePage(makeEn(), luke);
+      const previous = presentLoadedHomePage(
+        makeEn(),
+        luke,
+        "/star-wars/funnel",
+        makeAppShellViewModel(makeEn(), "night"),
+      );
       const formData = new FormData();
       formData.set("characterId", "1");
 

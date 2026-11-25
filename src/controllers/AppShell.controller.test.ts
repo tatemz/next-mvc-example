@@ -5,13 +5,14 @@ import { I18n, makeEn } from "../i18n/I18n.service";
 import { loadAppShell } from "./AppShell.controller";
 
 describe("loadAppShell", () => {
-  it.effect("builds the shell view model from i18n", () =>
+  it.effect("builds the shell view model from i18n and a theme", () =>
     Effect.gen(function*() {
-      const model = yield* loadAppShell.pipe(
+      const model = yield* loadAppShell("autumn").pipe(
         Effect.provideService(I18n, makeEn()),
       );
 
       expect(model).toMatchObject({
+        theme: "autumn",
         brand: { label: "Character Dossier", href: "/" },
         links: [
           { label: "Star Wars", href: "/star-wars" },

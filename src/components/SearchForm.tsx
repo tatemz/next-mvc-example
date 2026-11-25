@@ -1,6 +1,6 @@
 import { Lens } from "@fuiste/optics";
 import { Schema } from "effect";
-import type { I18n } from "../../i18n/I18n.service";
+import type { I18n } from "../i18n/I18n.service";
 
 export const SearchFormViewModel = Schema.TaggedStruct("SearchFormViewModel", {
   value: Schema.String,
@@ -50,7 +50,7 @@ export const SearchForm = ({
 }: SearchFormProps) => (
   <form
     action={dispatch}
-    method="post"
+    method="POST"
     className="card bg-base-100 shadow-xl"
   >
     <div className="card-body gap-3">

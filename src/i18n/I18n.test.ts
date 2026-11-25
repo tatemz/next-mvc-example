@@ -12,6 +12,7 @@ describe("I18n.make", () => {
   it("formats a message with values", () => {
     const i18n = I18n.make({
       messages: { greeting: "Hello, {name}!" } as const,
+      locale: "en-US",
     });
 
     expect(i18n._({ id: "greeting", values: { name: "John" } })).toBe(
@@ -20,13 +21,13 @@ describe("I18n.make", () => {
   });
 
   it("formats all descriptors", () => {
-    const i18n = I18n.make({ messages: { a: "A", b: "B" } as const });
+    const i18n = I18n.make({ messages: { a: "A", b: "B" } as const, locale: "en-US" });
 
     expect(i18n.all([{ id: "a" }, { id: "b" }])).toEqual({ a: "A", b: "B" });
   });
 
   it("formats a rich message", () => {
-    const i18n = I18n.make({ messages: { greeting: "Hello" } as const });
+    const i18n = I18n.make({ messages: { greeting: "Hello" } as const, locale: "en-US" });
 
     expect(i18n.rich({ id: "greeting" })).toBe("Hello");
   });

@@ -1,9 +1,13 @@
+import { Effect } from "effect";
 import { searchPerson } from "../../actions/SearchPerson.serverAction";
+import { ConnectedHomePage } from "../../components/HomePage.connected";
+import { loadHomePage } from "../../controllers/HomePage.controller";
+import { makeNextPage } from "../../platform/NextPage";
 import { swapiRuntime } from "../../server/Runtime";
-import { makeHomePage } from "./HomePage.factory";
 
-export const StarWarsHome = makeHomePage(
+export const StarWarsHomePage = makeNextPage(
   swapiRuntime,
-  searchPerson,
-  "/star-wars/funnel",
+  Effect.map(loadHomePage("/star-wars/funnel", "night"), (model) => (
+    <ConnectedHomePage model={model} searchAction={searchPerson} />
+  )),
 );

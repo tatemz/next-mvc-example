@@ -30,8 +30,9 @@ vi.mock("../server/Runtime", async () => {
   return { swapiRuntime: runtime };
 });
 
-import { makeFunnelSearchViewModel } from "../components/Funnel/Funnel";
+import { makeFunnelSearchViewModel } from "../components/Funnel";
 import { makeEn } from "../i18n/I18n.service";
+import { makeAppShellViewModel } from "../components/AppShell";
 import { submitFunnel } from "./Funnel.serverAction";
 
 describe("submitFunnel server action", () => {
@@ -41,7 +42,15 @@ describe("submitFunnel server action", () => {
       formData.set("query", "Luke");
 
       const result = yield* Effect.promise(() =>
-        submitFunnel(makeFunnelSearchViewModel(makeEn()), formData),
+        submitFunnel((() => {
+        const i18n = makeEn();
+        return makeFunnelSearchViewModel(
+          i18n,
+          makeAppShellViewModel(i18n, "night"),
+          "",
+          undefined,
+        );
+      })(), formData),
       );
 
       expect(result).toMatchObject({

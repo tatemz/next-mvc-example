@@ -1,5 +1,6 @@
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
+import { isValidElement } from "react";
 import { describe, expect, vi } from "vitest";
 
 vi.mock("../../server/Runtime", async () => {
@@ -18,14 +19,22 @@ vi.mock("../../server/Runtime", async () => {
   return { swapiRuntime: runtime };
 });
 
-import { ConnectedFunnel } from "../../components/Funnel/Funnel.connected";
+import { ConnectedFunnel } from "../../components/Funnel.connected";
 import { StarWarsFunnelPage } from "./StarWarsFunnel.page";
 
 describe("StarWars funnel page", () => {
   it.effect("loads the initial funnel through the SWAPI runtime", () =>
     Effect.gen(function*() {
-      const element = yield* Effect.promise(() => StarWarsFunnelPage());
+      const element = yield* Effect.promise(() =>
+        StarWarsFunnelPage({ searchParams: Promise.resolve({}) }),
+      );
 
+      expect(isValidElement(element)).toBe(true);
+      if (
+        !isValidElement<{ model: unknown; submitAction: unknown }>(element)
+      ) {
+        throw new Error("expected an element");
+      }
       expect(element.type).toBe(ConnectedFunnel);
       expect(element.props).toMatchObject({
         model: { _tag: "Search", stepLabel: "Step 1 of 4" },

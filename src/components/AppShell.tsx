@@ -1,6 +1,9 @@
 import { Array, Function, Schema } from "effect";
 import type { ReactNode } from "react";
-import type { I18n } from "../../i18n/I18n.service";
+import type { I18n } from "../i18n/I18n.service";
+
+export const ExperienceTheme = Schema.Literals(["night", "autumn"]);
+export type ExperienceTheme = typeof ExperienceTheme.Type;
 
 export const AppShellLinkViewModel = Schema.TaggedStruct(
   "AppShellLinkViewModel",
@@ -12,13 +15,18 @@ export const AppShellLinkViewModel = Schema.TaggedStruct(
 export type AppShellLinkViewModel = typeof AppShellLinkViewModel.Type;
 
 export const AppShellViewModel = Schema.TaggedStruct("AppShellViewModel", {
+  theme: ExperienceTheme,
   brand: AppShellLinkViewModel,
   links: Schema.Array(AppShellLinkViewModel),
 });
 export type AppShellViewModel = typeof AppShellViewModel.Type;
 
-export const makeAppShellViewModel = (i18n: I18n) =>
+export const makeAppShellViewModel = (
+  i18n: I18n,
+  theme: ExperienceTheme,
+) =>
   AppShellViewModel.make({
+    theme,
     brand: AppShellLinkViewModel.make({
       label: i18n._({ id: "shell.brand" }),
       href: "/",
@@ -40,7 +48,10 @@ export type AppShellProps = AppShellViewModel & {
 };
 
 export const AppShell = ({ children, ...model }: AppShellProps) => (
-  <>
+  <div
+    data-theme={model.theme}
+    className="min-h-screen bg-base-200 text-base-content"
+  >
     <header className="navbar bg-base-300 px-4 shadow-sm">
       <div className="flex-1">
         <a href={model.brand.href} className="btn btn-ghost text-xl">
@@ -59,5 +70,5 @@ export const AppShell = ({ children, ...model }: AppShellProps) => (
       </div>
     </header>
     <main className="mx-auto w-full max-w-5xl p-4">{children}</main>
-  </>
+  </div>
 );

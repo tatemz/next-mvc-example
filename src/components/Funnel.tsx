@@ -1,11 +1,12 @@
-import { Match, Schema } from "effect";
+import { Match, Option, Schema } from "effect";
 import type { ReactNode } from "react";
-import type { I18n } from "../../i18n/I18n.service";
-import { FilmListItemViewModel } from "../FilmListItem/FilmListItem";
+import type { I18n } from "../i18n/I18n.service";
+import { AppShell, AppShellViewModel } from "./AppShell";
+import { FilmListItemViewModel } from "./FilmListItem";
 import {
   PersonViewModel,
   TransportViewModel,
-} from "../PersonCard/PersonCard";
+} from "./PersonCard";
 
 export const PersonChoiceViewModel = Schema.TaggedStruct(
   "PersonChoiceViewModel",
@@ -17,6 +18,7 @@ export const PersonChoiceViewModel = Schema.TaggedStruct(
 export type PersonChoiceViewModel = typeof PersonChoiceViewModel.Type;
 
 const StepCopy = {
+  shell: AppShellViewModel,
   stepLabel: Schema.NonEmptyString,
   heading: Schema.NonEmptyString,
   subtitle: Schema.NonEmptyString,
@@ -95,10 +97,12 @@ export type FunnelViewModel = typeof FunnelViewModel.Type;
 
 export const makeFunnelSearchViewModel = (
   i18n: I18n,
-  query = "",
-  error?: string,
+  shell: AppShellViewModel,
+  query: string,
+  error: string | undefined,
 ) =>
   FunnelSearchViewModel.make({
+    shell,
     stepLabel: i18n._({ id: "funnel.step.search" }),
     heading: i18n._({ id: "funnel.search.heading" }),
     subtitle: i18n._({ id: "funnel.search.subtitle" }),
@@ -112,6 +116,7 @@ export const makeFunnelSearchViewModel = (
 
 export const makeFunnelChooseViewModel = (
   i18n: I18n,
+  shell: AppShellViewModel,
   query: string,
   results: readonly [
     PersonChoiceViewModel,
@@ -119,6 +124,7 @@ export const makeFunnelChooseViewModel = (
   ],
 ) =>
   FunnelChooseViewModel.make({
+    shell,
     stepLabel: i18n._({ id: "funnel.step.choose" }),
     heading: i18n._({ id: "funnel.choose.heading" }),
     subtitle: i18n._({ id: "funnel.choose.subtitle" }),
@@ -130,9 +136,11 @@ export const makeFunnelChooseViewModel = (
 
 export const makeFunnelFilmViewModel = (
   i18n: I18n,
+  shell: AppShellViewModel,
   person: PersonViewModel,
 ) =>
   FunnelFilmViewModel.make({
+    shell,
     stepLabel: i18n._({ id: "funnel.step.film" }),
     heading: i18n._({ id: "funnel.film.heading" }),
     subtitle: i18n._({ id: "funnel.film.subtitle" }),
@@ -143,10 +151,12 @@ export const makeFunnelFilmViewModel = (
 
 export const makeFunnelTransportViewModel = (
   i18n: I18n,
+  shell: AppShellViewModel,
   person: PersonViewModel,
   film: FilmListItemViewModel,
 ) =>
   FunnelTransportViewModel.make({
+    shell,
     stepLabel: i18n._({ id: "funnel.step.transport" }),
     heading: i18n._({ id: "funnel.transport.heading" }),
     subtitle: i18n._({ id: "funnel.transport.subtitle" }),
@@ -159,6 +169,7 @@ export const makeFunnelTransportViewModel = (
 
 export const makeFunnelReviewViewModel = (
   i18n: I18n,
+  shell: AppShellViewModel,
   person: PersonViewModel,
   film: FilmListItemViewModel,
   transport: TransportViewModel | null,
@@ -166,10 +177,14 @@ export const makeFunnelReviewViewModel = (
   const params = new URLSearchParams({
     character: person.id,
     film: String(film.order),
-    transport: transport?.key ?? "none",
+    transport: Option.match(Option.fromNullishOr(transport), {
+      onNone: () => "none",
+      onSome: (selected) => selected.key,
+    }),
   });
 
   return FunnelReviewViewModel.make({
+    shell,
     stepLabel: i18n._({ id: "funnel.step.review" }),
     heading: i18n._({ id: "funnel.review.heading" }),
     subtitle: i18n._({ id: "funnel.review.subtitle" }),
@@ -188,9 +203,11 @@ export const makeFunnelReviewViewModel = (
 
 export const makeFunnelFailedViewModel = (
   i18n: I18n,
+  shell: AppShellViewModel,
   message: string,
 ) =>
   FunnelFailedViewModel.make({
+    shell,
     stepLabel: i18n._({ id: "funnel.step.failed" }),
     heading: i18n._({ id: "funnel.failed.heading" }),
     subtitle: i18n._({ id: "funnel.failed.message" }),
@@ -386,7 +403,10 @@ const ReviewStep = ({ step }: { readonly step: FunnelReviewViewModel }) => (
       <h2 className="text-xl font-bold">{step.person.name}</h2>
       <p className="text-base-content/70">
         {step.person.origin.name} ·{" "}
-        {step.person.species?.name ?? step.person.speciesUnknownLabel}
+        {Option.match(Option.fromNullishOr(step.person.species), {
+          onNone: () => step.person.speciesUnknownLabel,
+          onSome: (species) => species.name,
+        })}
       </p>
     </div>
     <dl className="grid gap-3 sm:grid-cols-2">
@@ -441,21 +461,24 @@ export const Funnel = ({
   dispatch,
   isPending,
   ...model
-}: FunnelProps) =>
-  Match.value(model).pipe(
-    Match.tag("Search", (step) => (
-      <SearchStep step={step} dispatch={dispatch} isPending={isPending} />
-    )),
-    Match.tag("Choose", (step) => (
-      <ChooseStep step={step} dispatch={dispatch} isPending={isPending} />
-    )),
-    Match.tag("Film", (step) => (
-      <FilmStep step={step} dispatch={dispatch} isPending={isPending} />
-    )),
-    Match.tag("Transport", (step) => (
-      <TransportStep step={step} dispatch={dispatch} isPending={isPending} />
-    )),
-    Match.tag("Review", (step) => <ReviewStep step={step} />),
-    Match.tag("Failed", (step) => <FailedStep step={step} />),
-    Match.exhaustive,
-  );
+}: FunnelProps) => (
+  <AppShell {...model.shell}>
+    {Match.value(model).pipe(
+      Match.tag("Search", (step) => (
+        <SearchStep step={step} dispatch={dispatch} isPending={isPending} />
+      )),
+      Match.tag("Choose", (step) => (
+        <ChooseStep step={step} dispatch={dispatch} isPending={isPending} />
+      )),
+      Match.tag("Film", (step) => (
+        <FilmStep step={step} dispatch={dispatch} isPending={isPending} />
+      )),
+      Match.tag("Transport", (step) => (
+        <TransportStep step={step} dispatch={dispatch} isPending={isPending} />
+      )),
+      Match.tag("Review", (step) => <ReviewStep step={step} />),
+      Match.tag("Failed", (step) => <FailedStep step={step} />),
+      Match.exhaustive,
+    )}
+  </AppShell>
+);

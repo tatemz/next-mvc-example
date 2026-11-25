@@ -1,6 +1,6 @@
 import { it } from "@effect/vitest";
 import { describe, expect } from "vitest";
-import { getString, toRecord } from "./FormData";
+import { getStringOrEmpty, toRecord } from "./FormData";
 
 describe("FormData", () => {
   it("converts entries into a record", () => {
@@ -15,7 +15,7 @@ describe("FormData", () => {
   });
 
   it("reads a string or an empty value", () => {
-    expect(getString({ characterId: "3" }, "characterId")).toBe("3");
-    expect(getString({}, "characterId")).toBe("");
+    expect(getStringOrEmpty({ characterId: "3" }, "characterId")).toBe("3");
+    expect(getStringOrEmpty({}, "characterId")).toBe("");
   });
 });

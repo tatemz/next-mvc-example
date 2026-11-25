@@ -1,5 +1,4 @@
 import { it } from "@effect/vitest";
-import { Effect, Layer, ManagedRuntime } from "effect";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, vi } from "vitest";
 
@@ -16,7 +15,6 @@ vi.mock("../src/server/Runtime", async () => {
   );
 
   return {
-    shellRuntime: ManagedRuntime.make(i18nLayer),
     swapiRuntime: catalogRuntime,
     ghibliRuntime: catalogRuntime,
   };
@@ -32,18 +30,14 @@ describe("app", () => {
     expect(typeof GhibliPage).toBe("function");
   });
 
-  it.effect("wraps children in the shared app shell", () =>
-    Effect.gen(function*() {
-      const element = yield* Effect.promise(() =>
-        RootLayout({ children: <p>child</p> }),
-      );
-      const html = renderToStaticMarkup(element);
+  it("keeps the root layout to html and body", () => {
+    const html = renderToStaticMarkup(
+      RootLayout({ children: <p>child</p> }),
+    );
 
-      expect(html).toContain('<html lang="en" data-theme="night">');
-      expect(html).toContain("Character Dossier");
-      expect(html).toContain('href="/star-wars"');
-      expect(html).toContain('href="/ghibli"');
-      expect(html).toContain("<p>child</p>");
-    }),
-  );
+    expect(html).toContain('<html lang="en">');
+    expect(html).toContain("<body>");
+    expect(html).toContain("<p>child</p>");
+    expect(html).not.toContain("Character Dossier");
+  });
 });

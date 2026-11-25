@@ -1,9 +1,10 @@
 import { it } from "@effect/vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect } from "vitest";
-import { luke } from "../../domain/FilmUniverse.fixture";
-import { makeEn } from "../../i18n/I18n.service";
-import { makePersonViewModel } from "../PersonCard/PersonCard";
+import { luke } from "../domain/FilmUniverse.fixture";
+import { makeEn } from "../i18n/I18n.service";
+import { makePersonViewModel } from "./PersonCard";
+import { makeAppShellViewModel } from "./AppShell";
 import {
   Funnel,
   type FunnelViewModel,
@@ -18,6 +19,7 @@ import {
 import { ConnectedFunnel } from "./Funnel.connected";
 
 const i18n = makeEn();
+const shell = makeAppShellViewModel(i18n, "night");
 const person = makePersonViewModel(i18n, luke);
 const film = person.films[0];
 const transport = person.transports[0];
@@ -40,7 +42,7 @@ const render = (model: FunnelViewModel, isPending = false) =>
 
 describe("Funnel", () => {
   it("renders the search step", () => {
-    const model = makeFunnelSearchViewModel(i18n, "Luke");
+    const model = makeFunnelSearchViewModel(i18n, shell, "Luke", undefined);
 
     expect(model).toMatchObject({
       _tag: "Search",
@@ -59,7 +61,7 @@ describe("Funnel", () => {
 
   it("renders the search error", () => {
     const html = render(
-      makeFunnelSearchViewModel(i18n, "", "Enter a character name."),
+      makeFunnelSearchViewModel(i18n, shell, "", "Enter a character name."),
     );
 
     expect(html).toContain('role="alert"');
@@ -68,7 +70,7 @@ describe("Funnel", () => {
 
   it("renders the character choices in the pending state", () => {
     const html = render(
-      makeFunnelChooseViewModel(i18n, "Luke", [choice]),
+      makeFunnelChooseViewModel(i18n, shell, "Luke", [choice]),
       true,
     );
 
@@ -77,32 +79,32 @@ describe("Funnel", () => {
     expect(html).toContain("Loading...");
     expect(html).not.toContain("Choose character");
 
-    const idle = render(makeFunnelChooseViewModel(i18n, "Luke", [choice]));
+    const idle = render(makeFunnelChooseViewModel(i18n, shell, "Luke", [choice]));
     expect(idle).toContain("Choose character");
   });
 
   it("renders a film poster in the film choices", () => {
     const html = render(
-      makeFunnelFilmViewModel(i18n, illustratedPerson),
+      makeFunnelFilmViewModel(i18n, shell, illustratedPerson),
     );
 
     expect(html).toContain("poster.jpg");
   });
 
   it("renders the film choices", () => {
-    const html = render(makeFunnelFilmViewModel(i18n, person));
+    const html = render(makeFunnelFilmViewModel(i18n, shell, person));
 
     expect(html).toContain("Choose a film");
     expect(html).toContain("A New Hope");
     expect(html).toContain("Next: transport");
 
-    const pending = render(makeFunnelFilmViewModel(i18n, person), true);
+    const pending = render(makeFunnelFilmViewModel(i18n, shell, person), true);
     expect(pending).toContain("Loading...");
   });
 
   it("renders the transport choices", () => {
     const html = render(
-      makeFunnelTransportViewModel(i18n, person, film),
+      makeFunnelTransportViewModel(i18n, shell, person, film),
     );
 
     expect(html).toContain("X-wing");
@@ -113,7 +115,7 @@ describe("Funnel", () => {
     expect(html).toContain("Review dossier");
 
     const pending = render(
-      makeFunnelTransportViewModel(i18n, person, film),
+      makeFunnelTransportViewModel(i18n, shell, person, film),
       true,
     );
     expect(pending).toContain("Loading...");
@@ -125,17 +127,41 @@ describe("Funnel", () => {
       transports: [],
     });
     const html = render(
-      makeFunnelTransportViewModel(i18n, barePerson, film),
+      makeFunnelTransportViewModel(i18n, shell, barePerson, film),
     );
 
     expect(html).toContain("No transport");
     expect(html).toContain('value="none"');
   });
 
+  it("renders a known species in the review", () => {
+    const speciesPerson = makePersonViewModel(i18n, {
+      ...luke,
+      species: {
+        name: "Human",
+        classification: "mammal",
+        language: "Galactic Basic",
+      },
+    });
+
+    const html = render(
+      makeFunnelReviewViewModel(
+        i18n,
+        shell,
+        speciesPerson,
+        film,
+        transport,
+      ),
+    );
+
+    expect(html).toContain("Human");
+  });
+
   it("renders a film poster in the review", () => {
     const html = render(
       makeFunnelReviewViewModel(
         i18n,
+        shell,
         illustratedPerson,
         illustratedPerson.films[0],
         transport,
@@ -148,6 +174,7 @@ describe("Funnel", () => {
   it("renders the review with a transport", () => {
     const model = makeFunnelReviewViewModel(
       i18n,
+      shell,
       person,
       film,
       transport,
@@ -167,7 +194,7 @@ describe("Funnel", () => {
   });
 
   it("renders the review without a transport", () => {
-    const model = makeFunnelReviewViewModel(i18n, person, film, null);
+    const model = makeFunnelReviewViewModel(i18n, shell, person, film, null);
 
     expect(model.resultsHref).toContain("transport=none");
     expect(render(model)).toContain("No transport");
@@ -177,6 +204,7 @@ describe("Funnel", () => {
     const html = render(
       makeFunnelFailedViewModel(
         i18n,
+        shell,
         "The Star Wars API could not answer.",
       ),
     );
@@ -190,7 +218,7 @@ describe("Funnel", () => {
   it("renders the connected funnel with its initial model", () => {
     const html = renderToStaticMarkup(
       <ConnectedFunnel
-        model={makeFunnelSearchViewModel(i18n)}
+        model={makeFunnelSearchViewModel(i18n, shell, "", undefined)}
         submitAction={async (previous) => previous}
       />,
     );
