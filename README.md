@@ -86,6 +86,7 @@ boundaries.
 ## Layout
 
 ```text
+app/layout.tsx                               html/body wrapper; loads AppShell
 app/page.tsx                                 redirects / to /star-wars
 app/star-wars/page.tsx                       re-exports StarWarsHome.page
 app/star-wars/funnel/page.tsx                re-exports StarWarsFunnel.page
@@ -103,6 +104,7 @@ src/page-modules/Results/Results.factory.tsx      runtime + dataset base -> resu
 src/page-modules/Results/StarWarsResults.page.tsx SWAPI runtime + /star-wars
 src/page-modules/Results/GhibliResults.page.tsx   Ghibli runtime + /ghibli
 src/platform/NextPage.ts                     Next searchParams -> typed page params
+src/components/AppShell/                     AppShell.tsx
 src/components/HomePage/                     HomePage.tsx, HomePage.connected.tsx
 src/components/Funnel/                       Funnel.tsx, Funnel.connected.tsx
 src/components/Results/                      Results.tsx
@@ -110,6 +112,7 @@ src/components/PersonCard/                   PersonCard.tsx
 src/components/FilmList/                     FilmList.tsx
 src/components/FilmListItem/                 FilmListItem.tsx
 src/components/SearchForm/                   SearchForm.tsx
+src/controllers/AppShell.controller.ts      I18n -> shell view model
 src/controllers/HomePage.controller.ts       Config + PeopleCatalog -> home view model
 src/controllers/SearchPerson.controller.ts   form schema + catalog -> home view model
 src/controllers/Funnel.controller.ts         Match state machine for the funnel
@@ -120,7 +123,7 @@ src/actions/Funnel.serverAction.ts           SWAPI funnel "use server" boundary
 src/actions/GhibliFunnel.serverAction.ts     Ghibli funnel "use server" boundary
 src/domain/FilmUniverse.model.ts             CharacterId, Person, Film, Origin,
                                              Species, Transport
-src/server/Runtime.ts                        swapiRuntime and ghibliRuntime
+src/server/Runtime.ts                        shellRuntime, swapiRuntime, ghibliRuntime
 src/services/PeopleCatalog.ts                port and error
 src/services/SwapiApi.ts                     typed SWAPI endpoints
 src/services/SwapiPeopleCatalog.factory.ts   SWAPI records -> domain

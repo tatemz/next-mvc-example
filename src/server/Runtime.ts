@@ -20,5 +20,6 @@ const GhibliAppLayer = Layer.mergeAll(
   ),
 );
 
+export const shellRuntime = ManagedRuntime.make(I18nLayer);
 export const swapiRuntime = ManagedRuntime.make(SwapiAppLayer);
 export const ghibliRuntime = ManagedRuntime.make(GhibliAppLayer);

@@ -1,30 +1,20 @@
 import type { ReactNode } from "react";
 import "./globals.css";
+import { AppShell } from "../src/components/AppShell/AppShell";
+import { loadAppShell } from "../src/controllers/AppShell.controller";
+import { shellRuntime } from "../src/server/Runtime";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   readonly children: ReactNode;
 }) {
+  const model = await shellRuntime.runPromise(loadAppShell);
+
   return (
     <html lang="en" data-theme="night">
       <body className="min-h-screen bg-base-200 text-base-content">
-        <header className="navbar bg-base-300 px-4 shadow-sm">
-          <div className="flex-1">
-            <a href="/" className="btn btn-ghost text-xl">
-              Character Dossier
-            </a>
-          </div>
-          <div className="flex-none flex gap-2">
-            <a href="/star-wars" className="btn btn-ghost">
-              Star Wars
-            </a>
-            <a href="/ghibli" className="btn btn-ghost">
-              Ghibli
-            </a>
-          </div>
-        </header>
-        <main className="mx-auto w-full max-w-5xl p-4">{children}</main>
+        <AppShell {...model}>{children}</AppShell>
       </body>
     </html>
   );

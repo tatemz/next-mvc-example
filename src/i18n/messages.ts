@@ -26,6 +26,12 @@ const filmListMessages = {
   "film.count": "{count, plural, one {# film} other {# films}}",
 } as const;
 
+const shellMessages = {
+  "shell.brand": "Character Dossier",
+  "shell.starWars": "Star Wars",
+  "shell.ghibli": "Ghibli",
+} as const;
+
 const homePageMessages = {
   "homePage.loadError": "The character could not be loaded.",
   "homePage.hero.title": "One dossier, two universes",
@@ -93,6 +99,7 @@ export const MESSAGES = {
   ...searchFormMessages,
   ...personCardMessages,
   ...filmListMessages,
+  ...shellMessages,
   ...homePageMessages,
   ...funnelMessages,
   ...resultsMessages,
