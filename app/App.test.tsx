@@ -1,16 +1,9 @@
 import { it } from "@effect/vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect } from "vitest";
-import GhibliPage from "./ghibli/page";
 import RootLayout from "./layout";
-import StarWarsPage from "./star-wars/page";
 
 describe("app", () => {
-  it("exposes each dataset page", () => {
-    expect(typeof StarWarsPage).toBe("function");
-    expect(typeof GhibliPage).toBe("function");
-  });
-
   it("keeps the root layout to html and body", () => {
     const html = renderToStaticMarkup(
       RootLayout({ children: <p>child</p> }),

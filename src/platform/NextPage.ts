@@ -5,9 +5,11 @@ import {
   currentRenderContext,
 } from "../server/RenderContext";
 import * as NextRedirect from "./NextRedirect";
+import * as ParsedPathParams from "./ParsedPathParams";
 import * as ParsedSearchParams from "./ParsedSearchParams";
 
 export type NextPageProps = {
+  readonly params?: Promise<Record<string, string>>;
   readonly searchParams: Promise<ParsedSearchParams.ParsedSearchParams>;
 };
 
@@ -22,14 +24,21 @@ export const makeNextPage = <E>(
   load: Effect.Effect<
     ReactElement | NextRedirect.NextRedirect,
     E,
-    ParsedSearchParams.ParsedSearchParams | RenderServices
+    | ParsedSearchParams.ParsedSearchParams
+    | ParsedPathParams.ParsedPathParams
+    | RenderServices
   >,
 ) =>
-  async ({ searchParams }: NextPageProps) => {
-    const params = ParsedSearchParams.fromInput(await searchParams);
+  async ({ params, searchParams }: NextPageProps) => {
+    const search = ParsedSearchParams.fromInput(await searchParams);
+    const path = (await params) ?? {};
+
     return finish(
       await Effect.runPromiseWith(currentRenderContext())(
-        load.pipe(Effect.provideService(ParsedSearchParams.tag, params)),
+        load.pipe(
+          Effect.provideService(ParsedSearchParams.tag, search),
+          Effect.provideService(ParsedPathParams.tag, path),
+        ),
       ),
     );
   };

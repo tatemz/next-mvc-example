@@ -8,6 +8,7 @@ import {
   type PeopleCatalog,
 } from "../services/PeopleCatalog";
 import { layerStub } from "../services/SwapiPeopleCatalog.layer";
+import { tag as pathParamsTag } from "../platform/ParsedPathParams";
 import { tag as parsedSearchParamsTag } from "../platform/ParsedSearchParams";
 import { loadResults } from "./Results.controller";
 
@@ -17,9 +18,10 @@ const run = (
   params: Readonly<Record<string, string>>,
   getPerson: PeopleCatalog["getPerson"] = () => Effect.succeed(luke),
 ) =>
-  loadResults("star-wars").pipe(
+  loadResults.pipe(
     Effect.provide(layerStub(getPerson)),
     Effect.provideService(I18n, i18n),
+    Effect.provideService(pathParamsTag, { universe: "star-wars" }),
     Effect.provideService(parsedSearchParamsTag, params),
   );
 

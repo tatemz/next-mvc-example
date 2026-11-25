@@ -7,10 +7,14 @@ import {
 } from "../components/HomeView";
 import type { Universe } from "../domain/FilmUniverse.model";
 import { I18n, makeEn } from "../i18n/I18n.service";
+import { tag as pathParamsTag } from "../platform/ParsedPathParams";
 import { loadHome } from "./Home.controller";
 
 const run = (universe: Universe) =>
-  loadHome(universe).pipe(Effect.provideService(I18n, makeEn()));
+  loadHome.pipe(
+    Effect.provideService(I18n, makeEn()),
+    Effect.provideService(pathParamsTag, { universe }),
+  );
 
 describe("loadHome", () => {
   it.effect("builds the Star Wars splash", () =>

@@ -8,7 +8,7 @@ import {
   makeFunnelSearchViewModel,
   makeFunnelTransportResult,
 } from "../components/FunnelView";
-import type { Person, Universe } from "../domain/FilmUniverse.model";
+import type { Person } from "../domain/FilmUniverse.model";
 import {
   FunnelChooseForm,
   FunnelFilmForm,
@@ -17,13 +17,14 @@ import {
 } from "../forms/FunnelForm";
 import { toRecord } from "../forms/FormData";
 import { I18n } from "../i18n/I18n.service";
+import { currentUniverse } from "../platform/ParsedPathParams";
 import { PeopleCatalog } from "../services/PeopleCatalog";
 
-export const startFunnel = (universe: Universe) =>
-  Effect.gen(function*() {
-    const i18n = yield* I18n;
-    return makeFunnelSearchViewModel(i18n, universe, "", undefined);
-  });
+export const startFunnel = Effect.gen(function*() {
+  const i18n = yield* I18n;
+  const universe = yield* currentUniverse;
+  return makeFunnelSearchViewModel(i18n, universe, "", undefined);
+});
 
 export const advanceFunnel = (
   previous: FunnelViewModel,

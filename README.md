@@ -59,6 +59,9 @@ discipline inside an existing Next codebase.
 
 - Controllers are Effects; every model factory is a pure synchronous function
   over domain values and i18n.
+- The universe is a path parameter. One `[universe]` route tree and three page
+  modules serve both experiences; the boot composition selects the catalog for
+  each path.
 - Every model is a `Schema.TaggedStruct` or `Schema.TaggedUnion`; nested models
   carry their own `_tag`.
 - `CharacterId` is a branded string built from `Schema.NumberFromString`, so
@@ -129,29 +132,28 @@ the two experiences.
 
 ### Page modules and the request context
 
-Each route file re-exports one page module, and a page module names its
-program. `makeNextPage` supplies the parsed search params, runs the program
-with the request's Effect context, and renders the result or hands a
-`NextRedirect` to Next.
+The `app/[universe]` route segments re-export one page module per view.
+`makeNextPage` supplies the parsed search params and the raw path params,
+runs the program with the request's Effect context, and renders the result
+or hands a `NextRedirect` to Next.
 
 ```tsx
-export const StarWarsFunnelPage = makeNextPage(
-  Effect.map(startFunnel("star-wars"), (model) => (
-    <ConnectedFunnelView
-      model={model}
-      submitAction={submitFunnel}
-      universe="star-wars"
-    />
+export const FunnelPage = Function.pipe(
+  startFunnel,
+  Effect.map((model) => (
+    <ConnectedFunnelView model={model} submitAction={submitFunnel} />
   )),
+  makeNextPage,
 );
 ```
 
-- `makeNextPage` provides the raw Next `searchParams` as
-  `ParsedSearchParams`; the controller decodes its own schema with
-  `ParsedSearchParams.decodeOption`.
+- `makeNextPage` provides `ParsedSearchParams` and `ParsedPathParams`.
+  Controllers decode their own schemas; `currentUniverse` reads
+  `params.universe`, calls `notFound()` for an unknown value, and yields the
+  `Universe`.
 - The request context carries `I18n` and one `PeopleCatalog`. `boot/app.ts`
   mounts `/star-wars` with the SWAPI catalog and `/ghibli` with the Ghibli
-  one, so a page never chooses its adapter.
+  one, so a controller never chooses its adapter.
 - The root page uses `makeNextPage` with a redirect program.
 - Every page view model carries its `AppShellViewModel`, so
   `app/layout.tsx` is only `<html>` and `<body>`. The shell owns the
@@ -245,8 +247,8 @@ server.ts                    process entrypoint: the live app on the configured 
 boot/                        app composition, live wiring, socket, and Next bridge
 app/                         route re-exports; html/body layout
 src/api/                     UiEventApi definition and handler layer
-src/page-modules/            one Next page per route via makeNextPage
-src/platform/                Next adapter, redirect model, parsed params
+src/page-modules/            one page module per view; shared by both universes
+src/platform/                Next adapter, redirect model, parsed search and path params
 src/controllers/             page programs and the funnel state machine
 src/components/              flat view models and views (AppShell included)
 src/ui-events/               event model, payload, handler, sinks, and React provider

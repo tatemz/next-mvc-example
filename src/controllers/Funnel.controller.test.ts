@@ -15,6 +15,7 @@ import { luke, makeCharacterId } from "../domain/FilmUniverse.fixture";
 import { I18n, makeEn } from "../i18n/I18n.service";
 import { PeopleCatalog, PeopleCatalogError } from "../services/PeopleCatalog";
 import { layerStub } from "../services/SwapiPeopleCatalog.layer";
+import { tag as pathParamsTag } from "../platform/ParsedPathParams";
 import { advanceFunnel, startFunnel } from "./Funnel.controller";
 
 const i18n = makeEn();
@@ -53,8 +54,11 @@ const failed = makeFunnelFailedViewModel(i18n, shell, "unavailable");
 describe("startFunnel", () => {
   it.effect("starts on the search step", () =>
     Effect.gen(function*() {
-      const model = yield* startFunnel("star-wars").pipe(
+      const model = yield* startFunnel.pipe(
         Effect.provideService(I18n, i18n),
+        Effect.provideService(pathParamsTag, {
+          universe: "star-wars",
+        }),
       );
 
       expect(model).toMatchObject({
