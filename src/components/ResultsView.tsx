@@ -84,13 +84,17 @@ export const makeResultsMissingViewModel = (
     startOverHref: `/${universe}/funnel`,
   });
 
+export type ResultsQuery = {
+  readonly film: number;
+  readonly transport: string;
+};
+
 export const makeResultsViewModel = (
   i18n: I18n,
   shell: AppShellViewModel,
   universe: Universe,
   person: Option.Option<PersonCardInput>,
-  filmOrder: number,
-  transportKey: string,
+  query: ResultsQuery,
 ): ResultsViewModel => {
   if (Option.isNone(person)) {
     return makeResultsMissingViewModel(i18n, shell, universe);
@@ -98,23 +102,23 @@ export const makeResultsViewModel = (
 
   const film = Array.findFirst(
     person.value.films,
-    (candidate) => candidate.order === filmOrder,
+    (candidate) => candidate.order === query.film,
   );
 
   if (Option.isNone(film)) {
     return makeResultsMissingViewModel(i18n, shell, universe);
   }
 
-  const transport = transportKey === "none"
+  const transport = query.transport === "none"
     ? null
     : Option.getOrNull(
       Array.findFirst(
         person.value.transports,
-        (candidate) => candidate.key === transportKey,
+        (candidate) => candidate.key === query.transport,
       ),
     );
 
-  if (transportKey !== "none" && transport === null) {
+  if (query.transport !== "none" && transport === null) {
     return makeResultsMissingViewModel(i18n, shell, universe);
   }
 

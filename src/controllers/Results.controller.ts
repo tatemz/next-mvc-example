@@ -27,14 +27,7 @@ export const loadResults = (
     const client = yield* PeopleCatalog;
     const person = yield* Effect.option(client.getPerson(params.character));
 
-    return makeResultsViewModel(
-      i18n,
-      shell,
-      universe,
-      person,
-      params.film,
-      params.transport,
-    );
+    return makeResultsViewModel(i18n, shell, universe, person, params);
   });
 
 export const loadResultsPage = (universe: Universe) =>

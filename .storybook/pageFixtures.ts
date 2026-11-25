@@ -233,8 +233,10 @@ export const resultsReady = (
     dataset.shell,
     dataset.universe,
     Option.some(dataset.person),
-    Option.getOrThrow(Array.head(dataset.person.films)).order,
-    transport?.key ?? "none",
+    {
+      film: Option.getOrThrow(Array.head(dataset.person.films)).order,
+      transport: transport?.key ?? "none",
+    },
   );
 
 export const resultsMissing = (dataset: PageDataset): ResultsViewModel =>
@@ -243,6 +245,5 @@ export const resultsMissing = (dataset: PageDataset): ResultsViewModel =>
     dataset.shell,
     dataset.universe,
     Option.none(),
-    0,
-    "none",
+    { film: 0, transport: "none" },
   );
