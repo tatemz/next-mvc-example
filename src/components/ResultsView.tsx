@@ -1,7 +1,7 @@
 import { Array, Option, Schema } from "effect";
 import type { Universe } from "../domain/FilmUniverse.model";
 import type { I18n } from "../i18n/I18n.service";
-import { ResultsCtas, type ResultsCta } from "../ui-events/UiEvent";
+import type { ResultsCta } from "../ui-events/UiEvent";
 import {
   AppShell,
   AppShellViewModel,
@@ -12,8 +12,9 @@ import {
   FilmListItemViewModel,
   makeFilmListItemViewModel,
 } from "./FilmListItem";
+import { ResultsMissingView } from "./ResultsMissingView";
+import { ResultsReadyView } from "./ResultsReadyView";
 import {
-  PersonCard,
   PersonCardInput,
   PersonViewModel,
   TransportInput,
@@ -47,9 +48,6 @@ export const ResultsViewModel = Schema.TaggedUnion({
   },
 });
 export type ResultsViewModel = typeof ResultsViewModel.Type;
-
-type ResultsReadyViewModel = typeof ResultsViewModel.cases.Ready.Type;
-type ResultsMissingViewModel = typeof ResultsViewModel.cases.Missing.Type;
 
 export const makeResultsReadyViewModel = (
   i18n: I18n,
@@ -151,98 +149,14 @@ export type ResultsViewProps = {
   readonly onCtaClick: (cta: ResultsCta) => void;
 };
 
-const ReadyResults = ({
-  model,
-  onCtaClick,
-}: {
-  readonly model: ResultsReadyViewModel;
-  readonly onCtaClick: (cta: ResultsCta) => void;
-}) => (
-  <div className="flex flex-col gap-6">
-    <section className="hero rounded-box bg-base-100 shadow-xl">
-      <div className="hero-content py-8 text-center">
-        <div>
-          <h1 className="text-4xl font-bold">{model.heading}</h1>
-          <p className="py-3 text-base-content/70">{model.subtitle}</p>
-        </div>
-      </div>
-    </section>
-    <PersonCard {...model.person} />
-    <div className="grid gap-6 md:grid-cols-2">
-      <section className="card bg-base-100 shadow-xl">
-        <div className="card-body">
-          <h2 className="card-title">{model.filmLabel}</h2>
-          {model.film.imageUrl === undefined ? null : (
-            <img
-              src={model.film.imageUrl}
-              alt=""
-              className="mb-3 h-40 w-28 rounded-box object-cover"
-              loading="lazy"
-            />
-          )}
-          <p className="text-lg">{model.film.text}</p>
-        </div>
-      </section>
-      <section className="card bg-base-100 shadow-xl">
-        <div className="card-body">
-          <h2 className="card-title">{model.transportLabel}</h2>
-          <p className="text-lg">
-            {model.transport === null
-              ? model.noneLabel
-              : `${model.transport.name} (${model.transport.kind})`}
-          </p>
-        </div>
-      </section>
-    </div>
-    <div className="flex flex-wrap gap-3">
-      <a
-        href={model.startOverHref}
-        onClick={() => onCtaClick(ResultsCtas.BuildAnotherDossier)}
-        className="btn btn-primary"
-      >
-        {model.startOverLabel}
-      </a>
-      <a
-        href={model.homeHref}
-        onClick={() => onCtaClick(ResultsCtas.BackHome)}
-        className="btn btn-ghost"
-      >
-        {model.homeLabel}
-      </a>
-    </div>
-  </div>
-);
-
-const MissingResults = ({
-  model,
-  onCtaClick,
-}: {
-  readonly model: ResultsMissingViewModel;
-  readonly onCtaClick: (cta: ResultsCta) => void;
-}) => (
-  <div className="flex flex-col gap-6">
-    <h1 className="text-3xl font-bold">{model.heading}</h1>
-    <div role="alert" className="alert alert-error">
-      {model.message}
-    </div>
-    <a
-      href={model.startOverHref}
-      onClick={() => onCtaClick(ResultsCtas.BuildAnotherDossier)}
-      className="btn btn-primary"
-    >
-      {model.startOverLabel}
-    </a>
-  </div>
-);
-
 export const ResultsView = ({ model, onCtaClick }: ResultsViewProps) => (
   <AppShell {...model.shell}>
     {ResultsViewModel.match(model, {
       Ready: (ready) => (
-        <ReadyResults model={ready} onCtaClick={onCtaClick} />
+        <ResultsReadyView model={ready} onCtaClick={onCtaClick} />
       ),
       Missing: (missing) => (
-        <MissingResults model={missing} onCtaClick={onCtaClick} />
+        <ResultsMissingView model={missing} onCtaClick={onCtaClick} />
       ),
     })}
   </AppShell>

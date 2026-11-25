@@ -151,6 +151,8 @@ export const FunnelPage = Function.pipe(
   Controllers decode their own schemas. `currentUniverse` reads
   `params.universe` and returns an Option; an unknown universe becomes a
   `NotFoundViewModel` that the page renders.
+- Subviews with their own view models live in their own files: `HomeHero`,
+  the `Funnel*Step` components, and `ResultsReadyView`/`ResultsMissingView`.
 - The request context carries `I18n` and one `PeopleCatalog`. `boot/app.ts`
   mounts `/star-wars` with the SWAPI catalog and `/ghibli` with the Ghibli
   one, so a controller never chooses its adapter.
@@ -194,7 +196,8 @@ keeps its in-progress state in `FunnelViewModel` because the server action
 serializes that state between steps. Its controller parses the form and loads
 the catalog; pure step-result factories decide the next state. The transport
 and review factories build from the previous step's model, which is the data
-the action actually receives.
+the action actually receives. Form and loaded values stay `Option`s until a
+factory or view decides what absence means.
 
 ### UI events
 
@@ -250,7 +253,7 @@ src/api/                     UiEventApi definition and handler layer
 src/page-modules/            one page module per view; shared by both universes
 src/platform/                Next adapter, redirect model, parsed search and path params
 src/controllers/             page programs and the funnel state machine
-src/components/              flat view models and views (AppShell included)
+src/components/              view models, subviews, and the shared shell
 src/ui-events/               event model, payload, handler, sinks, and React provider
 src/server/                  Next service, render context, and UI event logger
 src/actions/                 "use server" boundaries
