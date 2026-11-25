@@ -1,12 +1,14 @@
-import { Option, Schema } from "effect";
+import { Array, Option, Schema } from "effect";
 import type { ReactNode } from "react";
 import type { I18n } from "../i18n/I18n.service";
 import type { FunnelCta } from "../ui-events/UiEvent";
 import { AppShell, AppShellViewModel } from "./AppShell";
 import { FilmListItemViewModel } from "./FilmListItem";
 import {
+  PersonCardInput,
   PersonViewModel,
   TransportViewModel,
+  makePersonViewModel,
 } from "./PersonCard";
 
 export const PersonChoiceViewModel = Schema.TaggedStruct(
@@ -17,6 +19,11 @@ export const PersonChoiceViewModel = Schema.TaggedStruct(
   },
 );
 export type PersonChoiceViewModel = typeof PersonChoiceViewModel.Type;
+
+type PersonChoiceInput = {
+  readonly id: string;
+  readonly name: string;
+};
 
 const StepCopy = {
   shell: AppShellViewModel,
@@ -108,33 +115,38 @@ export const makeFunnelChooseViewModel = (
   i18n: I18n,
   shell: AppShellViewModel,
   query: string,
-  results: readonly [
-    PersonChoiceViewModel,
-    ...PersonChoiceViewModel[],
-  ],
-) =>
-  FunnelViewModel.cases.Choose.make({
+  results: readonly [PersonChoiceInput, ...PersonChoiceInput[]],
+) => {
+  const [first, ...rest] = results;
+
+  return FunnelViewModel.cases.Choose.make({
     shell,
     stepLabel: i18n._({ id: "funnel.step.choose" }),
     heading: i18n._({ id: "funnel.choose.heading" }),
     subtitle: i18n._({ id: "funnel.choose.subtitle" }),
     query,
-    results,
+    results: [
+      PersonChoiceViewModel.make({ id: first.id, name: first.name }),
+      ...Array.map(rest, (person) =>
+        PersonChoiceViewModel.make({ id: person.id, name: person.name })
+      ),
+    ],
     submitLabel: i18n._({ id: "funnel.choose.submit" }),
     pendingLabel: i18n._({ id: "funnel.pending" }),
   });
+};
 
 export const makeFunnelFilmViewModel = (
   i18n: I18n,
   shell: AppShellViewModel,
-  person: PersonViewModel,
+  person: PersonCardInput,
 ) =>
   FunnelViewModel.cases.Film.make({
     shell,
     stepLabel: i18n._({ id: "funnel.step.film" }),
     heading: i18n._({ id: "funnel.film.heading" }),
     subtitle: i18n._({ id: "funnel.film.subtitle" }),
-    person,
+    person: makePersonViewModel(i18n, person),
     submitLabel: i18n._({ id: "funnel.film.submit" }),
     pendingLabel: i18n._({ id: "funnel.pending" }),
   });

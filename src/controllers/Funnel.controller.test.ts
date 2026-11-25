@@ -2,7 +2,6 @@ import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
 import {
-  PersonChoiceViewModel,
   makeFunnelChooseViewModel,
   makeFunnelFailedViewModel,
   makeFunnelFilmViewModel,
@@ -44,12 +43,9 @@ const search = makeFunnelSearchViewModel(i18n, shell, "", undefined);
 const person = makePersonViewModel(i18n, luke);
 const film = person.films[0];
 const transport = person.transports[0];
-const choice = PersonChoiceViewModel.make({
-  id: "1",
-  name: "Luke Skywalker",
-});
+const choice = { id: "1", name: "Luke Skywalker" };
 const choose = makeFunnelChooseViewModel(i18n, shell, "Luke", [choice]);
-const filmStep = makeFunnelFilmViewModel(i18n, shell, person);
+const filmStep = makeFunnelFilmViewModel(i18n, shell, luke);
 const transportStep = makeFunnelTransportViewModel(i18n, shell, person, film);
 const review = makeFunnelReviewViewModel(i18n, shell, person, film, transport);
 const failed = makeFunnelFailedViewModel(i18n, shell, "Nope");

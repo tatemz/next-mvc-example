@@ -10,7 +10,6 @@ import {
   makeFunnelReviewViewModel,
   makeFunnelSearchViewModel,
   makeFunnelTransportViewModel,
-  PersonChoiceViewModel,
   type FunnelViewModel,
 } from "../src/components/FunnelView";
 import type { FilmListItemViewModel } from "../src/components/FilmListItem";
@@ -180,15 +179,12 @@ export const funnelChoose = (
   secondName: string,
 ): FunnelViewModel =>
   makeFunnelChooseViewModel(i18n, dataset.shell, dataset.query, [
-    PersonChoiceViewModel.make({
-      id: dataset.person.id,
-      name: dataset.person.name,
-    }),
-    PersonChoiceViewModel.make({ id: "2", name: secondName }),
+    { id: dataset.person.id, name: dataset.person.name },
+    { id: "2", name: secondName },
   ]);
 
 export const funnelFilm = (dataset: PageDataset): FunnelViewModel =>
-  makeFunnelFilmViewModel(i18n, dataset.shell, dataset.view);
+  makeFunnelFilmViewModel(i18n, dataset.shell, dataset.person);
 
 export const funnelTransport = (dataset: PageDataset): FunnelViewModel =>
   makeFunnelTransportViewModel(

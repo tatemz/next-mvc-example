@@ -1,7 +1,6 @@
 import { Array, Effect, Function, Option, Schema } from "effect";
 import {
   FunnelViewModel,
-  PersonChoiceViewModel,
   makeFunnelChooseViewModel,
   makeFunnelFailedViewModel,
   makeFunnelFilmViewModel,
@@ -9,7 +8,6 @@ import {
   makeFunnelSearchViewModel,
   makeFunnelTransportViewModel,
 } from "../components/FunnelView";
-import { makePersonViewModel } from "../components/PersonCard";
 import { loadAppShell } from "./AppShell.controller";
 import { CharacterId, type Universe } from "../domain/FilmUniverse.model";
 import { getStringOrEmpty, toRecord } from "../forms/FormData";
@@ -52,12 +50,8 @@ const searchStep = (
       );
     }
 
-    const choices = Array.map(results.value, (person) =>
-      PersonChoiceViewModel.make({ id: person.id, name: person.name }),
-    );
-
     return Function.pipe(
-      choices,
+      results.value,
       Array.matchLeft({
         onEmpty: () =>
           makeFunnelSearchViewModel(
@@ -110,11 +104,7 @@ const chooseStep = (
       );
     }
 
-    return makeFunnelFilmViewModel(
-      i18n,
-      step.shell,
-      makePersonViewModel(i18n, person.value),
-    );
+    return makeFunnelFilmViewModel(i18n, step.shell, person.value);
   });
 
 const filmStep = (

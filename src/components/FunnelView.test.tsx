@@ -3,7 +3,10 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect } from "vitest";
 import { luke } from "../domain/FilmUniverse.fixture";
 import { makeEn } from "../i18n/I18n.service";
-import { makePersonViewModel } from "./PersonCard";
+import {
+  type PersonCardInput,
+  makePersonViewModel,
+} from "./PersonCard";
 import { makeAppShellViewModel } from "./AppShell";
 import {
   FunnelView,
@@ -14,7 +17,6 @@ import {
   makeFunnelReviewViewModel,
   makeFunnelSearchViewModel,
   makeFunnelTransportViewModel,
-  PersonChoiceViewModel,
 } from "./FunnelView";
 import { ConnectedFunnelView } from "./FunnelView.connected";
 import { UiEventProvider } from "../ui-events/UiEventContext";
@@ -24,17 +26,15 @@ const shell = makeAppShellViewModel(i18n, "star-wars");
 const person = makePersonViewModel(i18n, luke);
 const film = person.films[0];
 const transport = person.transports[0];
-const illustratedPerson = makePersonViewModel(i18n, {
+const illustratedPerson: PersonCardInput = {
   ...luke,
   films: [
     { ...luke.films[0], imageUrl: "https://example.com/poster.jpg" },
     luke.films[1],
   ],
-});
-const choice = PersonChoiceViewModel.make({
-  id: "1",
-  name: "Luke Skywalker",
-});
+};
+const illustratedView = makePersonViewModel(i18n, illustratedPerson);
+const choice = { id: "1", name: "Luke Skywalker" };
 
 const render = (model: FunnelViewModel, isPending = false) =>
   renderToStaticMarkup(
@@ -99,13 +99,13 @@ describe("Funnel", () => {
   });
 
   it("renders the film choices", () => {
-    const html = render(makeFunnelFilmViewModel(i18n, shell, person));
+    const html = render(makeFunnelFilmViewModel(i18n, shell, luke));
 
     expect(html).toContain("Choose a film");
     expect(html).toContain("A New Hope");
     expect(html).toContain("Next: transport");
 
-    const pending = render(makeFunnelFilmViewModel(i18n, shell, person), true);
+    const pending = render(makeFunnelFilmViewModel(i18n, shell, luke), true);
     expect(pending).toContain("Loading...");
   });
 
@@ -169,8 +169,8 @@ describe("Funnel", () => {
       makeFunnelReviewViewModel(
         i18n,
         shell,
-        illustratedPerson,
-        illustratedPerson.films[0],
+        illustratedView,
+        illustratedView.films[0],
         transport,
       ),
     );
