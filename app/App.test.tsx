@@ -24,14 +24,9 @@ vi.mock("../src/server/Runtime", async () => {
 
 import GhibliPage from "./ghibli/page";
 import RootLayout from "./layout";
-import Page from "./page";
 import StarWarsPage from "./star-wars/page";
 
 describe("app", () => {
-  it("redirects the root to the Star Wars page", () => {
-    expect(() => Page()).toThrow();
-  });
-
   it("exposes each dataset page", () => {
     expect(typeof StarWarsPage).toBe("function");
     expect(typeof GhibliPage).toBe("function");

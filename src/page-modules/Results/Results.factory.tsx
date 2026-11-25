@@ -52,6 +52,9 @@ export const makeResultsPage = (
   makeNextPage({
     runtime,
     searchParams: ResultsParams,
-    load: resultsPage(basePath),
-    view: (model) => <Results {...model} />,
+    load: (params) =>
+      Effect.map(
+        resultsPage(basePath)(params),
+        (model) => <Results {...model} />,
+      ),
   });

@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
+import { RootPage } from "../src/page-modules/Root/Root.page";
 
-export default function Page() {
-  redirect("/star-wars");
-}
+export default RootPage;

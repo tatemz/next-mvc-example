@@ -1,5 +1,10 @@
 import { Option, Schema, type Effect } from "effect";
 import type { ReactNode } from "react";
+import {
+  type NextRedirect,
+  handleNextRedirect,
+  isNextRedirect,
+} from "./NextRedirect";
 
 export type NextSearchParams = Readonly<
   Record<string, string | ReadonlyArray<string> | undefined>
@@ -13,13 +18,12 @@ type Runtime<R> = {
   readonly runPromise: <A, E>(effect: Effect.Effect<A, E, R>) => Promise<A>;
 };
 
-export type NextPageConfig<Params, Model, R> = {
+export type NextPageConfig<Params, R> = {
   readonly runtime: Runtime<R>;
   readonly searchParams: Schema.ConstraintDecoder<Params>;
   readonly load: (
     params: Option.Option<Params>,
-  ) => Effect.Effect<Model, never, R>;
-  readonly view: (model: Model) => ReactNode;
+  ) => Effect.Effect<ReactNode | NextRedirect, never, R>;
 };
 
 const firstValue = (value: string | ReadonlyArray<string> | undefined) =>
@@ -30,14 +34,14 @@ const normalizeSearchParams = (params: NextSearchParams) =>
     Object.entries(params).map(([key, value]) => [key, firstValue(value)]),
   );
 
-export const makeNextPage = <Params, Model, R>(
-  config: NextPageConfig<Params, Model, R>,
+export const makeNextPage = <Params, R>(
+  config: NextPageConfig<Params, R>,
 ) =>
   async function NextPage({ searchParams }: NextPageProps) {
     const raw = await searchParams;
     const params = Schema.decodeUnknownOption(config.searchParams)(
       normalizeSearchParams(raw),
     );
-    const model = await config.runtime.runPromise(config.load(params));
-    return config.view(model);
+    const result = await config.runtime.runPromise(config.load(params));
+    return isNextRedirect(result) ? handleNextRedirect(result) : result;
   };

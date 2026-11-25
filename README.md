@@ -19,8 +19,9 @@ Run `pnpm install && pnpm dev`, then open `/star-wars` or `/ghibli`.
 | Star Wars | `/star-wars` | `/star-wars/funnel` | `/star-wars/results` |
 | Studio Ghibli | `/ghibli` | `/ghibli/funnel` | `/ghibli/results` |
 
-The root redirects to `/star-wars`. The header switches between the two
-experiences; each home's CTA enters its own funnel.
+The root page's controller returns a `NextRedirect` to `/star-wars`; the page
+adapter turns that value into Next's redirect. The header switches between the
+two experiences; each home's CTA enters its own funnel.
 
 ## What it shows
 
@@ -54,10 +55,14 @@ experiences; each home's CTA enters its own funnel.
   The shared film list, funnel choices, review, and results render the poster
   only when it exists.
 - `makeNextPage` is the Next boundary adapter. It awaits `searchParams`, takes
-  the first value of repeated query keys, and decodes the result with a schema.
-  The page module receives `Option<Params>`; an invalid query renders its
-  `Missing` state, while the controller receives already-typed params. Route
-  files only re-export page modules.
+  the first value of repeated query keys, decodes the result with a schema, and
+  runs the page program. A program returns a React tree or a `NextRedirect`;
+  `handleNextRedirect` is the only module that calls Next's `redirect`. An
+  invalid query renders its `Missing` state, while the controller receives
+  already-typed params. Route files only re-export page modules.
+- `Root.controller.ts` returns
+  `NextRedirect.make({ url: "/star-wars", type: "replace" })`. Neither the route
+  nor the controller imports `next/navigation`; the platform adapter does.
 - `FunnelViewModel` is a `Schema.TaggedUnion` of `Search`, `Choose`, `Film`,
   `Transport`, `Review`, and `Failed`. `Funnel.controller.ts` advances it with an
   exhaustive Effect `Match` over the current step. Its controller also depends
@@ -87,13 +92,14 @@ boundaries.
 
 ```text
 app/layout.tsx                               html/body wrapper; loads AppShell
-app/page.tsx                                 redirects / to /star-wars
+app/page.tsx                                 re-exports Root.page
 app/star-wars/page.tsx                       re-exports StarWarsHome.page
 app/star-wars/funnel/page.tsx                re-exports StarWarsFunnel.page
 app/star-wars/results/page.tsx               re-exports StarWarsResults.page
 app/ghibli/page.tsx                          re-exports GhibliHome.page
 app/ghibli/funnel/page.tsx                   re-exports GhibliFunnel.page
 app/ghibli/results/page.tsx                  re-exports GhibliResults.page
+src/page-modules/Root/Root.page.tsx               shell runtime + root controller -> redirect page
 src/page-modules/HomePage/HomePage.factory.tsx    runtime + action + funnel href -> home page
 src/page-modules/HomePage/StarWarsHome.page.tsx   SWAPI runtime + action
 src/page-modules/HomePage/GhibliHome.page.tsx     Ghibli runtime + action
@@ -103,7 +109,8 @@ src/page-modules/Funnel/GhibliFunnel.page.tsx     Ghibli runtime + submitGhibliF
 src/page-modules/Results/Results.factory.tsx      runtime + dataset base -> results page
 src/page-modules/Results/StarWarsResults.page.tsx SWAPI runtime + /star-wars
 src/page-modules/Results/GhibliResults.page.tsx   Ghibli runtime + /ghibli
-src/platform/NextPage.ts                     Next searchParams -> typed page params
+src/platform/NextPage.ts                     page program -> React tree or NextRedirect
+src/platform/NextRedirect.ts                 redirect model + the only Next redirect call
 src/components/AppShell/                     AppShell.tsx
 src/components/HomePage/                     HomePage.tsx, HomePage.connected.tsx
 src/components/Funnel/                       Funnel.tsx, Funnel.connected.tsx
@@ -113,6 +120,7 @@ src/components/FilmList/                     FilmList.tsx
 src/components/FilmListItem/                 FilmListItem.tsx
 src/components/SearchForm/                   SearchForm.tsx
 src/controllers/AppShell.controller.ts      I18n -> shell view model
+src/controllers/Root.controller.ts          returns the root NextRedirect
 src/controllers/HomePage.controller.ts       Config + PeopleCatalog -> home view model
 src/controllers/SearchPerson.controller.ts   form schema + catalog -> home view model
 src/controllers/Funnel.controller.ts         Match state machine for the funnel
@@ -162,8 +170,8 @@ pnpm test:e2e
 pnpm test:e2e:debug
 ```
 
-Open `/star-wars` or `/ghibli` to compare the two datasets. The root redirects
-to `/star-wars`.
+Open `/star-wars` or `/ghibli` to compare the two datasets. The root's
+controller returns a redirect to `/star-wars`.
 
 ## Requirements
 
