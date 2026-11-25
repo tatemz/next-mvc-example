@@ -77,6 +77,13 @@ jobs:
       - run: pnpm test:e2e
         env:
           CHROMIUM_PATH: /usr/bin/google-chrome
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-reports
+          path: reports
+          if-no-files-found: ignore
+          overwrite: true
       - if: failure()
         uses: actions/upload-artifact@v7
         with:

@@ -5,6 +5,7 @@ next-env.d.ts
 .env*.local
 artifacts
 coverage
+reports
 .DS_Store
 .openchamber
 storybook-static

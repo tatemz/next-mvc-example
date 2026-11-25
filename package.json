@@ -30,7 +30,7 @@
     "test:e2e": "pnpm test:e2e:run --parallel=2",
     "pretest:e2e:debug": "next build",
     "test:e2e:debug": "E2E_DEBUG=1 pnpm test:e2e:run --parallel=1 --verbose",
-    "test:e2e:run": "NODE_OPTIONS=\"--import tsx\" effect-bdd --features \"features/**/*.feature\" --steps \"features/**/*.steps.ts\" --reporter text --strict --step-timeout \"60 seconds\"",
+    "test:e2e:run": "NODE_OPTIONS=\"--import tsx\" effect-bdd --features \"features/**/*.feature\" --steps \"features/**/*.steps.ts\" --reporter text --reporter junit --output-file.junit reports/junit.xml --reporter html --output-file.html reports/report.html --strict --step-timeout \"60 seconds\"",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "prepare": "effect-tsgo patch --typescript --oxlint",

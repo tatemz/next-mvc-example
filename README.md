@@ -190,8 +190,9 @@ pnpm build-storybook
 `pnpm test:e2e` builds the app, then runs `test:e2e:run` with `--parallel=2`.
 `pnpm test:e2e:debug` reuses the same runner with `E2E_DEBUG=1 --parallel=1
 --verbose`, pausing after each browser interaction and recording one WebM per
-feature. The shared command owns the feature/steps globs, reporter, strict mode,
-and step timeout.
+feature. The shared command owns the feature/steps globs, reporters, strict
+mode, and step timeout. Each run writes `reports/junit.xml` and
+`reports/report.html`.
 
 ## Integration tests
 
@@ -210,10 +211,11 @@ transport.
 
 Each scenario starts its own `tsx server.ts` on an OS-assigned port, so the
 Effect API and the Next catch-all share one server, and closes it and the
-browser when the scenario ends. The steps are declared inline in
-each feature's `.steps.ts`, top to bottom. Scenarios use the live SWAPI and
-Ghibli APIs, so they need a network connection. A failure writes a full-page
-screenshot under `artifacts/`; debug mode also needs ffmpeg.
+browser when the scenario ends. Shared steps are declared in
+`features/support/Steps.ts`, and each feature's `.steps.ts` composes the
+scenarios. Scenarios use the live SWAPI and Ghibli APIs, so they need a network
+connection. A failure writes a full-page screenshot under `artifacts/`; debug
+mode also needs ffmpeg.
 
 ```sh
 CHROMIUM_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
