@@ -26,6 +26,7 @@
         "src/api/**",
         "src/server/**",
         "src/services/**",
+        "boot/**",
         "server.ts"
       ],
       "rules": {
