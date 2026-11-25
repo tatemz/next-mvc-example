@@ -23,12 +23,11 @@ export const toRecord = (formData: globalThis.FormData) => {
   return Record.fromEntries(entries);
 };
 
-export const getStringOrEmpty = (
-  record: FormDataRecord,
-  key: string,
-) =>
-  Option.getOrElse(
-    Record.get(record, key),
-    () => "",
-  );
+export const getStringOrEmpty = (key: string) =>
+  (record: FormDataRecord) =>
+    Function.pipe(
+      record,
+      Record.get(key),
+      Option.getOrElse(() => ""),
+    );
 

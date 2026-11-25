@@ -31,7 +31,7 @@ const searchStep = (
   Effect.gen(function*() {
     const i18n = yield* I18n;
     const data = toRecord(formData);
-    const query = getStringOrEmpty(data, "query").trim();
+    const query = getStringOrEmpty("query")(data).trim();
 
     if (query === "") {
       return makeFunnelSearchViewModel(
@@ -81,7 +81,7 @@ const chooseStep = (
     const i18n = yield* I18n;
     const data = toRecord(formData);
     const characterId = Schema.decodeOption(CharacterId)(
-      getStringOrEmpty(data, "characterId"),
+      getStringOrEmpty("characterId")(data),
     );
 
     if (
@@ -128,7 +128,7 @@ const filmStep = (
     const film = Option.flatMap(
       Schema.decodeOption(
         Schema.NumberFromString.check(Schema.isInt()),
-      )(getStringOrEmpty(data, "order")),
+      )(getStringOrEmpty("order")(data)),
       (order) =>
         Array.findFirst(
           step.person.films,
@@ -159,7 +159,7 @@ const transportStep = (
   Effect.gen(function*() {
     const i18n = yield* I18n;
     const data = toRecord(formData);
-    const key = getStringOrEmpty(data, "transportKey");
+    const key = getStringOrEmpty("transportKey")(data);
     const transport = key === "none"
       ? Option.none()
       : Array.findFirst(

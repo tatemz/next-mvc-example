@@ -15,7 +15,7 @@ describe("FormData", () => {
   });
 
   it("reads a string or an empty value", () => {
-    expect(getStringOrEmpty({ characterId: "3" }, "characterId")).toBe("3");
-    expect(getStringOrEmpty({}, "characterId")).toBe("");
+    expect(getStringOrEmpty("characterId")({ characterId: "3" })).toBe("3");
+    expect(getStringOrEmpty("characterId")({})).toBe("");
   });
 });
