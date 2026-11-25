@@ -28,7 +28,7 @@ export const getStringOrEmpty = (
   key: string,
 ) =>
   Option.getOrElse(
-    Option.fromNullishOr(record[key]),
+    Record.get(record, key),
     () => "",
   );
 
