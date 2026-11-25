@@ -9,8 +9,11 @@ import {
 import { describe, expect } from "vitest";
 import { appWith } from "../../boot/app";
 import { serve } from "../../boot/serve";
-import { makeCharacterId } from "../domain/FilmUniverse.fixture";
-import { PersonSummary } from "../domain/FilmUniverse.model";
+import {
+  makeCharacterId,
+  personNamed,
+} from "../domain/FilmUniverse.fixture";
+import { catalogOf } from "../services/PeopleCatalog.fixture";
 import {
   GhibliCatalog,
   PeopleCatalog,
@@ -20,13 +23,8 @@ import type { RenderServices } from "./RenderContext";
 import { Next } from "./Next";
 import { UiEventLogger, noopUiEventLogger } from "./UiEventLogger";
 
-const catalogServing = (name: string): PeopleCatalog => ({
-  getPerson: () => Effect.die("getPerson is not used here"),
-  searchPeople: () =>
-    Effect.succeed([
-      PersonSummary.make({ id: makeCharacterId("1"), name }),
-    ]),
-});
+const catalogServing = (name: string) =>
+  catalogOf([personNamed(makeCharacterId("1"), name)]);
 
 const fakeNext = Layer.succeed(
   Next,

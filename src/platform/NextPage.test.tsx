@@ -10,10 +10,10 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { redirect } from "next/navigation";
-import { makeCharacterId } from "../domain/FilmUniverse.fixture";
-import { PersonSummary } from "../domain/FilmUniverse.model";
+import { makeCharacterId, personNamed } from "../domain/FilmUniverse.fixture";
 import { I18n } from "../i18n/I18n.service";
 import { PeopleCatalog } from "../services/PeopleCatalog";
+import { catalogOf } from "../services/PeopleCatalog.fixture";
 import { makeNextPage, makeRedirectNextPage } from "./NextPage";
 import { NextRedirect } from "./NextRedirect";
 import { type ParsedSearchParams, decodeOption } from "./ParsedSearchParams";
@@ -24,15 +24,9 @@ const Params = Schema.Struct({
   id: Schema.NumberFromString.check(Schema.isInt()),
 });
 
-const namedCatalog = (name: string): PeopleCatalog => ({
-  getPerson: () => Effect.die("getPerson is not used here"),
-  searchPeople: () =>
-    Effect.succeed([
-      PersonSummary.make({ id: makeCharacterId("2"), name }),
-    ]),
-});
-
-const context = renderContext(namedCatalog("Ghibli"));
+const context = renderContext(
+  catalogOf([personNamed(makeCharacterId("2"), "Ghibli")]),
+);
 
 const Page = makeNextPage(
   Effect.gen(function*() {
