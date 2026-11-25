@@ -1,9 +1,9 @@
 import { Effect } from "effect";
+import { starWarsSplashImage } from "../../components/HomePage";
 import { ConnectedHomePage } from "../../components/HomePage.connected";
 import { loadHomePage } from "../../controllers/HomePage.controller";
 import { makeNextPage } from "../../platform/NextPage";
 import { shellRuntime } from "../../server/Runtime";
-import { starWarsSplashImage } from "./SplashImages";
 
 export const StarWarsHomePage = makeNextPage(
   shellRuntime,

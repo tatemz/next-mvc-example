@@ -16,7 +16,9 @@ import {
 } from "../src/components/Funnel";
 import type { FilmListItemViewModel } from "../src/components/FilmListItem";
 import {
+  ghibliSplashImage,
   makeHomePageViewModel,
+  starWarsSplashImage,
   type HomeHeroImageViewModel,
   type HomePageViewModel,
   type HomeUniverse,
@@ -31,13 +33,11 @@ import {
   makeResultsReadyViewModel,
   type ResultsViewModel,
 } from "../src/components/Results";
-import { ghibliSplashImage, starWarsSplashImage } from "../src/page-modules/HomePage/SplashImages";
 import { luke, makeCharacterId } from "../src/domain/FilmUniverse.fixture";
 import type { Person } from "../src/domain/FilmUniverse.model";
 import { makeEn } from "../src/i18n/I18n.service";
 
 const i18n = makeEn();
-
 
 const haku: Person = {
   _tag: "Person",

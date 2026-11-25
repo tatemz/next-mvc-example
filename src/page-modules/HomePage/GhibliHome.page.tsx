@@ -1,9 +1,9 @@
 import { Effect } from "effect";
+import { ghibliSplashImage } from "../../components/HomePage";
 import { ConnectedHomePage } from "../../components/HomePage.connected";
 import { loadHomePage } from "../../controllers/HomePage.controller";
 import { makeNextPage } from "../../platform/NextPage";
 import { shellRuntime } from "../../server/Runtime";
-import { ghibliSplashImage } from "./SplashImages";
 
 export const GhibliHomePage = makeNextPage(
   shellRuntime,
