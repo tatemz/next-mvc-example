@@ -51,7 +51,7 @@ export const validateFormData =
   (formData: globalThis.FormData) =>
     Effect.gen(function*() {
       const formDataRecord = toRecord(formData);
-      const decoded = Schema.decodeUnknownEffect(schema)(formDataRecord);
+      const decoded = Schema.decodeEffect(schema)(formDataRecord);
 
       return yield* Function.pipe(
         decoded,

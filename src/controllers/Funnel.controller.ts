@@ -80,7 +80,7 @@ const chooseStep = (
   Effect.gen(function*() {
     const i18n = yield* I18n;
     const data = toRecord(formData);
-    const characterId = Schema.decodeUnknownOption(CharacterId)(
+    const characterId = Schema.decodeOption(CharacterId)(
       getStringOrEmpty(data, "characterId"),
     );
 
@@ -126,7 +126,7 @@ const filmStep = (
     const i18n = yield* I18n;
     const data = toRecord(formData);
     const film = Option.flatMap(
-      Schema.decodeUnknownOption(
+      Schema.decodeOption(
         Schema.NumberFromString.check(Schema.isInt()),
       )(getStringOrEmpty(data, "order")),
       (order) =>

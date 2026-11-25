@@ -5,19 +5,19 @@ import { CharacterId, Person } from "./FilmUniverse.model";
 
 describe("CharacterId", () => {
   it("accepts a positive whole number written as a string", () => {
-    expect(Schema.decodeUnknownSync(CharacterId)("3")).toBe("3");
+    expect(Schema.decodeSync(CharacterId)("3")).toBe("3");
   });
 
   it("normalizes a numeric id to its canonical string", () => {
-    expect(Schema.decodeUnknownSync(CharacterId)("01")).toBe("1");
+    expect(Schema.decodeSync(CharacterId)("01")).toBe("1");
   });
 
   it("rejects zero", () => {
-    expect(() => Schema.decodeUnknownSync(CharacterId)("0")).toThrow();
+    expect(() => Schema.decodeSync(CharacterId)("0")).toThrow();
   });
 
   it("rejects a non-numeric id", () => {
-    expect(() => Schema.decodeUnknownSync(CharacterId)("abc")).toThrow();
+    expect(() => Schema.decodeSync(CharacterId)("abc")).toThrow();
   });
 });
 
@@ -38,16 +38,16 @@ const person = {
   species: null,
   films: [{ _tag: "Film", title: "A New Hope", order: 4 }],
   transports: [],
-};
+} as const;
 
 describe("Person", () => {
   it("identifies a person with a character id string", () => {
-    expect(Schema.decodeUnknownSync(Person)(person)).toMatchObject({ id: "1" });
+    expect(Schema.decodeSync(Person)(person)).toMatchObject({ id: "1" });
   });
 
   it("rejects an id that is not a character id", () => {
     expect(() =>
-      Schema.decodeUnknownSync(Person)({ ...person, id: "0" }),
+      Schema.decodeSync(Person)({ ...person, id: "0" }),
     ).toThrow();
   });
 });

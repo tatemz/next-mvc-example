@@ -46,13 +46,7 @@ const unavailable = (kind: string, personId: CharacterId) =>
   });
 
 const resourceId = (kind: string, personId: CharacterId) => (url: string) =>
-  Function.pipe(
-    idFromUrl(url),
-    Option.match({
-      onNone: () => Effect.fail(unavailable(kind, personId)),
-      onSome: Effect.succeed,
-    }),
-  );
+  Effect.fromOption(idFromUrl(url), () => unavailable(kind, personId));
 
 const toFilm = (film: SwapiFilmResponse) =>
   Film.make({

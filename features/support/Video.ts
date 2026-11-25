@@ -7,6 +7,7 @@ import {
   FileSystem,
   Ref,
   Schedule,
+  Schema,
   Stream,
 } from "effect";
 import { ChildProcess } from "effect/process";
@@ -17,6 +18,14 @@ import { dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
+
+class VideoError extends Schema.TaggedError<
+  VideoError,
+  { readonly brand: unique symbol }
+>()("VideoError", {
+  message: Schema.String,
+  cause: Schema.optional(Schema.Unknown),
+}) {}
 
 export type ScenarioRecording = {
   readonly feature: string;
@@ -68,7 +77,10 @@ const joinFeatureVideo = Effect.fn("joinFeatureVideo")(function*(
         join(artifacts, `${feature}.webm`),
       ]),
     catch: (cause) =>
-      new Error(`Could not join the ${feature} video: ${String(cause)}`),
+      new VideoError({
+        message: `Could not join the ${feature} video: ${String(cause)}`,
+        cause,
+      }),
   });
 });
 

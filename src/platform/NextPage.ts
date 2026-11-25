@@ -1,5 +1,5 @@
 import { Effect, type ManagedRuntime } from "effect";
-import type { ReactNode } from "react";
+import type { ReactElement } from "react";
 import {
   type NextRedirect,
   handleNextRedirect,
@@ -18,7 +18,7 @@ export type NextPageProps = {
 export const makeNextPage = <R, E>(
   runtime: ManagedRuntime.ManagedRuntime<R, E>,
   load: Effect.Effect<
-    ReactNode | NextRedirect,
+    ReactElement | NextRedirect,
     never,
     R | ParsedSearchParams
   >,

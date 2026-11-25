@@ -100,6 +100,7 @@ value and validation-error variants.
 ## Layout
 
 ```text
+.oxlintrc.json               Effect Oxlint preset and boundary overrides
 .storybook/                  Storybook config and page fixtures
 app/                         route re-exports; html/body layout
 src/page-modules/            one Next page per route via makeNextPage
@@ -123,6 +124,9 @@ pnpm test
 pnpm test:coverage
 pnpm typecheck
 pnpm build
+pnpm check
+pnpm lint
+pnpm lint:fix
 pnpm test:e2e
 pnpm test:e2e:debug
 pnpm storybook
@@ -157,6 +161,21 @@ screenshot under `artifacts/`; debug mode also needs ffmpeg.
 CHROMIUM_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
   pnpm test:e2e
 ```
+
+## Checks
+
+```sh
+pnpm check
+pnpm typecheck
+pnpm lint
+pnpm lint:fix
+```
+
+`typecheck` runs the Effect-patched TypeScript-Go compiler. `lint` runs
+type-aware Oxlint with the recommended Effect preset. `check` runs both, and
+the `prepare` script patches TypeScript and Oxlint after install. The
+`unstable-api-usage` warning is disabled only at the experimental
+`effect/http`, `effect/http-api`, and test/e2e boundaries.
 
 ## Requirements
 

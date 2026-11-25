@@ -1,4 +1,5 @@
 {
+  "$schema": "./node_modules/@effect/tsgo/schema.json",
   "compilerOptions": {
     "target": "ES2022",
     "lib": [
@@ -18,6 +19,10 @@
     "plugins": [
       {
         "name": "next"
+      },
+      {
+        "name": "@effect/language-service",
+        "diagnostics": false
       }
     ],
     "allowJs": true,

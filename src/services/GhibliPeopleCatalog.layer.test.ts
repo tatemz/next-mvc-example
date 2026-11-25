@@ -33,31 +33,65 @@ const bodyFor = (url: string) => {
   return species;
 };
 
-const httpClient = HttpClient.make((request) =>
-  Effect.succeed(
-    HttpClientResponse.fromWeb(
-      request,
-      new Response(JSON.stringify(bodyFor(request.url)), {
-        status: 200,
-        headers: { "content-type": "application/json" },
-      }),
-    ),
-  ),
-);
+const httpClientFor = (statusFor: (url: string) => number) =>
+  HttpClient.make((request) => {
+    const status = statusFor(request.url);
+    const body = status === 200 ? JSON.stringify(bodyFor(request.url)) : "";
+    return Effect.succeed(
+      HttpClientResponse.fromWeb(
+        request,
+        new Response(body, {
+          status,
+          headers:
+            status === 200
+              ? { "content-type": "application/json" }
+              : undefined,
+        }),
+      ),
+    );
+  });
 
-const testLayer = layer.pipe(
-  Layer.provide(Layer.succeed(HttpClient.HttpClient, httpClient)),
-  Layer.provide(
-    Layer.succeed(
-      ConfigProvider.ConfigProvider,
-      ConfigProvider.fromEnv({
-        env: { GHIBLI_API_URL: "https://ghibliapi.vercel.app" },
-      }),
+const layerFor = (statusFor: (url: string) => number) =>
+  layer.pipe(
+    Layer.provide(
+      Layer.succeed(HttpClient.HttpClient, httpClientFor(statusFor)),
     ),
-  ),
-);
+    Layer.provide(
+      Layer.succeed(
+        ConfigProvider.ConfigProvider,
+        ConfigProvider.fromEnv({
+          env: { GHIBLI_API_URL: "https://ghibliapi.vercel.app" },
+        }),
+      ),
+    ),
+  );
+
+const testLayer = layerFor(() => 200);
+
+const failureCase = (path: string, message: string) =>
+  it.effect(`maps a ${path} request failure to a catalog error`, () =>
+    Effect.gen(function*() {
+      const error = yield* PeopleCatalog.use((catalog) =>
+        catalog.getPerson(makeCharacterId("1")),
+      ).pipe(
+        Effect.provide(
+          layerFor((url) => (url.includes(path) ? 500 : 200)),
+        ),
+        Effect.flip,
+      );
+
+      expect(error).toMatchObject({
+        _tag: "PeopleCatalogError",
+        message,
+      });
+    }),
+  );
 
 describe("GhibliPeopleCatalog layer", () => {
+  failureCase("/people", "Characters are not available.");
+  failureCase("/films", "Films are not available.");
+  failureCase("/species", "Species are not available.");
+
   it.effect("builds the catalog over the typed Ghibli API", () =>
     Effect.gen(function*() {
       const person = yield* PeopleCatalog.use((catalog) =>

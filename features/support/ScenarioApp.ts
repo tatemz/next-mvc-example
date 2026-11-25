@@ -6,6 +6,7 @@ import {
   Layer,
   Option,
   Schedule,
+  Schema,
   Stream,
 } from "effect";
 import { ChildProcess } from "effect/process";
@@ -16,10 +17,18 @@ export class ScenarioApp extends Context.Service<
   { readonly url: string }
 >()("next-mvc-example/test/ScenarioApp") {}
 
+class ScenarioAppError extends Schema.TaggedError<
+  ScenarioAppError,
+  { readonly brand: unique symbol }
+>()("ScenarioAppError", {
+  message: Schema.String,
+  cause: Schema.optional(Schema.Unknown),
+}) {}
+
 const repoRoot = resolve(import.meta.dirname, "../..");
 const nextBin = resolve(repoRoot, "node_modules/next/dist/bin/next");
 
-const ansi = /\u001b\[[0-9;]*m/g;
+const ansi = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
 const localLine = /^\s*(?:-\s*)?Local:\s+https?:\/\/\S+:(\d+)\s*$/;
 
 export const parseNextStartPort = (line: string): Option.Option<number> => {
@@ -37,12 +46,15 @@ const waitUntilReady = (url: string) =>
     const response = yield* Effect.tryPromise({
       try: () => fetch(url),
       catch: (cause) =>
-        new Error(`The app did not answer at ${url}: ${String(cause)}`),
+        new ScenarioAppError({
+          message: `The app did not answer at ${url}: ${String(cause)}`,
+          cause,
+        }),
     });
     if (!response.ok) {
-      return yield* Effect.fail(
-        new Error(`The app answered ${response.status} at ${url}`),
-      );
+      return yield* new ScenarioAppError({
+        message: `The app answered ${response.status} at ${url}`,
+      });
     }
   }).pipe(
     Effect.retry({ schedule: Schedule.spaced("250 millis"), times: 120 }),
@@ -86,7 +98,9 @@ const startNext = (env: Record<string, string>) =>
       Effect.timeout("30 seconds"),
       Effect.mapError(
         () =>
-          new Error("next start did not report its port within 30 seconds"),
+          new ScenarioAppError({
+            message: "next start did not report its port within 30 seconds",
+          }),
       ),
     );
     const url = `http://127.0.0.1:${port}`;

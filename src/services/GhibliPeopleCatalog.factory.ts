@@ -18,19 +18,19 @@ export type GhibliSource = {
   readonly people: {
     readonly list: () => Effect.Effect<
       ReadonlyArray<GhibliPersonResponse>,
-      unknown
+      PeopleCatalogError
     >;
   };
   readonly films: {
     readonly list: () => Effect.Effect<
       ReadonlyArray<GhibliFilmResponse>,
-      unknown
+      PeopleCatalogError
     >;
   };
   readonly species: {
     readonly list: () => Effect.Effect<
       ReadonlyArray<GhibliSpeciesResponse>,
-      unknown
+      PeopleCatalogError
     >;
   };
 };
@@ -78,11 +78,9 @@ export const make = (ghibli: GhibliSource) => {
       const personOption = Array.get(people, Number(id) - 1);
 
       if (Option.isNone(personOption)) {
-        return yield* Effect.fail(
-          new PeopleCatalogError({
-            message: `Character ${id} is not available.`,
-          }),
-        );
+        return yield* new PeopleCatalogError({
+          message: `Character ${id} is not available.`,
+        });
       }
 
       const person = personOption.value;

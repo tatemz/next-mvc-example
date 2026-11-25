@@ -5,7 +5,10 @@ import type {
   PersonSummary,
 } from "../domain/FilmUniverse.model";
 
-export class PeopleCatalogError extends Schema.TaggedError<PeopleCatalogError>()(
+export class PeopleCatalogError extends Schema.TaggedError<
+  PeopleCatalogError,
+  { readonly brand: unique symbol }
+>()(
   "PeopleCatalogError",
   {
     message: Schema.NonEmptyString,

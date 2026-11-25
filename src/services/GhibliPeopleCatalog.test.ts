@@ -8,6 +8,7 @@ import type {
   GhibliSpeciesResponse,
 } from "./GhibliApi";
 import { make, type GhibliSource } from "./GhibliPeopleCatalog.factory";
+import { PeopleCatalogError } from "./PeopleCatalog";
 
 const people: ReadonlyArray<GhibliPersonResponse> = [
   {
@@ -193,7 +194,7 @@ describe("GhibliPeopleCatalog", () => {
     Effect.gen(function*() {
       const error = yield* Effect.flip(
         make(
-          source({ people: { list: () => Effect.fail("offline") } }),
+          source({ people: { list: () => Effect.fail(new PeopleCatalogError({ message: "offline" })) } }),
         ).getPerson(id("1")),
       );
 
@@ -207,7 +208,7 @@ describe("GhibliPeopleCatalog", () => {
     Effect.gen(function*() {
       const error = yield* Effect.flip(
         make(
-          source({ films: { list: () => Effect.fail("offline") } }),
+          source({ films: { list: () => Effect.fail(new PeopleCatalogError({ message: "offline" })) } }),
         ).getPerson(id("1")),
       );
 
@@ -221,7 +222,7 @@ describe("GhibliPeopleCatalog", () => {
     Effect.gen(function*() {
       const error = yield* Effect.flip(
         make(
-          source({ species: { list: () => Effect.fail("offline") } }),
+          source({ species: { list: () => Effect.fail(new PeopleCatalogError({ message: "offline" })) } }),
         ).getPerson(id("1")),
       );
 
@@ -234,7 +235,7 @@ describe("GhibliPeopleCatalog", () => {
   it.effect("maps a search request failure to a catalog error", () =>
     Effect.gen(function*() {
       const error = yield* Effect.flip(
-        make(source({ people: { list: () => Effect.fail("offline") } })).searchPeople(
+        make(source({ people: { list: () => Effect.fail(new PeopleCatalogError({ message: "offline" })) } })).searchPeople(
           "hak",
         ),
       );

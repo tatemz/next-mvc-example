@@ -28,5 +28,5 @@ export const decodeOption = <A>(
 ) =>
   Effect.gen(function*() {
     const params = yield* tag;
-    return Schema.decodeUnknownOption(schema)(firstValues(params));
+    return Schema.decodeOption(schema)(firstValues(params));
   });
