@@ -2,7 +2,11 @@ import { Array, Option, Schema } from "effect";
 import type { Universe } from "../domain/FilmUniverse.model";
 import type { I18n } from "../i18n/I18n.service";
 import type { ResultsCta } from "../ui-events/UiEvent";
-import { AppShell, AppShellViewModel } from "./AppShell";
+import {
+  AppShell,
+  AppShellViewModel,
+  makeAppShellViewModel,
+} from "./AppShell";
 import {
   FilmListItemInput,
   FilmListItemViewModel,
@@ -71,7 +75,7 @@ export const makeResultsReadyViewModel = (
     homeHref: `/${universe}`,
   });
 
-export const makeResultsMissingViewModel = (
+const missingViewModel = (
   i18n: I18n,
   shell: AppShellViewModel,
   universe: Universe,
@@ -84,6 +88,16 @@ export const makeResultsMissingViewModel = (
     startOverHref: `/${universe}/funnel`,
   });
 
+export const makeResultsMissingViewModel = (
+  i18n: I18n,
+  universe: Universe,
+) =>
+  missingViewModel(
+    i18n,
+    makeAppShellViewModel(i18n, universe),
+    universe,
+  );
+
 export type ResultsQuery = {
   readonly film: number;
   readonly transport: string;
@@ -91,13 +105,14 @@ export type ResultsQuery = {
 
 export const makeResultsViewModel = (
   i18n: I18n,
-  shell: AppShellViewModel,
   universe: Universe,
   person: Option.Option<PersonCardInput>,
   query: ResultsQuery,
 ): ResultsViewModel => {
+  const shell = makeAppShellViewModel(i18n, universe);
+
   if (Option.isNone(person)) {
-    return makeResultsMissingViewModel(i18n, shell, universe);
+    return missingViewModel(i18n, shell, universe);
   }
 
   const film = Array.findFirst(
@@ -106,7 +121,7 @@ export const makeResultsViewModel = (
   );
 
   if (Option.isNone(film)) {
-    return makeResultsMissingViewModel(i18n, shell, universe);
+    return missingViewModel(i18n, shell, universe);
   }
 
   const transport = query.transport === "none"
@@ -119,7 +134,7 @@ export const makeResultsViewModel = (
     );
 
   if (query.transport !== "none" && transport === null) {
-    return makeResultsMissingViewModel(i18n, shell, universe);
+    return missingViewModel(i18n, shell, universe);
   }
 
   return makeResultsReadyViewModel(

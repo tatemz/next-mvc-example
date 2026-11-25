@@ -22,8 +22,7 @@ import { PeopleCatalog } from "../services/PeopleCatalog";
 export const startFunnel = (universe: Universe) =>
   Effect.gen(function*() {
     const i18n = yield* I18n;
-    const shell = makeAppShellViewModel(i18n, universe);
-    return makeFunnelSearchViewModel(i18n, shell, "", undefined);
+    return makeFunnelSearchViewModel(i18n, universe, "", undefined);
   });
 
 export const advanceFunnel = (
@@ -39,11 +38,11 @@ export const advanceFunnel = (
         );
 
         if (Option.isNone(form)) {
-          return makeFunnelSearchViewModel(
+          return makeFunnelSearchResult(
             i18n,
-            step.shell,
-            "",
-            i18n._({ id: "funnel.search.required" }),
+            step,
+            form,
+            Option.none(),
           );
         }
 
@@ -51,7 +50,7 @@ export const advanceFunnel = (
         const results = yield* Effect.option(
           client.searchPeople(form.value.query),
         );
-        return makeFunnelSearchResult(i18n, step, form.value, results);
+        return makeFunnelSearchResult(i18n, step, form, results);
       }),
     Choose: (step) =>
       Effect.gen(function*() {

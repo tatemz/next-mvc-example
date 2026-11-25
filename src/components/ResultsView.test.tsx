@@ -73,7 +73,7 @@ describe("ResultsView", () => {
   });
 
   it("renders a missing dossier", () => {
-    const model = makeResultsMissingViewModel(i18n, shell, "star-wars");
+    const model = makeResultsMissingViewModel(i18n, "star-wars");
     const html = renderToStaticMarkup(<ResultsView model={model} onCtaClick={() => {}} />);
 
     expect(html).toContain("Dossier not found");

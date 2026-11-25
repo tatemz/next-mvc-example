@@ -1,7 +1,11 @@
 import { Schema } from "effect";
 import type { I18n } from "../i18n/I18n.service";
 import type { Universe } from "../domain/FilmUniverse.model";
-import { AppShell, AppShellViewModel } from "./AppShell";
+import {
+  AppShell,
+  AppShellViewModel,
+  makeAppShellViewModel,
+} from "./AppShell";
 
 export const HomeHeroImageViewModel = Schema.TaggedStruct(
   "HomeHeroImageViewModel",
@@ -61,10 +65,9 @@ const copyFor = (i18n: I18n, universe: Universe) =>
 export const makeHomeViewModel = (
   i18n: I18n,
   universe: Universe,
-  shell: AppShellViewModel,
 ) =>
   HomeViewModel.make({
-    shell,
+    shell: makeAppShellViewModel(i18n, universe),
     hero: HomeHeroViewModel.make({
       ...copyFor(i18n, universe),
       funnelLabel: i18n._({ id: "home.hero.funnel" }),

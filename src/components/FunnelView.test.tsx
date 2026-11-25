@@ -49,7 +49,7 @@ const render = (model: FunnelViewModel, isPending = false) =>
 
 describe("Funnel", () => {
   it("renders the search step", () => {
-    const model = makeFunnelSearchViewModel(i18n, shell, "Luke", undefined);
+    const model = makeFunnelSearchViewModel(i18n, "star-wars", "Luke", undefined);
 
     expect(model).toMatchObject({
       _tag: "Search",
@@ -68,7 +68,7 @@ describe("Funnel", () => {
 
   it("renders the search error", () => {
     const html = render(
-      makeFunnelSearchViewModel(i18n, shell, "", "Enter a character name."),
+      makeFunnelSearchViewModel(i18n, "star-wars", "", "Enter a character name."),
     );
 
     expect(html).toContain('role="alert"');
@@ -222,7 +222,7 @@ describe("Funnel", () => {
     const html = renderToStaticMarkup(
       <UiEventProvider handler={() => {}}>
         <ConnectedFunnelView
-          model={makeFunnelSearchViewModel(i18n, shell, "", undefined)}
+          model={makeFunnelSearchViewModel(i18n, "star-wars", "", undefined)}
           submitAction={async (previous) => previous}
           universe="ghibli"
         />

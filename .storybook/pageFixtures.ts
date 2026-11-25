@@ -154,12 +154,12 @@ export const ghibli = datasetFor(haku, "ghibli", "Haku");
 export const ghibliPilot = datasetFor(porco, "ghibli", "Porco");
 
 export const homeSplash = (dataset: PageDataset): HomeViewModel =>
-  makeHomeViewModel(i18n, dataset.universe, dataset.shell);
+  makeHomeViewModel(i18n, dataset.universe);
 
 export const funnelSearch = (dataset: PageDataset): FunnelViewModel =>
   makeFunnelSearchViewModel(
     i18n,
-    dataset.shell,
+    dataset.universe,
     dataset.query,
     undefined,
   );
@@ -169,7 +169,7 @@ export const funnelSearchWithError = (
 ): FunnelViewModel =>
   makeFunnelSearchViewModel(
     i18n,
-    dataset.shell,
+    dataset.universe,
     "",
     i18n._({ id: "funnel.search.required" }),
   );
@@ -222,7 +222,6 @@ export const resultsReady = (
 ): ResultsViewModel =>
   makeResultsViewModel(
     i18n,
-    dataset.shell,
     dataset.universe,
     Option.some(dataset.person),
     {
@@ -234,7 +233,6 @@ export const resultsReady = (
 export const resultsMissing = (dataset: PageDataset): ResultsViewModel =>
   makeResultsViewModel(
     i18n,
-    dataset.shell,
     dataset.universe,
     Option.none(),
     { film: 0, transport: "none" },

@@ -1,9 +1,5 @@
 import { Effect, Option, Schema } from "effect";
 import {
-  makeAppShellViewModel,
-  type AppShellViewModel,
-} from "../components/AppShell";
-import {
   makeResultsMissingViewModel,
   makeResultsViewModel,
 } from "../components/ResultsView";
@@ -19,28 +15,18 @@ export const ResultsParams = Schema.Struct({
 });
 export type ResultsParams = typeof ResultsParams.Type;
 
-export const loadResults = (
-  universe: Universe,
-  params: ResultsParams,
-  shell: AppShellViewModel,
-) =>
+export const loadResults = (universe: Universe) =>
   Effect.gen(function*() {
     const i18n = yield* I18n;
-    const client = yield* PeopleCatalog;
-    const person = yield* Effect.option(client.getPerson(params.character));
-
-    return makeResultsViewModel(i18n, shell, universe, person, params);
-  });
-
-export const loadResultsPage = (universe: Universe) =>
-  Effect.gen(function*() {
-    const i18n = yield* I18n;
-    const shell = makeAppShellViewModel(i18n, universe);
     const params = yield* decodeOption(ResultsParams);
 
     if (Option.isNone(params)) {
-      return makeResultsMissingViewModel(i18n, shell, universe);
+      return makeResultsMissingViewModel(i18n, universe);
     }
 
-    return yield* loadResults(universe, params.value, shell);
+    const client = yield* PeopleCatalog;
+    const person = yield* Effect.option(
+      client.getPerson(params.value.character),
+    );
+    return makeResultsViewModel(i18n, universe, person, params.value);
   });

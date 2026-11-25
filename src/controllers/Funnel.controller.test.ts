@@ -39,7 +39,7 @@ const run = (
     Effect.provideService(I18n, i18n),
   );
 
-const search = makeFunnelSearchViewModel(i18n, shell, "", undefined);
+const search = makeFunnelSearchViewModel(i18n, "star-wars", "", undefined);
 const person = makePersonViewModel(i18n, luke);
 const film = person.films[0];
 const transport = person.transports[0];

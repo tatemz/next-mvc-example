@@ -1,34 +1,34 @@
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
-import { luke, makeCharacterId } from "../domain/FilmUniverse.fixture";
+import { luke } from "../domain/FilmUniverse.fixture";
 import { I18n, makeEn } from "../i18n/I18n.service";
-import { makeAppShellViewModel } from "../components/AppShell";
 import {
   PeopleCatalogError,
   type PeopleCatalog,
 } from "../services/PeopleCatalog";
 import { layerStub } from "../services/SwapiPeopleCatalog.layer";
-import { loadResults, type ResultsParams } from "./Results.controller";
+import { tag as parsedSearchParamsTag } from "../platform/ParsedSearchParams";
+import { loadResults } from "./Results.controller";
 
 const i18n = makeEn();
-const shell = makeAppShellViewModel(i18n, "star-wars");
 
 const run = (
-  params: ResultsParams,
+  params: Readonly<Record<string, string>>,
   getPerson: PeopleCatalog["getPerson"] = () => Effect.succeed(luke),
 ) =>
-  loadResults("star-wars", params, shell).pipe(
+  loadResults("star-wars").pipe(
     Effect.provide(layerStub(getPerson)),
     Effect.provideService(I18n, i18n),
+    Effect.provideService(parsedSearchParamsTag, params),
   );
 
 describe("loadResults", () => {
   it.effect("loads a complete dossier", () =>
     Effect.gen(function*() {
       const model = yield* run({
-        character: makeCharacterId("1"),
-        film: 4,
+        character: "1",
+        film: "4",
         transport: "starship-12",
       });
 
@@ -46,8 +46,8 @@ describe("loadResults", () => {
   it.effect("accepts an explicit no-transport choice", () =>
     Effect.gen(function*() {
       const model = yield* run({
-        character: makeCharacterId("1"),
-        film: 4,
+        character: "1",
+        film: "4",
         transport: "none",
       });
 
@@ -58,10 +58,18 @@ describe("loadResults", () => {
     }),
   );
 
+  it.effect("renders a missing dossier when params do not decode", () =>
+    Effect.gen(function*() {
+      const model = yield* run({});
+
+      expect(model).toMatchObject({ _tag: "Missing" });
+    }),
+  );
+
   it.effect("rejects a person load failure", () =>
     Effect.gen(function*() {
       const model = yield* run(
-        { character: makeCharacterId("1"), film: 4, transport: "none" },
+        { character: "1", film: "4", transport: "none" },
         () => Effect.fail(new PeopleCatalogError({ message: "down" })),
       );
 
@@ -75,8 +83,8 @@ describe("loadResults", () => {
   it.effect("rejects a film outside the person", () =>
     Effect.gen(function*() {
       const model = yield* run({
-        character: makeCharacterId("1"),
-        film: 99,
+        character: "1",
+        film: "99",
         transport: "none",
       });
 
@@ -87,8 +95,8 @@ describe("loadResults", () => {
   it.effect("rejects a transport outside the person", () =>
     Effect.gen(function*() {
       const model = yield* run({
-        character: makeCharacterId("1"),
-        film: 4,
+        character: "1",
+        film: "4",
         transport: "starship-99",
       });
 

@@ -8,7 +8,12 @@ import type {
   FunnelSearchForm,
   FunnelTransportForm,
 } from "../forms/FunnelForm";
-import { AppShell, AppShellViewModel } from "./AppShell";
+import {
+  AppShell,
+  AppShellViewModel,
+  makeAppShellViewModel,
+} from "./AppShell";
+import type { Universe } from "../domain/FilmUniverse.model";
 import { FilmListItemViewModel } from "./FilmListItem";
 import {
   PersonCardInput,
@@ -98,7 +103,7 @@ type FunnelTransportViewModel = typeof FunnelViewModel.cases.Transport.Type;
 type FunnelReviewViewModel = typeof FunnelViewModel.cases.Review.Type;
 type FunnelFailedViewModel = typeof FunnelViewModel.cases.Failed.Type;
 
-export const makeFunnelSearchViewModel = (
+const searchViewModel = (
   i18n: I18n,
   shell: AppShellViewModel,
   query: string,
@@ -119,6 +124,19 @@ export const makeFunnelSearchViewModel = (
     pendingLabel: i18n._({ id: "funnel.pending" }),
     ...(error === undefined ? {} : { error }),
   });
+
+export const makeFunnelSearchViewModel = (
+  i18n: I18n,
+  universe: Universe,
+  query: string,
+  error: string | undefined,
+) =>
+  searchViewModel(
+    i18n,
+    makeAppShellViewModel(i18n, universe),
+    query,
+    error,
+  );
 
 export const makeFunnelChooseViewModel = (
   i18n: I18n,
@@ -255,26 +273,35 @@ const isAvailableChoice = (
 export const makeFunnelSearchResult = (
   i18n: I18n,
   step: FunnelSearchViewModel,
-  form: FunnelSearchForm,
+  form: Option.Option<FunnelSearchForm>,
   results: Option.Option<readonly PersonChoiceInput[]>,
 ): FunnelViewModel => {
+  if (Option.isNone(form)) {
+    return searchViewModel(
+      i18n,
+      step.shell,
+      "",
+      i18n._({ id: "funnel.search.required" }),
+    );
+  }
+
   if (Option.isNone(results)) {
     return makeFunnelFailedViewModel(i18n, step.shell, "unavailable");
   }
 
   return Array.matchLeft(results.value, {
     onEmpty: () =>
-      makeFunnelSearchViewModel(
+      searchViewModel(
         i18n,
         step.shell,
-        form.query,
+        form.value.query,
         i18n._({ id: "funnel.search.noResults" }),
       ),
     onNonEmpty: (first, rest) =>
       makeFunnelChooseViewModel(
         i18n,
         step.shell,
-        form.query,
+        form.value.query,
         [first, ...rest],
       ),
   });
