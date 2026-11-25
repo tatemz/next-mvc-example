@@ -116,7 +116,9 @@ pnpm dev
 
 `pnpm dev` builds the Next app and then serves it through the Effect HTTP
 server in `server.ts`. Open `/star-wars` or `/ghibli`. `pnpm build` creates the
-production build and `pnpm start` serves an existing one.
+production build and `pnpm start` serves an existing one. Both scripts load
+`.env.local` with Node's `--env-file-if-exists`, so the values reach the
+server without exporting them in the shell.
 
 ## Routes
 
@@ -347,7 +349,8 @@ factories. `pnpm build-storybook` writes the static site to `storybook-static/`.
 
 ## Configuration
 
-Copy `.env.example` to `.env.local` for local development.
+Copy `.env.example` to `.env.local` for local development. The standalone
+server loads it automatically.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
