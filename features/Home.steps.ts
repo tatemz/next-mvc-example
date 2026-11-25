@@ -6,6 +6,8 @@ import {
   openFunnelFromHome,
   openHome,
   see,
+  theAddressIs,
+  theDocumentLanguageIs,
   theLocaleIs,
   theThemeIs,
   theUniverseIs,
@@ -16,10 +18,12 @@ const splash = Bdd.scenario(
 ).pipe(
   givenTheAppIsRunning,
   theUniverseIs,
+  theLocaleIs,
   openHome,
   see,
   see,
   theThemeIs,
+  theDocumentLanguageIs,
   Bdd.provide(environment("home", "splash")),
 );
 
@@ -28,28 +32,17 @@ const funnelFromHome = Bdd.scenario(
 ).pipe(
   givenTheAppIsRunning,
   theUniverseIs,
+  theLocaleIs,
   openHome,
   openFunnelFromHome,
   see,
   theThemeIs,
+  theAddressIs,
   Bdd.provide(environment("home", "cta")),
 );
 
-const spanishSplash = Bdd.scenario(
-  "The splash uses Mexican Spanish",
-).pipe(
-  givenTheAppIsRunning,
-  theUniverseIs,
-  theLocaleIs,
-  openHome,
-  see,
-  see,
-  theThemeIs,
-  Bdd.provide(environment("home", "spanish")),
-);
-
-const switchToEnglish = Bdd.scenario(
-  "The header switches back to US English",
+const languageSwitch = Bdd.scenario(
+  "The language switch keeps the universe",
 ).pipe(
   givenTheAppIsRunning,
   theUniverseIs,
@@ -57,12 +50,14 @@ const switchToEnglish = Bdd.scenario(
   openHome,
   chooseLanguage,
   see,
+  theDocumentLanguageIs,
+  theThemeIs,
+  theAddressIs,
   Bdd.provide(environment("home", "switch")),
 );
 
 export const home = Bdd.feature("The universe splash").pipe(
   splash,
   funnelFromHome,
-  spanishSplash,
-  switchToEnglish,
+  languageSwitch,
 );

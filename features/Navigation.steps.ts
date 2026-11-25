@@ -1,27 +1,75 @@
 import { Bdd } from "effect-bdd";
 import {
-  chooseUniverse,
+  chooseUniverseNamed,
   environment,
   givenTheAppIsRunning,
-  openRoot,
+  openBrand,
+  openFunnel,
+  openHome,
+  openPath,
   see,
+  theAddressIs,
+  theDocumentLanguageIs,
+  theLinkPointsTo,
+  theLocaleIs,
   theThemeIs,
   theUniverseIs,
 } from "./support/Steps";
 
-const navigation = Bdd.scenario(
-  "The header opens the universe",
+const route = Bdd.scenario(
+  "A route resolves its locale and universe",
+).pipe(
+  givenTheAppIsRunning,
+  openPath,
+  theAddressIs,
+  see,
+  theDocumentLanguageIs,
+  theThemeIs,
+  Bdd.provide(environment("navigation", "route")),
+);
+
+const headerSwitch = Bdd.scenario(
+  "The header switches the universe and keeps the locale",
 ).pipe(
   givenTheAppIsRunning,
   theUniverseIs,
-  openRoot,
-  chooseUniverse,
-  see,
+  theLocaleIs,
+  openHome,
+  chooseUniverseNamed,
   see,
   theThemeIs,
-  Bdd.provide(environment("navigation", "header")),
+  theDocumentLanguageIs,
+  theAddressIs,
+  Bdd.provide(environment("navigation", "switch")),
+);
+
+const brand = Bdd.scenario(
+  "The brand returns to the app home",
+).pipe(
+  givenTheAppIsRunning,
+  theUniverseIs,
+  theLocaleIs,
+  openFunnel,
+  openBrand,
+  see,
+  theAddressIs,
+  theDocumentLanguageIs,
+  Bdd.provide(environment("navigation", "brand")),
+);
+
+const notFound = Bdd.scenario(
+  "An unknown universe renders NotFound",
+).pipe(
+  givenTheAppIsRunning,
+  openPath,
+  theAddressIs,
+  see,
+  see,
+  theLinkPointsTo,
+  theDocumentLanguageIs,
+  Bdd.provide(environment("navigation", "not-found")),
 );
 
 export const navigationFeature = Bdd.feature(
-  "Moving between the universes",
-).pipe(navigation);
+  "Moving between universes and locales",
+).pipe(route, headerSwitch, brand, notFound);
