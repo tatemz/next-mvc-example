@@ -1,5 +1,36 @@
 # next-mvc-example
 
+## Why this project exists
+
+This is a reference for maintaining a production Next.js App Router
+application with Effect. Next leaves the application architecture to you;
+this repo shows one that stays explicit:
+
+- a controller is an Effect. It loads and parses data, then hands domain
+  objects to one top-level model factory;
+- model factories are pure and synchronous. They hold the rendering and
+  business logic that turns domain values into a view model;
+- views render a view model and nothing else;
+- the request's Effect context is bridged into Next's render, so the same
+  controllers run in production and in the browser suite with stubbed
+  catalogs.
+
+The demo exists because those boundaries are easy to lose as a Next app grows:
+module-level clients, ambient configuration, and route handlers that mix
+loading, decisions, and markup. Keeping them explicit is what makes the pages
+testable without a network and the adapters replaceable.
+
+A new application that can choose its stack should look at
+[Foldkit](https://foldkit.dev), a TypeScript framework built on Effect that
+makes this architecture the framework's own. One `Model`, explicit `Message`
+values, a pure `update` that returns the next model and its `Command`s, and a
+runtime that executes them. Foldkit enforces the separation this demo builds
+by hand, and it handles server rendering and hydration itself. The tradeoff is
+leaving React and Next, which this project cannot do: it is here to show the
+discipline inside an existing Next codebase.
+
+## What it is
+
 One character-dossier UI, served from two film universes: Star Wars through
 SWAPI and Studio Ghibli through the Ghibli API. Controllers, view models, and
 views are shared. Each experience's routes carry its catalog and daisyUI
@@ -51,6 +82,9 @@ export const StarWarsFunnelPage = makeNextPage(
   `ParsedSearchParams` service, then runs the program with the request context
   bridged from `boot/next.ts`. The program decodes its own schema with
   `ParsedSearchParams.decodeOption`; the adapter takes no params schema.
+- The program is a controller Effect. It decodes and loads, then hands domain
+  values to one pure model factory, which decides the page state and builds
+  the view model.
 - The request context carries `I18n` and one `PeopleCatalog`: the
   `/star-wars` routes provide the SWAPI adapter, the `/ghibli` routes the
   Ghibli one. A page never chooses its adapter.
@@ -70,6 +104,8 @@ export const StarWarsFunnelPage = makeNextPage(
 
 ## What it shows
 
+- Controllers are Effects; every model factory is a pure synchronous function
+  over domain values and i18n.
 - Every model is a `Schema.TaggedStruct` or `Schema.TaggedUnion`; nested models
   carry their own `_tag`.
 - `CharacterId` is a branded string built from `Schema.NumberFromString`, so
