@@ -1,14 +1,13 @@
 import { it } from "@effect/vitest";
 import { describe, expect } from "vitest";
 import { luke } from "../domain/FilmUniverse.fixture";
-import { catalogOf } from "../services/PeopleCatalog.fixture";
 import {
   currentRenderContext,
   runInRenderContext,
 } from "./RenderContext";
 import { renderContext } from "./RenderContext.fixture";
 
-const context = renderContext(catalogOf([luke]));
+const context = renderContext({ starWars: [luke] });
 
 describe("RenderContext", () => {
   it("fails when a render has no request context", () => {
@@ -26,7 +25,7 @@ describe("RenderContext", () => {
   });
 
   it("restores the surrounding context after a nested render", async () => {
-    const other = renderContext(catalogOf([]));
+    const other = renderContext();
 
     const seen = await runInRenderContext(context, async () => {
       await runInRenderContext(other, async () => currentRenderContext());
