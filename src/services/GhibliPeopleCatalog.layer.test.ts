@@ -12,6 +12,7 @@ const people = [
     gender: "Male",
     films: ["https://ghibliapi.vercel.app/films/spirited-away"],
     species: "https://ghibliapi.vercel.app/species/dragon",
+    url: "https://ghibliapi.vercel.app/people/haku",
   },
 ];
 
@@ -27,9 +28,23 @@ const species = [
   { name: "Dragon", url: "https://ghibliapi.vercel.app/species/dragon" },
 ];
 
+const vehicles = [
+  {
+    id: "red-wing",
+    name: "Red Wing",
+    description: "An experimental aircraft.",
+    vehicle_class: "Airplane",
+    length: "20",
+    pilot: "https://ghibliapi.vercel.app/people/haku",
+    films: ["https://ghibliapi.vercel.app/films/spirited-away"],
+    url: "https://ghibliapi.vercel.app/vehicles/red-wing",
+  },
+];
+
 const bodyFor = (url: string) => {
   if (url.includes("/people")) return people;
   if (url.includes("/films")) return films;
+  if (url.includes("/vehicles")) return vehicles;
   return species;
 };
 
@@ -91,6 +106,7 @@ describe("GhibliPeopleCatalog layer", () => {
   failureCase("/people", "Characters are not available.");
   failureCase("/films", "Films are not available.");
   failureCase("/species", "Species are not available.");
+  failureCase("/vehicles", "Vehicles are not available.");
 
   it.effect("builds the catalog over the typed Ghibli API", () =>
     Effect.gen(function*() {

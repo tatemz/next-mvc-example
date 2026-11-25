@@ -10,6 +10,7 @@ export const GhibliPersonResponse = Schema.Struct({
   gender: Schema.String,
   films: Schema.Array(Schema.String),
   species: Schema.String,
+  url: Schema.String,
 });
 export type GhibliPersonResponse = typeof GhibliPersonResponse.Type;
 
@@ -44,7 +45,26 @@ class GhibliSpeciesApi extends HttpApiGroup.make("species").add(
   }),
 ) {}
 
+export const GhibliVehicleResponse = Schema.Struct({
+  id: Schema.NonEmptyString,
+  name: Schema.NonEmptyString,
+  description: Schema.String,
+  vehicle_class: Schema.NonEmptyString,
+  length: Schema.String,
+  pilot: Schema.String,
+  films: Schema.Array(Schema.String),
+  url: Schema.String,
+});
+export type GhibliVehicleResponse = typeof GhibliVehicleResponse.Type;
+
+class GhibliVehiclesApi extends HttpApiGroup.make("vehicles").add(
+  HttpApiEndpoint.get("list", "/vehicles", {
+    success: Schema.Array(GhibliVehicleResponse),
+  }),
+) {}
+
 export class GhibliApi extends HttpApi.make("GhibliApi")
   .add(GhibliPeopleApi)
   .add(GhibliFilmsApi)
-  .add(GhibliSpeciesApi) {}
+  .add(GhibliSpeciesApi)
+  .add(GhibliVehiclesApi) {}

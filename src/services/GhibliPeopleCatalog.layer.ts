@@ -49,6 +49,17 @@ export const layer = Layer.effect(
             ),
           ),
       },
+      vehicles: {
+        list: () =>
+          ghibli.vehicles.list().pipe(
+            Effect.mapError(
+              () =>
+                new PeopleCatalogError({
+                  message: "Vehicles are not available.",
+                }),
+            ),
+          ),
+      },
     });
   }),
 );

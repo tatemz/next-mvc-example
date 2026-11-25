@@ -6,9 +6,12 @@ import type {
   GhibliFilmResponse,
   GhibliPersonResponse,
   GhibliSpeciesResponse,
+  GhibliVehicleResponse,
 } from "./GhibliApi";
 import { make, type GhibliSource } from "./GhibliPeopleCatalog.factory";
 import { PeopleCatalogError } from "./PeopleCatalog";
+
+const hakuUrl = "https://ghibliapi.vercel.app/people/haku";
 
 const people: ReadonlyArray<GhibliPersonResponse> = [
   {
@@ -16,12 +19,14 @@ const people: ReadonlyArray<GhibliPersonResponse> = [
     gender: "Male",
     films: ["https://ghibliapi.vercel.app/films/spirited-away"],
     species: "https://ghibliapi.vercel.app/species/dragon",
+    url: hakuUrl,
   },
   {
     name: "Pazu",
     gender: "Male",
     films: ["https://ghibliapi.vercel.app/films/castle-in-the-sky"],
     species: "https://ghibliapi.vercel.app/species/human",
+    url: "https://ghibliapi.vercel.app/people/pazu",
   },
 ];
 
@@ -43,10 +48,22 @@ const species: ReadonlyArray<GhibliSpeciesResponse> = [
   { name: "Human", url: "https://ghibliapi.vercel.app/species/human" },
 ];
 
+const hakuVehicle: GhibliVehicleResponse = {
+  id: "red-wing",
+  name: "Red Wing",
+  description: "An experimental aircraft.",
+  vehicle_class: "Airplane",
+  length: "20",
+  pilot: hakuUrl,
+  films: ["https://ghibliapi.vercel.app/films/spirited-away"],
+  url: "https://ghibliapi.vercel.app/vehicles/red-wing",
+};
+
 const source = (overrides: Partial<GhibliSource> = {}): GhibliSource => ({
   people: { list: () => Effect.succeed(people) },
   films: { list: () => Effect.succeed(films) },
   species: { list: () => Effect.succeed(species) },
+  vehicles: { list: () => Effect.succeed([]) },
   ...overrides,
 });
 
@@ -190,6 +207,44 @@ describe("GhibliPeopleCatalog", () => {
     }),
   );
 
+  it.effect("maps a piloted vehicle to a transport", () =>
+    Effect.gen(function*() {
+      const person = yield* make(
+        source({ vehicles: { list: () => Effect.succeed([hakuVehicle]) } }),
+      ).getPerson(id("1"));
+
+      expect(person.transports).toEqual([
+        {
+          _tag: "Transport",
+          key: "red-wing",
+          kind: "Vehicle",
+          name: "Red Wing",
+          model: "Airplane",
+        },
+      ]);
+    }),
+  );
+
+  it.effect("ignores a vehicle piloted by another character", () =>
+    Effect.gen(function*() {
+      const person = yield* make(
+        source({
+          vehicles: {
+            list: () =>
+              Effect.succeed([
+                {
+                  ...hakuVehicle,
+                  pilot: "https://ghibliapi.vercel.app/people/pazu",
+                },
+              ]),
+          },
+        }),
+      ).getPerson(id("1"));
+
+      expect(person.transports).toEqual([]);
+    }),
+  );
+
   it.effect("maps a people request failure to a catalog error", () =>
     Effect.gen(function*() {
       const error = yield* Effect.flip(
@@ -228,6 +283,27 @@ describe("GhibliPeopleCatalog", () => {
 
       expect(error).toMatchObject({
         message: "Species are not available.",
+      });
+    }),
+  );
+
+  it.effect("maps a vehicles request failure to a catalog error", () =>
+    Effect.gen(function*() {
+      const error = yield* Effect.flip(
+        make(
+          source({
+            vehicles: {
+              list: () =>
+                Effect.fail(
+                  new PeopleCatalogError({ message: "offline" }),
+                ),
+            },
+          }),
+        ).getPerson(id("1")),
+      );
+
+      expect(error).toMatchObject({
+        message: "Vehicles are not available.",
       });
     }),
   );

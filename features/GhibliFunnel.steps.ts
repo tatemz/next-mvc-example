@@ -139,6 +139,21 @@ const buildDossier = Bdd.scenario("Building a dossier for Haku").pipe(
   Bdd.provide(environment("haku-dossier", 0)),
 );
 
+const buildVehicleDossier = Bdd.scenario(
+  "Building a dossier with a vehicle",
+).pipe(
+  openGhibliFunnel,
+  searchTheFunnel,
+  chooseTheCharacter,
+  chooseTheFilm,
+  chooseTheTransport,
+  openTheDossier,
+  see("Your dossier"),
+  see("Air Destroyer Goliath (Vehicle)"),
+  theThemeIs("autumn"),
+  Bdd.provide(environment("vehicle-dossier", 2)),
+);
+
 const noMatches = Bdd.scenario("Searching with no matches").pipe(
   openGhibliFunnel,
   searchTheFunnel,
@@ -148,4 +163,4 @@ const noMatches = Bdd.scenario("Searching with no matches").pipe(
 
 export const ghibliFunnel = Bdd.feature(
   "Building a Ghibli dossier",
-).pipe(buildDossier, noMatches);
+).pipe(buildDossier, buildVehicleDossier, noMatches);

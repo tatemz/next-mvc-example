@@ -6,11 +6,13 @@ import {
   PersonSummary,
   Origin,
   Species,
+  Transport,
 } from "../domain/FilmUniverse.model";
 import type {
   GhibliFilmResponse,
   GhibliPersonResponse,
   GhibliSpeciesResponse,
+  GhibliVehicleResponse,
 } from "./GhibliApi";
 import { PeopleCatalog, PeopleCatalogError } from "./PeopleCatalog";
 
@@ -30,6 +32,12 @@ export type GhibliSource = {
   readonly species: {
     readonly list: () => Effect.Effect<
       ReadonlyArray<GhibliSpeciesResponse>,
+      PeopleCatalogError
+    >;
+  };
+  readonly vehicles: {
+    readonly list: () => Effect.Effect<
+      ReadonlyArray<GhibliVehicleResponse>,
       PeopleCatalogError
     >;
   };
@@ -69,10 +77,20 @@ export const make = (ghibli: GhibliSource) => {
     ),
   );
 
+  const loadVehicles = Function.pipe(
+    ghibli.vehicles.list(),
+    Effect.mapError(
+      () =>
+        new PeopleCatalogError({
+          message: "Vehicles are not available.",
+        }),
+    ),
+  );
+
   const getPerson = (id: CharacterId) =>
     Effect.gen(function*() {
-      const [people, films, species] = yield* Effect.all(
-        [loadPeople, loadFilms, loadSpecies],
+      const [people, films, species, vehicles] = yield* Effect.all(
+        [loadPeople, loadFilms, loadSpecies, loadVehicles],
         { concurrency: "unbounded" },
       );
       const personOption = Array.get(people, Number(id) - 1);
@@ -140,7 +158,18 @@ export const make = (ghibli: GhibliSource) => {
                     }),
                 }),
                 films: [first, ...rest],
-                transports: [],
+                transports: Array.flatMap(vehicles, (vehicle) =>
+                  vehicle.pilot === person.url
+                    ? [
+                        Transport.make({
+                          key: vehicle.id,
+                          kind: "Vehicle",
+                          name: vehicle.name,
+                          model: vehicle.vehicle_class,
+                        }),
+                      ]
+                    : [],
+                ),
               }),
             ),
         }),
