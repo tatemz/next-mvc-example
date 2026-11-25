@@ -24,7 +24,7 @@ const StepCopy = {
   subtitle: Schema.NonEmptyString,
 };
 
-export const FunnelSearchViewModel = Schema.TaggedStruct("Search", {
+const FunnelSearchViewModel = Schema.TaggedStruct("Search", {
   ...StepCopy,
   query: Schema.String,
   label: Schema.NonEmptyString,
@@ -33,26 +33,26 @@ export const FunnelSearchViewModel = Schema.TaggedStruct("Search", {
   pendingLabel: Schema.NonEmptyString,
   error: Schema.optional(Schema.String),
 });
-export type FunnelSearchViewModel = typeof FunnelSearchViewModel.Type;
+type FunnelSearchViewModel = typeof FunnelSearchViewModel.Type;
 
-export const FunnelChooseViewModel = Schema.TaggedStruct("Choose", {
+const FunnelChooseViewModel = Schema.TaggedStruct("Choose", {
   ...StepCopy,
   query: Schema.NonEmptyString,
   results: Schema.NonEmptyArray(PersonChoiceViewModel),
   submitLabel: Schema.NonEmptyString,
   pendingLabel: Schema.NonEmptyString,
 });
-export type FunnelChooseViewModel = typeof FunnelChooseViewModel.Type;
+type FunnelChooseViewModel = typeof FunnelChooseViewModel.Type;
 
-export const FunnelFilmViewModel = Schema.TaggedStruct("Film", {
+const FunnelFilmViewModel = Schema.TaggedStruct("Film", {
   ...StepCopy,
   person: PersonViewModel,
   submitLabel: Schema.NonEmptyString,
   pendingLabel: Schema.NonEmptyString,
 });
-export type FunnelFilmViewModel = typeof FunnelFilmViewModel.Type;
+type FunnelFilmViewModel = typeof FunnelFilmViewModel.Type;
 
-export const FunnelTransportViewModel = Schema.TaggedStruct("Transport", {
+const FunnelTransportViewModel = Schema.TaggedStruct("Transport", {
   ...StepCopy,
   person: PersonViewModel,
   film: FilmListItemViewModel,
@@ -60,9 +60,9 @@ export const FunnelTransportViewModel = Schema.TaggedStruct("Transport", {
   pendingLabel: Schema.NonEmptyString,
   noneLabel: Schema.NonEmptyString,
 });
-export type FunnelTransportViewModel = typeof FunnelTransportViewModel.Type;
+type FunnelTransportViewModel = typeof FunnelTransportViewModel.Type;
 
-export const FunnelReviewViewModel = Schema.TaggedStruct("Review", {
+const FunnelReviewViewModel = Schema.TaggedStruct("Review", {
   ...StepCopy,
   person: PersonViewModel,
   film: FilmListItemViewModel,
@@ -75,15 +75,15 @@ export const FunnelReviewViewModel = Schema.TaggedStruct("Review", {
   startOverHref: Schema.NonEmptyString,
   resultsHref: Schema.NonEmptyString,
 });
-export type FunnelReviewViewModel = typeof FunnelReviewViewModel.Type;
+type FunnelReviewViewModel = typeof FunnelReviewViewModel.Type;
 
-export const FunnelFailedViewModel = Schema.TaggedStruct("Failed", {
+const FunnelFailedViewModel = Schema.TaggedStruct("Failed", {
   ...StepCopy,
   message: Schema.NonEmptyString,
   startOverLabel: Schema.NonEmptyString,
   startOverHref: Schema.NonEmptyString,
 });
-export type FunnelFailedViewModel = typeof FunnelFailedViewModel.Type;
+type FunnelFailedViewModel = typeof FunnelFailedViewModel.Type;
 
 export const FunnelViewModel = Schema.Union([
   FunnelSearchViewModel,

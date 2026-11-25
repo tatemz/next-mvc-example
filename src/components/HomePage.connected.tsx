@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { HomePage, type HomePageViewModel } from "./HomePage";
 
-export type HomePageAction = (
+type HomePageAction = (
   previous: HomePageViewModel,
   formData: FormData,
 ) => Promise<HomePageViewModel>;

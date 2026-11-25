@@ -36,8 +36,8 @@ export const Species = Schema.TaggedStruct("Species", {
 });
 export type Species = typeof Species.Type;
 
-export const TransportKind = Schema.Literals(["Starship", "Vehicle"]);
-export type TransportKind = typeof TransportKind.Type;
+const TransportKind = Schema.Literals(["Starship", "Vehicle"]);
+type TransportKind = typeof TransportKind.Type;
 
 export const Transport = Schema.TaggedStruct("Transport", {
   key: Schema.NonEmptyString,

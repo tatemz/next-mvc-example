@@ -6,22 +6,22 @@ import {
   makeFilmListItemViewModel,
 } from "./FilmListItem";
 
-export const OriginViewModel = Schema.TaggedStruct("OriginViewModel", {
+const OriginViewModel = Schema.TaggedStruct("OriginViewModel", {
   name: Schema.NonEmptyString,
   climate: Schema.String,
   terrain: Schema.String,
 });
-export type OriginViewModel = typeof OriginViewModel.Type;
+type OriginViewModel = typeof OriginViewModel.Type;
 
-export const SpeciesViewModel = Schema.TaggedStruct("SpeciesViewModel", {
+const SpeciesViewModel = Schema.TaggedStruct("SpeciesViewModel", {
   name: Schema.NonEmptyString,
   classification: Schema.String,
   language: Schema.String,
 });
-export type SpeciesViewModel = typeof SpeciesViewModel.Type;
+type SpeciesViewModel = typeof SpeciesViewModel.Type;
 
-export const TransportKind = Schema.Literals(["Starship", "Vehicle"]);
-export type TransportKind = typeof TransportKind.Type;
+const TransportKind = Schema.Literals(["Starship", "Vehicle"]);
+type TransportKind = typeof TransportKind.Type;
 
 export const TransportViewModel = Schema.TaggedStruct("TransportViewModel", {
   key: Schema.NonEmptyString,

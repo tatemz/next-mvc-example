@@ -1,8 +1,8 @@
 import { Predicate, Schema } from "effect";
 import { redirect as nextRedirect } from "next/navigation";
 
-export const RedirectType = Schema.Literals(["push", "replace"]);
-export type RedirectType = typeof RedirectType.Type;
+const RedirectType = Schema.Literals(["push", "replace"]);
+type RedirectType = typeof RedirectType.Type;
 
 export const NextRedirect = Schema.TaggedStruct("NextRedirect", {
   url: Schema.NonEmptyString,

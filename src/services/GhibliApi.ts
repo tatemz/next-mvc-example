@@ -1,7 +1,6 @@
 import { Schema } from "effect";
 import {
   HttpApi,
-  HttpApiClient,
   HttpApiEndpoint,
   HttpApiGroup,
 } from "effect/http-api";
@@ -27,19 +26,19 @@ export const GhibliSpeciesResponse = Schema.Struct({
 });
 export type GhibliSpeciesResponse = typeof GhibliSpeciesResponse.Type;
 
-export class GhibliPeopleApi extends HttpApiGroup.make("people").add(
+class GhibliPeopleApi extends HttpApiGroup.make("people").add(
   HttpApiEndpoint.get("list", "/people", {
     success: Schema.Array(GhibliPersonResponse),
   }),
 ) {}
 
-export class GhibliFilmsApi extends HttpApiGroup.make("films").add(
+class GhibliFilmsApi extends HttpApiGroup.make("films").add(
   HttpApiEndpoint.get("list", "/films", {
     success: Schema.Array(GhibliFilmResponse),
   }),
 ) {}
 
-export class GhibliSpeciesApi extends HttpApiGroup.make("species").add(
+class GhibliSpeciesApi extends HttpApiGroup.make("species").add(
   HttpApiEndpoint.get("list", "/species", {
     success: Schema.Array(GhibliSpeciesResponse),
   }),
@@ -49,5 +48,3 @@ export class GhibliApi extends HttpApi.make("GhibliApi")
   .add(GhibliPeopleApi)
   .add(GhibliFilmsApi)
   .add(GhibliSpeciesApi) {}
-
-export type GhibliApiClient = HttpApiClient.ForApi<typeof GhibliApi>;

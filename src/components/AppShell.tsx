@@ -5,14 +5,14 @@ import type { I18n } from "../i18n/I18n.service";
 export const ExperienceTheme = Schema.Literals(["night", "autumn"]);
 export type ExperienceTheme = typeof ExperienceTheme.Type;
 
-export const AppShellLinkViewModel = Schema.TaggedStruct(
+const AppShellLinkViewModel = Schema.TaggedStruct(
   "AppShellLinkViewModel",
   {
     label: Schema.NonEmptyString,
     href: Schema.NonEmptyString,
   },
 );
-export type AppShellLinkViewModel = typeof AppShellLinkViewModel.Type;
+type AppShellLinkViewModel = typeof AppShellLinkViewModel.Type;
 
 export const AppShellViewModel = Schema.TaggedStruct("AppShellViewModel", {
   theme: ExperienceTheme,

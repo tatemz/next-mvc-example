@@ -5,12 +5,12 @@ import {
   validateFormData,
 } from "../forms/FormData";
 
-export const SearchFormData = Schema.Struct({
+const SearchFormData = Schema.Struct({
   characterId: CharacterId,
 });
-export type SearchFormData = typeof SearchFormData.Type;
+type SearchFormData = typeof SearchFormData.Type;
 
-export type SearchFormMessageId =
+type SearchFormMessageId =
   | "search.characterId.required"
   | "search.characterId.invalid";
 
@@ -24,7 +24,7 @@ const firstIssue = (issue: SchemaIssue.Issue): SchemaIssue.Issue => {
   return issue;
 };
 
-export const searchFormErrors = (
+const searchFormErrors = (
   issue: SchemaIssue.Issue,
 ): SearchFormFieldErrors => ({
   characterId:

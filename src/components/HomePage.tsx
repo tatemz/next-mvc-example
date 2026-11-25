@@ -12,15 +12,15 @@ import {
   SearchFormViewModel,
 } from "./SearchForm";
 
-export const HomeHeroViewModel = Schema.TaggedStruct("HomeHeroViewModel", {
+const HomeHeroViewModel = Schema.TaggedStruct("HomeHeroViewModel", {
   title: Schema.NonEmptyString,
   subtitle: Schema.NonEmptyString,
   funnelLabel: Schema.NonEmptyString,
   funnelHref: Schema.NonEmptyString,
 });
-export type HomeHeroViewModel = typeof HomeHeroViewModel.Type;
+type HomeHeroViewModel = typeof HomeHeroViewModel.Type;
 
-export const makeHomeHeroViewModel = (i18n: I18n, funnelHref: string) =>
+const makeHomeHeroViewModel = (i18n: I18n, funnelHref: string) =>
   HomeHeroViewModel.make({
     title: i18n._({ id: "homePage.hero.title" }),
     subtitle: i18n._({ id: "homePage.hero.subtitle" }),

@@ -8,7 +8,7 @@ import {
   TransportViewModel,
 } from "./PersonCard";
 
-export const ResultsReadyViewModel = Schema.TaggedStruct("Ready", {
+const ResultsReadyViewModel = Schema.TaggedStruct("Ready", {
   shell: AppShellViewModel,
   heading: Schema.NonEmptyString,
   subtitle: Schema.NonEmptyString,
@@ -23,16 +23,16 @@ export const ResultsReadyViewModel = Schema.TaggedStruct("Ready", {
   startOverHref: Schema.NonEmptyString,
   homeHref: Schema.NonEmptyString,
 });
-export type ResultsReadyViewModel = typeof ResultsReadyViewModel.Type;
+type ResultsReadyViewModel = typeof ResultsReadyViewModel.Type;
 
-export const ResultsMissingViewModel = Schema.TaggedStruct("Missing", {
+const ResultsMissingViewModel = Schema.TaggedStruct("Missing", {
   shell: AppShellViewModel,
   heading: Schema.NonEmptyString,
   message: Schema.NonEmptyString,
   startOverLabel: Schema.NonEmptyString,
   startOverHref: Schema.NonEmptyString,
 });
-export type ResultsMissingViewModel = typeof ResultsMissingViewModel.Type;
+type ResultsMissingViewModel = typeof ResultsMissingViewModel.Type;
 
 export const ResultsViewModel = Schema.Union([
   ResultsReadyViewModel,

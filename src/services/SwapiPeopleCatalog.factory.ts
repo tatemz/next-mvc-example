@@ -21,10 +21,6 @@ import {
 import type {
   SwapiFilmResponse,
   SwapiPersonResponse,
-  SwapiPlanetResponse,
-  SwapiSpeciesResponse,
-  SwapiStarshipResponse,
-  SwapiVehicleResponse,
   SwapiApiClient,
 } from "./SwapiApi";
 import { PeopleCatalog, PeopleCatalogError } from "./PeopleCatalog";

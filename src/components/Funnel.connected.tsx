@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { Funnel, type FunnelViewModel } from "./Funnel";
 
-export type FunnelAction = (
+type FunnelAction = (
   previous: FunnelViewModel,
   formData: FormData,
 ) => Promise<FunnelViewModel>;
