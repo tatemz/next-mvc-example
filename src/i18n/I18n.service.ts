@@ -20,6 +20,5 @@ export const layerTest = Layer.sync(I18n, () => {
       [descriptor.id]: _(descriptor),
     }),
   );
-  const rich: I18n["rich"] = (descriptor) => [_(descriptor)];
-  return I18n.of({ _, all, rich });
+  return I18n.of({ _, all });
 });

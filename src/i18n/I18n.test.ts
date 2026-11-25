@@ -26,10 +26,16 @@ describe("I18n.make", () => {
     expect(i18n.all([{ id: "a" }, { id: "b" }])).toEqual({ a: "A", b: "B" });
   });
 
-  it("formats a rich message", () => {
-    const i18n = I18n.make({ messages: { greeting: "Hello" } as const, locale: "en-US" });
+  it("formats a plural message", () => {
+    const i18n = I18n.make({
+      messages: {
+        items: "{count, plural, one {# item} other {# items}}",
+      } as const,
+      locale: "en-US",
+    });
 
-    expect(i18n.rich({ id: "greeting" })).toBe("Hello");
+    expect(i18n._({ id: "items", values: { count: 1 } })).toBe("1 item");
+    expect(i18n._({ id: "items", values: { count: 3 } })).toBe("3 items");
   });
 });
 
@@ -43,6 +49,18 @@ describe("I18n.service", () => {
         expect(i18n._({ id: "home.starWars.title" })).toBe(
           "Star Wars character dossier",
         );
+        expect(
+          i18n._({
+            id: "funnel.step.progress",
+            values: { step: 2, total: 4 },
+          }),
+        ).toBe("Step 2 of 4");
+        expect(
+          i18n._({
+            id: "funnel.choose.subtitle",
+            values: { count: 2 },
+          }),
+        ).toContain("2 characters matched");
       }),
     );
   });
@@ -58,9 +76,6 @@ describe("I18n.service", () => {
         expect(i18n.all([{ id: "person.heightLabel" }])).toEqual({
           "person.heightLabel": '{"id":"person.heightLabel"}',
         });
-        expect(i18n.rich({ id: "person.heightLabel" })).toEqual([
-          '{"id":"person.heightLabel"}',
-        ]);
       }),
     );
   });

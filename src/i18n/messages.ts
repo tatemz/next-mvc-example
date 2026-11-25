@@ -26,10 +26,7 @@ const homePageMessages = {
 } as const;
 
 const funnelMessages = {
-  "funnel.step.search": "Step 1 of 4",
-  "funnel.step.choose": "Step 2 of 4",
-  "funnel.step.film": "Step 3 of 4",
-  "funnel.step.transport": "Step 4 of 4",
+  "funnel.step.progress": "Step {step, number} of {total, number}",
   "funnel.step.review": "Review",
   "funnel.step.failed": "Something went wrong",
   "funnel.search.heading": "Find a character",
@@ -40,7 +37,8 @@ const funnelMessages = {
   "funnel.search.required": "Enter a character name.",
   "funnel.search.noResults": "No characters matched that name.",
   "funnel.choose.heading": "Choose a character",
-  "funnel.choose.subtitle": "Pick the character whose dossier you want to build.",
+  "funnel.choose.subtitle":
+    "{count, plural, one {One character matched.} other {# characters matched.}} Pick the one whose dossier you want to build.",
   "funnel.choose.submit": "Choose character",
   "funnel.film.heading": "Choose a film",
   "funnel.film.subtitle": "Pick the film that anchors the dossier.",

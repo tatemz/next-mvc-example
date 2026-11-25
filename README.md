@@ -64,7 +64,8 @@ discipline inside an existing Next codebase.
 - `CharacterId` is a branded string built from `Schema.NumberFromString`, so
   `Person.id` and `PeopleCatalog.getPerson` accept only a validated id.
 - Every user-visible string is carried by the view model; views contain no
-  copy.
+  copy. Messages are typed ICU strings, so the step progress and the plural
+  choice subtitle reject the wrong value types at compile time.
 - `PeopleCatalog` is the port: `getPerson` and `searchPeople`, with
   `PeopleCatalogError`. Two adapters implement it:
   - `SwapiPeopleCatalog` maps SWAPI people, films, planets, species,

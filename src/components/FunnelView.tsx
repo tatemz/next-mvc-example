@@ -100,7 +100,10 @@ export const makeFunnelSearchViewModel = (
 ) =>
   FunnelViewModel.cases.Search.make({
     shell,
-    stepLabel: i18n._({ id: "funnel.step.search" }),
+    stepLabel: i18n._({
+      id: "funnel.step.progress",
+      values: { step: 1, total: 4 },
+    }),
     heading: i18n._({ id: "funnel.search.heading" }),
     subtitle: i18n._({ id: "funnel.search.subtitle" }),
     query,
@@ -121,9 +124,15 @@ export const makeFunnelChooseViewModel = (
 
   return FunnelViewModel.cases.Choose.make({
     shell,
-    stepLabel: i18n._({ id: "funnel.step.choose" }),
+    stepLabel: i18n._({
+      id: "funnel.step.progress",
+      values: { step: 2, total: 4 },
+    }),
     heading: i18n._({ id: "funnel.choose.heading" }),
-    subtitle: i18n._({ id: "funnel.choose.subtitle" }),
+    subtitle: i18n._({
+      id: "funnel.choose.subtitle",
+      values: { count: results.length },
+    }),
     query,
     results: [
       PersonChoiceViewModel.make({ id: first.id, name: first.name }),
@@ -143,7 +152,10 @@ export const makeFunnelFilmViewModel = (
 ) =>
   FunnelViewModel.cases.Film.make({
     shell,
-    stepLabel: i18n._({ id: "funnel.step.film" }),
+    stepLabel: i18n._({
+      id: "funnel.step.progress",
+      values: { step: 3, total: 4 },
+    }),
     heading: i18n._({ id: "funnel.film.heading" }),
     subtitle: i18n._({ id: "funnel.film.subtitle" }),
     person: makePersonViewModel(i18n, person),
@@ -159,7 +171,10 @@ export const makeFunnelTransportViewModel = (
 ) =>
   FunnelViewModel.cases.Transport.make({
     shell,
-    stepLabel: i18n._({ id: "funnel.step.transport" }),
+    stepLabel: i18n._({
+      id: "funnel.step.progress",
+      values: { step: 4, total: 4 },
+    }),
     heading: i18n._({ id: "funnel.transport.heading" }),
     subtitle: i18n._({ id: "funnel.transport.subtitle" }),
     person,
