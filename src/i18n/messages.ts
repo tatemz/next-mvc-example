@@ -58,6 +58,7 @@ const funnelMessages = {
   "funnel.review.open": "Open dossier",
   "funnel.review.startOver": "Start over",
   "funnel.failed.heading": "The dossier could not be built",
+  "funnel.failed.subtitle": "Start over to try again.",
   "funnel.failed.message": "The character API could not answer.",
   "funnel.failed.invalidChoice": "That choice is no longer available.",
   "funnel.failed.startOver": "Start over",

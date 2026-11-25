@@ -200,7 +200,7 @@ export const makeFunnelFailedViewModel = (
     shell,
     stepLabel: i18n._({ id: "funnel.step.failed" }),
     heading: i18n._({ id: "funnel.failed.heading" }),
-    subtitle: i18n._({ id: "funnel.failed.message" }),
+    subtitle: i18n._({ id: "funnel.failed.subtitle" }),
     message,
     startOverLabel: i18n._({ id: "funnel.failed.startOver" }),
     startOverHref: "funnel",
