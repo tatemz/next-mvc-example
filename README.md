@@ -94,10 +94,23 @@ components:
 - `FormValidationError`
 - `InputFilled`
 
-Each event can carry `characterId`, `filmOrder`, `transportKey`, and `query`
-metadata. `makeUiEventHandler` transforms an event into a flat
-`UiEventPayload` with `event`, `page`, `universe`, `occurredAt`, and
-`properties`, then sends it to an injected `UiEventSink`.
+`PageLoaded` and `CtaClicked` carry a discriminated page context instead of a
+bag of optional fields. The context is `Home`, a funnel stage (`FunnelSearch`,
+`FunnelChoose`, `FunnelFilm`, `FunnelTransport`, `FunnelReview`,
+`FunnelFailed`), or a results outcome (`ResultsMissing`, `ResultsReady`). Each
+variant carries only the facts that state has, so a home page load cannot carry
+a film order and a funnel review always has a transport. A transport is
+`TransportChosen` with its key or `NoTransport`, never a missing optional key.
+`FormValidationError` and `InputFilled` exist only for the funnel search, and
+no event payload uses an optional field.
+
+`CtaClicked` is a closed union with one variant per page state: the home CTA,
+each funnel stage's CTA, and each results outcome's CTA. A search click cannot
+carry a review CTA. `makeUiEventHandler` transforms an event
+into a flat `UiEventPayload` with `event`, `page`, `universe`, `occurredAt`,
+and `properties`, then sends it to every injected `UiEventSink`. The sink
+keeps the flat property names (`characterId`, `filmOrder`, `transportKey`,
+`query`, and so on).
 
 `AppUiEventProvider` mounts the handler once at the root. The default browser
 sink dispatches a `ui-event` `CustomEvent`; replace the provider or sink to

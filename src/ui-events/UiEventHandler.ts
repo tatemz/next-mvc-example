@@ -1,5 +1,11 @@
 import { Match } from "effect";
-import type { Page, UiEvent, Universe } from "./UiEvent";
+import type {
+  Page,
+  PageContext,
+  TransportChoice,
+  UiEvent,
+  Universe,
+} from "./UiEvent";
 
 export type UiEventProperty = string | number | boolean;
 
@@ -14,31 +20,79 @@ export type UiEventPayload = {
 export type UiEventSink = (payload: UiEventPayload) => void;
 export type UiEventHandler = (event: UiEvent) => void;
 
-type Metadata = {
-  readonly characterId?: string;
-  readonly filmOrder?: number;
-  readonly transportKey?: string;
-  readonly query?: string;
+type ContextPayload = {
+  readonly page: Page;
+  readonly universe: Universe;
+  readonly properties: Readonly<Record<string, UiEventProperty>>;
 };
 
-const metadataProperties = (event: Metadata) => {
-  const properties: Record<string, UiEventProperty> = {};
+const transportProperties = (
+  transport: TransportChoice,
+): Readonly<Record<string, UiEventProperty>> =>
+  Match.valueTags(transport, {
+    TransportChosen: (chosen) => ({ transportKey: chosen.key }),
+    NoTransport: () => ({}),
+  });
 
-  if (event.characterId !== undefined) {
-    properties.characterId = event.characterId;
-  }
-  if (event.filmOrder !== undefined) {
-    properties.filmOrder = event.filmOrder;
-  }
-  if (event.transportKey !== undefined) {
-    properties.transportKey = event.transportKey;
-  }
-  if (event.query !== undefined) {
-    properties.query = event.query;
-  }
-
-  return properties;
-};
+const contextPayload = (context: PageContext): ContextPayload =>
+  Match.valueTags(context, {
+    Home: (home) => ({
+      page: "home" as const,
+      universe: home.universe,
+      properties: {},
+    }),
+    FunnelSearch: (search) => ({
+      page: "funnel" as const,
+      universe: search.universe,
+      properties: {},
+    }),
+    FunnelChoose: (choose) => ({
+      page: "funnel" as const,
+      universe: choose.universe,
+      properties: { query: choose.query },
+    }),
+    FunnelFilm: (film) => ({
+      page: "funnel" as const,
+      universe: film.universe,
+      properties: { characterId: film.characterId },
+    }),
+    FunnelTransport: (transport) => ({
+      page: "funnel" as const,
+      universe: transport.universe,
+      properties: {
+        characterId: transport.characterId,
+        filmOrder: transport.filmOrder,
+      },
+    }),
+    FunnelReview: (review) => ({
+      page: "funnel" as const,
+      universe: review.universe,
+      properties: {
+        characterId: review.characterId,
+        filmOrder: review.filmOrder,
+        ...transportProperties(review.transport),
+      },
+    }),
+    FunnelFailed: (failed) => ({
+      page: "funnel" as const,
+      universe: failed.universe,
+      properties: {},
+    }),
+    ResultsMissing: (missing) => ({
+      page: "results" as const,
+      universe: missing.universe,
+      properties: {},
+    }),
+    ResultsReady: (ready) => ({
+      page: "results" as const,
+      universe: ready.universe,
+      properties: {
+        characterId: ready.characterId,
+        filmOrder: ready.filmOrder,
+        ...transportProperties(ready.transport),
+      },
+    }),
+  });
 
 export const toUiEventPayload = (
   event: UiEvent,
@@ -47,35 +101,36 @@ export const toUiEventPayload = (
   Match.valueTags(event, {
     PageLoaded: (loaded) => ({
       event: "page_loaded",
-      page: loaded.page,
-      universe: loaded.universe,
+      ...contextPayload(loaded.context),
       occurredAt,
-      properties: metadataProperties(loaded),
     }),
-    CtaClicked: (clicked) => ({
-      event: "cta_clicked",
-      page: clicked.page,
-      universe: clicked.universe,
-      occurredAt,
-      properties: {
-        cta: clicked.cta,
-        ...metadataProperties(clicked),
-      },
-    }),
+    CtaClicked: (clicked) => {
+      const context = contextPayload(clicked.context);
+      return {
+        event: "cta_clicked",
+        page: context.page,
+        universe: context.universe,
+        occurredAt,
+        properties: {
+          ...context.properties,
+          cta: clicked.cta,
+        },
+      };
+    },
     FormValidationError: (error) => ({
       event: "form_validation_error",
-      page: error.page,
+      page: "funnel" as const,
       universe: error.universe,
       occurredAt,
       properties: {
         form: error.form,
         message: error.message,
-        ...metadataProperties(error),
+        query: error.query,
       },
     }),
     InputFilled: (input) => ({
       event: "input_filled",
-      page: input.page,
+      page: "funnel" as const,
       universe: input.universe,
       occurredAt,
       properties: {

@@ -31,16 +31,14 @@ describe("ConnectedHomePage events", () => {
       expect(events).toContainEqual(
         expect.objectContaining({
           _tag: "PageLoaded",
-          page: "home",
-          universe: "star-wars",
+          context: { _tag: "Home", universe: "star-wars" },
         }),
       ),
     );
     expect(events).toContainEqual(
       expect.objectContaining({
         _tag: "CtaClicked",
-        page: "home",
-        universe: "star-wars",
+        context: { _tag: "Home", universe: "star-wars" },
         cta: "build_dossier",
       }),
     );

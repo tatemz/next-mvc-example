@@ -13,7 +13,7 @@ import {
   ghibli,
   starWars,
 } from "../../.storybook/pageFixtures";
-import { type UiEvent } from "../ui-events/UiEvent";
+import { type Universe, type UiEvent } from "../ui-events/UiEvent";
 import { UiEventProvider } from "../ui-events/UiEventContext";
 import type { FunnelViewModel } from "./Funnel";
 import { ConnectedFunnel } from "./Funnel.connected";
@@ -22,14 +22,17 @@ afterEach(cleanup);
 
 const action = async (previous: FunnelViewModel) => previous;
 
-const renderFunnel = (model: FunnelViewModel) => {
+const renderFunnel = (
+  model: FunnelViewModel,
+  universe: Universe = "star-wars",
+) => {
   const events: UiEvent[] = [];
   render(
     <UiEventProvider handler={(event) => events.push(event)}>
       <ConnectedFunnel
         model={model}
         submitAction={action}
-        universe="star-wars"
+        universe={universe}
       />
     </UiEventProvider>,
   );
@@ -52,14 +55,17 @@ describe("ConnectedFunnel events", () => {
       expect(events).toContainEqual(
         expect.objectContaining({
           _tag: "PageLoaded",
-          page: "funnel",
-          universe: "star-wars",
+          context: {
+            _tag: "FunnelSearch",
+            universe: "star-wars",
+          },
         }),
       ),
     );
     expect(events).toContainEqual(
       expect.objectContaining({
         _tag: "InputFilled",
+        universe: "star-wars",
         field: "funnel_query",
         value: "Leia",
       }),
@@ -67,6 +73,10 @@ describe("ConnectedFunnel events", () => {
     expect(events).toContainEqual(
       expect.objectContaining({
         _tag: "CtaClicked",
+        context: {
+          _tag: "FunnelSearch",
+          universe: "star-wars",
+        },
         cta: "search",
       }),
     );
@@ -79,7 +89,9 @@ describe("ConnectedFunnel events", () => {
       expect(events).toContainEqual(
         expect.objectContaining({
           _tag: "FormValidationError",
+          universe: "star-wars",
           form: "funnel_search",
+          query: "",
         }),
       ),
     );
@@ -94,8 +106,12 @@ describe("ConnectedFunnel events", () => {
     expect(events).toContainEqual(
       expect.objectContaining({
         _tag: "CtaClicked",
+        context: {
+          _tag: "FunnelChoose",
+          universe: "star-wars",
+          query: "Luke",
+        },
         cta: "choose_character",
-        query: "Luke",
       }),
     );
   });
@@ -109,8 +125,12 @@ describe("ConnectedFunnel events", () => {
     expect(events).toContainEqual(
       expect.objectContaining({
         _tag: "CtaClicked",
+        context: {
+          _tag: "FunnelFilm",
+          universe: "star-wars",
+          characterId: "1",
+        },
         cta: "next_transport",
-        characterId: "1",
       }),
     );
   });
@@ -124,9 +144,13 @@ describe("ConnectedFunnel events", () => {
     expect(events).toContainEqual(
       expect.objectContaining({
         _tag: "CtaClicked",
+        context: {
+          _tag: "FunnelTransport",
+          universe: "star-wars",
+          characterId: "1",
+          filmOrder: 4,
+        },
         cta: "review_dossier",
-        characterId: "1",
-        filmOrder: 4,
       }),
     );
   });
@@ -144,28 +168,52 @@ describe("ConnectedFunnel events", () => {
     expect(events).toContainEqual(
       expect.objectContaining({
         _tag: "CtaClicked",
+        context: {
+          _tag: "FunnelReview",
+          universe: "star-wars",
+          characterId: "1",
+          filmOrder: 4,
+          transport: {
+            _tag: "TransportChosen",
+            key: "starship-12",
+          },
+        },
         cta: "open_dossier",
-        transportKey: "starship-12",
       }),
     );
     expect(events).toContainEqual(
       expect.objectContaining({
         _tag: "CtaClicked",
+        context: {
+          _tag: "FunnelReview",
+          universe: "star-wars",
+          characterId: "1",
+          filmOrder: 4,
+          transport: {
+            _tag: "TransportChosen",
+            key: "starship-12",
+          },
+        },
         cta: "start_over",
       }),
     );
   });
 
   it("emits review and failed CTAs without a transport", () => {
-    const reviewEvents = renderFunnel(funnelReview(ghibli, null));
+    const reviewEvents = renderFunnel(funnelReview(ghibli, null), "ghibli");
     const open = screen.getByRole("link", { name: "Open dossier" });
     preventNavigation(open);
     fireEvent.click(open);
     expect(reviewEvents).toContainEqual(
       expect.objectContaining({
         _tag: "CtaClicked",
+        context: expect.objectContaining({
+          _tag: "FunnelReview",
+          universe: "ghibli",
+          characterId: "1",
+          transport: { _tag: "NoTransport" },
+        }),
         cta: "open_dossier",
-        characterId: "1",
       }),
     );
 
@@ -177,6 +225,10 @@ describe("ConnectedFunnel events", () => {
     expect(failedEvents).toContainEqual(
       expect.objectContaining({
         _tag: "CtaClicked",
+        context: {
+          _tag: "FunnelFailed",
+          universe: "star-wars",
+        },
         cta: "start_over",
       }),
     );

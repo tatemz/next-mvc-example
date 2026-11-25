@@ -1,105 +1,344 @@
 import { it } from "@effect/vitest";
 import { describe, expect } from "vitest";
 import {
-  CtaClicked,
+  FunnelChooseContext,
+  FunnelChooseCtaClicked,
+  FunnelFailedContext,
+  FunnelFilmContext,
+  FunnelReviewContext,
+  FunnelSearchContext,
+  FunnelTransportContext,
   FormValidationError,
+  HomeContext,
+  HomeCtaClicked,
   InputFilled,
+  NoTransport,
   PageLoaded,
+  ResultsMissingContext,
+  ResultsReadyContext,
+  ResultsReadyCtaClicked,
+  TransportChosen,
 } from "./UiEvent";
 import { makeUiEventHandler, toUiEventPayload } from "./UiEventHandler";
 
 const occurredAt = "2026-11-24T12:00:00.000Z";
 
+const transportChosen = TransportChosen.make({ key: "starship-12" });
+const noTransport = NoTransport.make({});
+
+const payloadOf = (event: Parameters<typeof toUiEventPayload>[0]) =>
+  toUiEventPayload(event, occurredAt);
+
 describe("toUiEventPayload", () => {
-  it("maps a page load with domain metadata", () => {
+  it("maps the home page load", () => {
     expect(
-      toUiEventPayload(
+      payloadOf(
         PageLoaded.make({
-          page: "results",
-          universe: "ghibli",
-          characterId: "1",
-          filmOrder: 1,
-          transportKey: "red-wing",
+          context: HomeContext.make({ universe: "star-wars" }),
         }),
-        occurredAt,
       ),
     ).toEqual({
       event: "page_loaded",
-      page: "results",
-      universe: "ghibli",
+      page: "home",
+      universe: "star-wars",
       occurredAt,
+      properties: {},
+    });
+  });
+
+  it("maps the funnel search page load", () => {
+    expect(
+      payloadOf(
+        PageLoaded.make({
+          context: FunnelSearchContext.make({ universe: "ghibli" }),
+        }),
+      ),
+    ).toMatchObject({
+      event: "page_loaded",
+      page: "funnel",
+      universe: "ghibli",
+      properties: {},
+    });
+  });
+
+  it("maps the funnel choose page load with its query", () => {
+    expect(
+      payloadOf(
+        PageLoaded.make({
+          context: FunnelChooseContext.make({
+            universe: "star-wars",
+            query: "Luke",
+          }),
+        }),
+      ),
+    ).toMatchObject({
+      event: "page_loaded",
+      page: "funnel",
+      properties: { query: "Luke" },
+    });
+  });
+
+  it("maps the funnel film page load with its character", () => {
+    expect(
+      payloadOf(
+        PageLoaded.make({
+          context: FunnelFilmContext.make({
+            universe: "star-wars",
+            characterId: "1",
+          }),
+        }),
+      ),
+    ).toMatchObject({
+      event: "page_loaded",
+      page: "funnel",
+      properties: { characterId: "1" },
+    });
+  });
+
+  it("maps the funnel transport page load", () => {
+    expect(
+      payloadOf(
+        PageLoaded.make({
+          context: FunnelTransportContext.make({
+            universe: "star-wars",
+            characterId: "1",
+            filmOrder: 4,
+          }),
+        }),
+      ),
+    ).toMatchObject({
+      event: "page_loaded",
+      page: "funnel",
+      properties: { characterId: "1", filmOrder: 4 },
+    });
+  });
+
+  it("maps the funnel review page load with a chosen transport", () => {
+    expect(
+      payloadOf(
+        PageLoaded.make({
+          context: FunnelReviewContext.make({
+            universe: "star-wars",
+            characterId: "1",
+            filmOrder: 4,
+            transport: transportChosen,
+          }),
+        }),
+      ),
+    ).toMatchObject({
+      event: "page_loaded",
+      page: "funnel",
       properties: {
         characterId: "1",
-        filmOrder: 1,
-        transportKey: "red-wing",
+        filmOrder: 4,
+        transportKey: "starship-12",
       },
     });
   });
 
-  it("maps a CTA click", () => {
+  it("maps the funnel review page load with no transport", () => {
     expect(
-      toUiEventPayload(
-        CtaClicked.make({
-          page: "funnel",
-          universe: "star-wars",
-          cta: "choose_character",
-          characterId: "1",
-          query: "Luke",
+      payloadOf(
+        PageLoaded.make({
+          context: FunnelReviewContext.make({
+            universe: "ghibli",
+            characterId: "1",
+            filmOrder: 1,
+            transport: noTransport,
+          }),
         }),
-        occurredAt,
+      ),
+    ).toMatchObject({
+      event: "page_loaded",
+      page: "funnel",
+      properties: { characterId: "1", filmOrder: 1 },
+    });
+  });
+
+  it("maps the funnel failed page load", () => {
+    expect(
+      payloadOf(
+        PageLoaded.make({
+          context: FunnelFailedContext.make({ universe: "star-wars" }),
+        }),
+      ),
+    ).toMatchObject({
+      event: "page_loaded",
+      page: "funnel",
+      properties: {},
+    });
+  });
+
+  it("maps the missing results page load", () => {
+    expect(
+      payloadOf(
+        PageLoaded.make({
+          context: ResultsMissingContext.make({ universe: "ghibli" }),
+        }),
+      ),
+    ).toMatchObject({
+      event: "page_loaded",
+      page: "results",
+      universe: "ghibli",
+      properties: {},
+    });
+  });
+
+  it("maps the ready results page load with a chosen transport", () => {
+    expect(
+      payloadOf(
+        PageLoaded.make({
+          context: ResultsReadyContext.make({
+            universe: "star-wars",
+            characterId: "1",
+            filmOrder: 4,
+            transport: transportChosen,
+          }),
+        }),
+      ),
+    ).toMatchObject({
+      event: "page_loaded",
+      page: "results",
+      properties: {
+        characterId: "1",
+        filmOrder: 4,
+        transportKey: "starship-12",
+      },
+    });
+  });
+
+  it("maps the ready results page load with no transport", () => {
+    expect(
+      payloadOf(
+        PageLoaded.make({
+          context: ResultsReadyContext.make({
+            universe: "ghibli",
+            characterId: "1",
+            filmOrder: 1,
+            transport: noTransport,
+          }),
+        }),
+      ),
+    ).toMatchObject({
+      event: "page_loaded",
+      page: "results",
+      properties: { characterId: "1", filmOrder: 1 },
+    });
+  });
+
+  it("maps the home CTA click", () => {
+    expect(
+      payloadOf(
+        HomeCtaClicked.make({
+          context: HomeContext.make({ universe: "star-wars" }),
+          cta: "build_dossier",
+        }),
+      ),
+    ).toEqual({
+      event: "cta_clicked",
+      page: "home",
+      universe: "star-wars",
+      occurredAt,
+      properties: { cta: "build_dossier" },
+    });
+  });
+
+  it("maps a funnel CTA click with its stage facts", () => {
+    expect(
+      payloadOf(
+        FunnelChooseCtaClicked.make({
+          context: FunnelChooseContext.make({
+            universe: "star-wars",
+            query: "Luke",
+          }),
+          cta: "choose_character",
+        }),
       ),
     ).toMatchObject({
       event: "cta_clicked",
-      properties: {
-        cta: "choose_character",
-        characterId: "1",
-        query: "Luke",
-      },
+      page: "funnel",
+      properties: { cta: "choose_character", query: "Luke" },
     });
   });
 
-  it("maps a form validation error", () => {
+  it("maps a results CTA click with its dossier facts", () => {
     expect(
-      toUiEventPayload(
-        FormValidationError.make({
-          page: "home",
-          universe: "star-wars",
-          form: "home_search",
-          message: "Character id is required.",
-          characterId: " ",
+      payloadOf(
+        ResultsReadyCtaClicked.make({
+          context: ResultsReadyContext.make({
+            universe: "star-wars",
+            characterId: "1",
+            filmOrder: 4,
+            transport: transportChosen,
+          }),
+          cta: "back_home",
         }),
-        occurredAt,
       ),
     ).toMatchObject({
-      event: "form_validation_error",
+      event: "cta_clicked",
+      page: "results",
       properties: {
-        form: "home_search",
-        message: "Character id is required.",
-        characterId: " ",
+        cta: "back_home",
+        characterId: "1",
+        filmOrder: 4,
+        transportKey: "starship-12",
       },
     });
   });
 
-  it("maps an input fill", () => {
+  it("maps the funnel validation error", () => {
     expect(
-      toUiEventPayload(
+      payloadOf(
+        FormValidationError.make({
+          universe: "star-wars",
+          form: "funnel_search",
+          query: "",
+          message: "Enter a character name.",
+        }),
+      ),
+    ).toEqual({
+      event: "form_validation_error",
+      page: "funnel",
+      universe: "star-wars",
+      occurredAt,
+      properties: {
+        form: "funnel_search",
+        message: "Enter a character name.",
+        query: "",
+      },
+    });
+  });
+
+  it("maps the funnel input fill", () => {
+    expect(
+      payloadOf(
         InputFilled.make({
-          page: "funnel",
           universe: "ghibli",
           field: "funnel_query",
           value: "Haku",
         }),
-        occurredAt,
       ),
-    ).toMatchObject({
+    ).toEqual({
       event: "input_filled",
-      properties: {
-        field: "funnel_query",
-        value: "Haku",
-      },
+      page: "funnel",
+      universe: "ghibli",
+      occurredAt,
+      properties: { field: "funnel_query", value: "Haku" },
     });
   });
 });
+
+const pageLoaded = PageLoaded.make({
+  context: FunnelSearchContext.make({ universe: "star-wars" }),
+});
+
+const pageLoadedPayload = {
+  event: "page_loaded",
+  page: "funnel",
+  universe: "star-wars",
+  occurredAt,
+  properties: {},
+};
 
 describe("makeUiEventHandler", () => {
   it("adds the timestamp and sends the payload to the sink", () => {
@@ -109,21 +348,8 @@ describe("makeUiEventHandler", () => {
       () => occurredAt,
     );
 
-    handler(
-      PageLoaded.make({
-        page: "home",
-        universe: "star-wars",
-      }),
-    );
+    handler(pageLoaded);
 
-    expect(payloads).toEqual([
-      {
-        event: "page_loaded",
-        page: "home",
-        universe: "star-wars",
-        occurredAt,
-        properties: {},
-      },
-    ]);
+    expect(payloads).toEqual([pageLoadedPayload]);
   });
 });

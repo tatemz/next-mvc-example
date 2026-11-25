@@ -1,6 +1,7 @@
 import { Match, Option, Schema } from "effect";
 import type { ReactNode } from "react";
 import type { I18n } from "../i18n/I18n.service";
+import type { FunnelCta } from "../ui-events/UiEvent";
 import { AppShell, AppShellViewModel } from "./AppShell";
 import { FilmListItemViewModel } from "./FilmListItem";
 import {
@@ -216,14 +217,6 @@ export const makeFunnelFailedViewModel = (
     startOverHref: "funnel",
   });
 
-export type FunnelCta =
-  | "search"
-  | "choose_character"
-  | "next_transport"
-  | "review_dossier"
-  | "open_dossier"
-  | "start_over";
-
 type FunnelExtras = {
   readonly dispatch: (formData: FormData) => void;
   readonly isPending: boolean;
@@ -253,14 +246,14 @@ const StepShell = ({ step, children }: StepShellProps) => (
   </section>
 );
 
-type StepProps<T> = {
+type StepProps<T, Cta extends FunnelCta = FunnelCta> = {
   readonly step: T;
   readonly dispatch: (formData: FormData) => void;
   readonly isPending: boolean;
-  readonly onCtaClick: (cta: FunnelCta) => void;
+  readonly onCtaClick: (cta: Cta) => void;
 };
 
-type SearchStepProps = StepProps<FunnelSearchViewModel> & {
+type SearchStepProps = StepProps<FunnelSearchViewModel, "search"> & {
   readonly onQueryChange: (value: string) => void;
 };
 
@@ -311,7 +304,7 @@ const ChooseStep = ({
   dispatch,
   isPending,
   onCtaClick,
-}: StepProps<FunnelChooseViewModel>) => (
+}: StepProps<FunnelChooseViewModel, "choose_character">) => (
   <StepShell step={step}>
     <form
       action={dispatch}
@@ -347,7 +340,7 @@ const FilmStep = ({
   dispatch,
   isPending,
   onCtaClick,
-}: StepProps<FunnelFilmViewModel>) => (
+}: StepProps<FunnelFilmViewModel, "next_transport">) => (
   <StepShell step={step}>
     <form
       action={dispatch}
@@ -391,7 +384,7 @@ const TransportStep = ({
   dispatch,
   isPending,
   onCtaClick,
-}: StepProps<FunnelTransportViewModel>) => (
+}: StepProps<FunnelTransportViewModel, "review_dossier">) => (
   <StepShell step={step}>
     <form
       action={dispatch}
@@ -439,7 +432,7 @@ const ReviewStep = ({
   onCtaClick,
 }: {
   readonly step: FunnelReviewViewModel;
-  readonly onCtaClick: (cta: FunnelCta) => void;
+  readonly onCtaClick: (cta: "open_dossier" | "start_over") => void;
 }) => (
   <StepShell step={step}>
     <div className="rounded-box bg-base-200 p-4">
@@ -502,7 +495,7 @@ const FailedStep = ({
   onCtaClick,
 }: {
   readonly step: FunnelFailedViewModel;
-  readonly onCtaClick: (cta: FunnelCta) => void;
+  readonly onCtaClick: (cta: "start_over") => void;
 }) => (
   <StepShell step={step}>
     <div role="alert" className="alert alert-error">

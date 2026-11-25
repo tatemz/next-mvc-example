@@ -1,5 +1,6 @@
 import { Match, Schema } from "effect";
 import type { I18n } from "../i18n/I18n.service";
+import type { ResultsCta } from "../ui-events/UiEvent";
 import { AppShell, AppShellViewModel } from "./AppShell";
 import { FilmListItemViewModel } from "./FilmListItem";
 import {
@@ -78,8 +79,6 @@ export const makeResultsMissingViewModel = (
     startOverHref,
   });
 
-export type ResultsCta = "build_another_dossier" | "back_home";
-
 export type ResultsProps = {
   readonly model: ResultsViewModel;
   readonly onCtaClick: (cta: ResultsCta) => void;
@@ -152,7 +151,7 @@ const MissingResults = ({
   onCtaClick,
 }: {
   readonly model: ResultsMissingViewModel;
-  readonly onCtaClick: (cta: ResultsCta) => void;
+  readonly onCtaClick: (cta: "build_another_dossier") => void;
 }) => (
   <div className="flex flex-col gap-6">
     <h1 className="text-3xl font-bold">{model.heading}</h1>

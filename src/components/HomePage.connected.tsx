@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { CtaClicked, PageLoaded } from "../ui-events/UiEvent";
+import {
+  HomeContext,
+  HomeCtaClicked,
+  PageLoaded,
+} from "../ui-events/UiEvent";
 import { useUiEventDispatch } from "../ui-events/UiEventContext";
 import { HomePage, type HomePageViewModel } from "./HomePage";
 
@@ -15,17 +19,15 @@ export const ConnectedHomePage = ({ model }: ConnectedHomePageProps) => {
   useEffect(() => {
     emit(
       PageLoaded.make({
-        page: "home",
-        universe: model.universe,
+        context: HomeContext.make({ universe: model.universe }),
       }),
     );
   }, [emit, model.universe]);
 
   const onCtaClick = () =>
     emit(
-      CtaClicked.make({
-        page: "home",
-        universe: model.universe,
+      HomeCtaClicked.make({
+        context: HomeContext.make({ universe: model.universe }),
         cta: "build_dossier",
       }),
     );

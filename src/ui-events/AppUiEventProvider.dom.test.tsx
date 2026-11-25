@@ -5,7 +5,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, vi } from "vitest";
 import { AppUiEventProvider } from "./AppUiEventProvider";
 import { UI_EVENT_NAME } from "./BrowserUiEventSink";
-import { PageLoaded } from "./UiEvent";
+import { FunnelChooseContext, PageLoaded } from "./UiEvent";
 import { useUiEventDispatch } from "./UiEventContext";
 
 const Trigger = () => {
@@ -15,9 +15,10 @@ const Trigger = () => {
       onClick={() =>
         emit(
           PageLoaded.make({
-            page: "home",
-            universe: "ghibli",
-            characterId: "1",
+            context: FunnelChooseContext.make({
+              universe: "ghibli",
+              query: "Leia",
+            }),
           }),
         )
       }
@@ -43,9 +44,9 @@ describe("AppUiEventProvider", () => {
     const browserEvent = listener.mock.calls[0]?.[0] as CustomEvent;
     expect(browserEvent.detail).toMatchObject({
       event: "page_loaded",
-      page: "home",
+      page: "funnel",
       universe: "ghibli",
-      properties: { characterId: "1" },
+      properties: { query: "Leia" },
     });
 
     window.removeEventListener(UI_EVENT_NAME, listener);

@@ -3,18 +3,29 @@
 import { Match } from "effect";
 import { useEffect, useActionState } from "react";
 import {
-  CtaClicked,
+  FunnelChooseContext,
+  FunnelChooseCtaClicked,
+  FunnelFailedContext,
+  FunnelFailedCtaClicked,
+  FunnelFilmContext,
+  FunnelFilmCtaClicked,
+  FunnelReviewContext,
+  FunnelReviewCtaClicked,
+  FunnelSearchContext,
+  FunnelSearchCtaClicked,
+  FunnelTransportContext,
+  FunnelTransportCtaClicked,
   FormValidationError,
   InputFilled,
   PageLoaded,
+  makeTransportChoice,
+  type CtaClicked,
+  type FunnelContext,
+  type FunnelCta,
   type Universe,
 } from "../ui-events/UiEvent";
 import { useUiEventDispatch } from "../ui-events/UiEventContext";
-import {
-  Funnel,
-  type FunnelCta,
-  type FunnelViewModel,
-} from "./Funnel";
+import { Funnel, type FunnelViewModel } from "./Funnel";
 
 type FunnelAction = (
   previous: FunnelViewModel,
@@ -27,23 +38,86 @@ export type ConnectedFunnelProps = {
   readonly universe: Universe;
 };
 
-const metadataFor = (model: FunnelViewModel) =>
+const contextFor = (
+  model: FunnelViewModel,
+  universe: Universe,
+): FunnelContext =>
   Match.valueTags(model, {
-    Search: () => ({}),
-    Choose: (step) => ({ query: step.query }),
-    Film: (step) => ({ characterId: step.person.id }),
-    Transport: (step) => ({
-      characterId: step.person.id,
-      filmOrder: step.film.order,
-    }),
-    Review: (step) => ({
-      characterId: step.person.id,
-      filmOrder: step.film.order,
-      ...(step.transport === null
-        ? {}
-        : { transportKey: step.transport.key }),
-    }),
-    Failed: () => ({}),
+    Search: () => FunnelSearchContext.make({ universe }),
+    Choose: (step) =>
+      FunnelChooseContext.make({ universe, query: step.query }),
+    Film: (step) =>
+      FunnelFilmContext.make({
+        universe,
+        characterId: step.person.id,
+      }),
+    Transport: (step) =>
+      FunnelTransportContext.make({
+        universe,
+        characterId: step.person.id,
+        filmOrder: step.film.order,
+      }),
+    Review: (step) =>
+      FunnelReviewContext.make({
+        universe,
+        characterId: step.person.id,
+        filmOrder: step.film.order,
+        transport: makeTransportChoice(step.transport),
+      }),
+    Failed: () => FunnelFailedContext.make({ universe }),
+  });
+
+const ctaEventFor = (
+  model: FunnelViewModel,
+  universe: Universe,
+  cta: FunnelCta,
+): CtaClicked =>
+  Match.valueTags(model, {
+    Search: () =>
+      FunnelSearchCtaClicked.make({
+        context: FunnelSearchContext.make({ universe }),
+        cta: "search",
+      }),
+    Choose: (step) =>
+      FunnelChooseCtaClicked.make({
+        context: FunnelChooseContext.make({
+          universe,
+          query: step.query,
+        }),
+        cta: "choose_character",
+      }),
+    Film: (step) =>
+      FunnelFilmCtaClicked.make({
+        context: FunnelFilmContext.make({
+          universe,
+          characterId: step.person.id,
+        }),
+        cta: "next_transport",
+      }),
+    Transport: (step) =>
+      FunnelTransportCtaClicked.make({
+        context: FunnelTransportContext.make({
+          universe,
+          characterId: step.person.id,
+          filmOrder: step.film.order,
+        }),
+        cta: "review_dossier",
+      }),
+    Review: (step) =>
+      FunnelReviewCtaClicked.make({
+        context: FunnelReviewContext.make({
+          universe,
+          characterId: step.person.id,
+          filmOrder: step.film.order,
+          transport: makeTransportChoice(step.transport),
+        }),
+        cta: cta === "start_over" ? "start_over" : "open_dossier",
+      }),
+    Failed: () =>
+      FunnelFailedCtaClicked.make({
+        context: FunnelFailedContext.make({ universe }),
+        cta: "start_over",
+      }),
   });
 
 export const ConnectedFunnel = ({
@@ -55,37 +129,32 @@ export const ConnectedFunnel = ({
   const [state, dispatch, isPending] = useActionState(submitAction, model);
 
   useEffect(() => {
-    emit(PageLoaded.make({ page: "funnel", universe }));
-  }, [emit, universe]);
+    emit(
+      PageLoaded.make({
+        context: contextFor(model, universe),
+      }),
+    );
+  }, [emit, model, universe]);
 
   useEffect(() => {
     if (state._tag === "Search" && state.error !== undefined) {
       emit(
         FormValidationError.make({
-          page: "funnel",
           universe,
           form: "funnel_search",
-          message: state.error,
           query: state.query,
+          message: state.error,
         }),
       );
     }
   }, [emit, state, universe]);
 
   const onCtaClick = (cta: FunnelCta) =>
-    emit(
-      CtaClicked.make({
-        page: "funnel",
-        universe,
-        cta,
-        ...metadataFor(state),
-      }),
-    );
+    emit(ctaEventFor(state, universe, cta));
 
   const onQueryChange = (value: string) =>
     emit(
       InputFilled.make({
-        page: "funnel",
         universe,
         field: "funnel_query",
         value,

@@ -45,22 +45,48 @@ describe("ConnectedResults events", () => {
       expect(events).toContainEqual(
         expect.objectContaining({
           _tag: "PageLoaded",
-          page: "results",
-          characterId: "1",
-          filmOrder: 4,
-          transportKey: "starship-12",
+          context: {
+            _tag: "ResultsReady",
+            universe: "star-wars",
+            characterId: "1",
+            filmOrder: 4,
+            transport: {
+              _tag: "TransportChosen",
+              key: "starship-12",
+            },
+          },
         }),
       ),
     );
     expect(events).toContainEqual(
       expect.objectContaining({
         _tag: "CtaClicked",
+        context: {
+          _tag: "ResultsReady",
+          universe: "star-wars",
+          characterId: "1",
+          filmOrder: 4,
+          transport: {
+            _tag: "TransportChosen",
+            key: "starship-12",
+          },
+        },
         cta: "build_another_dossier",
       }),
     );
     expect(events).toContainEqual(
       expect.objectContaining({
         _tag: "CtaClicked",
+        context: {
+          _tag: "ResultsReady",
+          universe: "star-wars",
+          characterId: "1",
+          filmOrder: 4,
+          transport: {
+            _tag: "TransportChosen",
+            key: "starship-12",
+          },
+        },
         cta: "back_home",
       }),
     );
@@ -72,9 +98,13 @@ describe("ConnectedResults events", () => {
     expect(events).toContainEqual(
       expect.objectContaining({
         _tag: "PageLoaded",
-        page: "results",
-        characterId: "1",
-        filmOrder: 4,
+        context: {
+          _tag: "ResultsReady",
+          universe: "star-wars",
+          characterId: "1",
+          filmOrder: 4,
+          transport: { _tag: "NoTransport" },
+        },
       }),
     );
   });
@@ -89,12 +119,19 @@ describe("ConnectedResults events", () => {
     expect(events).toContainEqual(
       expect.objectContaining({
         _tag: "PageLoaded",
-        page: "results",
+        context: {
+          _tag: "ResultsMissing",
+          universe: "star-wars",
+        },
       }),
     );
     expect(events).toContainEqual(
       expect.objectContaining({
         _tag: "CtaClicked",
+        context: {
+          _tag: "ResultsMissing",
+          universe: "star-wars",
+        },
         cta: "build_another_dossier",
       }),
     );
